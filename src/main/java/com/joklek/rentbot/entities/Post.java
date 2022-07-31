@@ -14,15 +14,20 @@ public class Post {
     private String externalId;
     private String source;
     private String link;
+    private String phone;
     private LocalDateTime lastSeen;
     private BigDecimal price;
     private Integer rooms;
-    private Integer year;
+    private Integer constructionYear;
     private Integer floor;
     private Integer totalFloors;
     private Boolean isWithFees;
-    private String address;
     private String descriptionHash;
+    private String street;
+    private String district;
+    private String houseNumber;
+    private String heating;
+    private BigDecimal area;
 
     public Long getId() {
         return id;
@@ -54,6 +59,15 @@ public class Post {
         this.link = link;
     }
 
+    public String getPhone() {
+        return phone;
+    }
+
+    public Post setPhone(String phone) {
+        this.phone = phone;
+        return this;
+    }
+
     public LocalDateTime getLastSeen() {
         return lastSeen;
     }
@@ -78,12 +92,12 @@ public class Post {
         this.rooms = rooms;
     }
 
-    public Integer getYear() {
-        return year;
+    public Integer getConstructionYear() {
+        return constructionYear;
     }
 
-    public void setYear(Integer year) {
-        this.year = year;
+    public void setConstructionYear(Integer year) {
+        this.constructionYear = year;
     }
 
     public Integer getFloor() {
@@ -110,20 +124,57 @@ public class Post {
         isWithFees = withFees;
     }
 
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
     public String getDescriptionHash() {
         return descriptionHash;
     }
 
     public void setDescriptionHash(String descriptionHash) {
         this.descriptionHash = descriptionHash;
+    }
+
+    public String getStreet() {
+        return street;
+    }
+
+    public Post setStreet(String street) {
+        this.street = street;
+        return this;
+    }
+
+    public String getDistrict() {
+        return district;
+    }
+
+    public Post setDistrict(String district) {
+        this.district = district;
+        return this;
+    }
+
+    public String getHouseNumber() {
+        return houseNumber;
+    }
+
+    public Post setHouseNumber(String houseNumber) {
+        this.houseNumber = houseNumber;
+        return this;
+    }
+
+    public String getHeating() {
+        return heating;
+    }
+
+    public Post setHeating(String heating) {
+        this.heating = heating;
+        return this;
+    }
+
+    public BigDecimal getArea() {
+        return area;
+    }
+
+    public Post setArea(BigDecimal area) {
+        this.area = area;
+        return this;
     }
 
     @Override

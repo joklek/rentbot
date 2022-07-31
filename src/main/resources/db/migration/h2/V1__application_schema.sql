@@ -15,19 +15,24 @@ CREATE TABLE `users`
 
 CREATE TABLE `posts`
 (
-    id               INTEGER AUTO_INCREMENT,
-    external_id      VARCHAR(63)    NOT NULL,
-    source           VARCHAR(63)    NOT NULL,
-    link             VARCHAR(1023)  NOT NULL,
-    last_seen        TIMESTAMP      NOT NULL,
-    price            DECIMAL(19, 4) NOT NULL,
-    rooms            INTEGER        NOT NULL,
-    `year`           INTEGER        NOT NULL,
-    floor            INTEGER        NOT NULL,
-    total_floors     INTEGER        NOT NULL,
-    is_with_fees     BOOL           NOT NULL,
-    address          VARCHAR(1023)  NOT NULL,
-    description_hash VARCHAR(125)   NULL,
+    id                INTEGER AUTO_INCREMENT,
+    external_id       VARCHAR(63)    NOT NULL,
+    source            VARCHAR(63)    NOT NULL,
+    link              VARCHAR(1023)  NOT NULL,
+    phone             VARCHAR(63)    NOT NULL,
+    last_seen         TIMESTAMP      NOT NULL,
+    price             DECIMAL(19, 4) NOT NULL,
+    rooms             INTEGER        NOT NULL,
+    construction_year INTEGER        NOT NULL,
+    floor             INTEGER        NOT NULL,
+    total_floors      INTEGER        NOT NULL,
+    is_with_fees      BOOL           NOT NULL,
+    street            VARCHAR(63)    NULL,
+    district          VARCHAR(63)    NULL,
+    house_number      VARCHAR(63)    NULL,
+    heating           VARCHAR(63)    NULL,
+    area              DECIMAL(19, 4) NULL,
+    description_hash  VARCHAR(125)   NULL,
     CONSTRAINT PK__posts PRIMARY KEY (id)
 );
 

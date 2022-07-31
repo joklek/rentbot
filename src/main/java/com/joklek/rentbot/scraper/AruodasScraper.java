@@ -60,7 +60,7 @@ public class AruodasScraper {
                 .flatMap(this::parseInt);
         var area = objDetailsLabels.stream().filter(x -> x.getText().startsWith("Plotas")).findFirst().map(x -> objDetailsValues.get(objDetailsLabels.indexOf(x)).getText())
                 .map(x -> x.replace(" m²", ""))
-                .flatMap(this::parseInt);
+                .flatMap(this::parseBigDecimal);
         var price = objDetailsLabels.stream().filter(x -> x.getText().startsWith("Kaina mėn.")).findFirst().map(x -> objDetailsValues.get(objDetailsLabels.indexOf(x)).getText())
                 .map(x -> x.replace("€", ""))
                 .map(x -> x.replace(" ", ""))
@@ -68,6 +68,7 @@ public class AruodasScraper {
         var rooms = objDetailsLabels.stream().filter(x -> x.getText().startsWith("Kambarių sk.")).findFirst().map(x -> objDetailsValues.get(objDetailsLabels.indexOf(x)).getText())
                 .flatMap(this::parseInt);
         var year = objDetailsLabels.stream().filter(x -> x.getText().startsWith("Metai")).findFirst().map(x -> objDetailsValues.get(objDetailsLabels.indexOf(x)).getText())
+                .map(x -> x.substring(0, 4))
                 .flatMap(this::parseInt);
 
         post.setExternalId(aruodasId)

@@ -14,7 +14,7 @@ public abstract class PostDto {
     private String heating;
     private Integer floor;
     private Integer totalFloors;
-    private Integer area;
+    private BigDecimal area;
     private BigDecimal price;
     private Integer rooms;
     private Integer year;
@@ -111,11 +111,11 @@ public abstract class PostDto {
         return this;
     }
 
-    public Integer getArea() {
+    public BigDecimal getArea() {
         return area;
     }
 
-    public PostDto setArea(Integer area) {
+    public PostDto setArea(BigDecimal area) {
         this.area = area;
         return this;
     }
