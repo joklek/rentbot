@@ -21,7 +21,7 @@ public class AruodasScraper {
         try {
             return getPosts(driver);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw e; // TODO
         } finally {
             driver.quit();
         }
@@ -70,7 +70,7 @@ public class AruodasScraper {
         var year = objDetailsLabels.stream().filter(x -> x.getText().startsWith("Metai")).findFirst().map(x -> objDetailsValues.get(objDetailsLabels.indexOf(x)).getText())
                 .flatMap(this::parseInt);
 
-        post.setInternalId(aruodasId)
+        post.setExternalId(aruodasId)
                 .setLink(link)
                 .setPhone(phone);
         rawAddress.ifPresent(splitAddress -> post.setDistrict(splitAddress[1]));
@@ -120,6 +120,7 @@ public class AruodasScraper {
     private static class AruodasPost extends PostDto {
         private static final String SOURCE = "ARUODAS";
 
+        @Override
         public String getSource() {
             return SOURCE;
         }
