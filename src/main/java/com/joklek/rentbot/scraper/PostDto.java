@@ -3,8 +3,8 @@ package com.joklek.rentbot.scraper;
 import java.math.BigDecimal;
 import java.net.URI;
 
-public class PostDto {
-    private String internalId;
+public abstract class PostDto {
+    private String externalId;
     private URI link;
     private String phone;
     private String description;
@@ -19,12 +19,14 @@ public class PostDto {
     private Integer rooms;
     private Integer year;
 
-    public String getInternalId() {
-        return internalId;
+    public abstract String getSource();
+
+    public String getExternalId() {
+        return externalId;
     }
 
-    public PostDto setInternalId(String internalId) {
-        this.internalId = internalId;
+    public PostDto setExternalId(String externalId) {
+        this.externalId = externalId;
         return this;
     }
 
