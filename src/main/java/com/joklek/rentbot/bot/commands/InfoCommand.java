@@ -7,6 +7,6 @@ public class InfoCommand extends StartCommand {
 
     @Override
     public String command() {
-        return "/help";
+        return "/info";
     }
 }

@@ -24,7 +24,7 @@ public class StartCommand implements Command {
 
     private SendMessage simpleResponse(Update update, String message) {
         return new SendMessage(update.message().chat().id(), message)
-                .parseMode(ParseMode.MarkdownV2)
+                .parseMode(ParseMode.Markdown)
                 .disableWebPagePreview(false);
     }
 }

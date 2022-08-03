@@ -28,6 +28,9 @@ public class UpdateListener {
             }
             var rawText = update.message().text();
             var handler = commandRecognizer.getHandler(rawText);
+            if (handler == null) {
+                return; // TODO add error handler
+            }
             var payload = commandRecognizer.getPayload(rawText);
             var message = handler.handle(update, payload);
 
@@ -52,6 +55,7 @@ public class UpdateListener {
         }
         var newUser = new User();
         newUser.setTelegramId(telegramId);
+        newUser.setEnabled(false);
         users.save(newUser);
     }
 }

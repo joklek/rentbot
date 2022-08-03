@@ -7,7 +7,7 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 
 public class CommandRecognizer {
-    private final Pattern commandPattern = Pattern.compile("^/(\\w)+$");
+    private final Pattern commandPattern = Pattern.compile("^/(\\w)+");
     private final Map<String, Command> handlers;
     private final Command errorHandler;
 
@@ -33,6 +33,6 @@ public class CommandRecognizer {
             return null;
         }
         var extractedCommand = matcher.group();
-        return rawCommand.substring(extractedCommand.length());
+        return rawCommand.substring(extractedCommand.length()).strip();
     }
 }

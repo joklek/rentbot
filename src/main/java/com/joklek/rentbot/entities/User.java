@@ -1,6 +1,8 @@
 package com.joklek.rentbot.entities;
 
 import javax.persistence.*;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import java.util.Objects;
 
 
@@ -10,15 +12,25 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @NotNull
     private Long telegramId;
+    @NotNull
     private Boolean enabled;
+    @Min(0)
     private Integer priceMin;
+    @Min(0)
     private Integer priceMax;
+    @Min(0)
     private Integer roomsMin;
+    @Min(0)
     private Integer roomsMax;
+    @Min(0)
     private Integer yearMin;
+    @Min(0)
     private Integer floorMin;
-    private Integer showWithFees;
+    @NotNull
+    private Boolean showWithFees;
+    //    @NotNull
     private Boolean filterByDistrict;
 
     public User(Long id) {
@@ -97,11 +109,11 @@ public class User {
         this.floorMin = minFloor;
     }
 
-    public Integer getShowWithFees() {
+    public Boolean getShowWithFees() {
         return showWithFees;
     }
 
-    public void setShowWithFees(Integer showWithFees) {
+    public void setShowWithFees(boolean showWithFees) {
         this.showWithFees = showWithFees;
     }
 
