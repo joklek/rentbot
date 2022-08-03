@@ -3,9 +3,7 @@ package com.joklek.rentbot.bot.commands;
 import com.joklek.rentbot.entities.User;
 import com.joklek.rentbot.repo.UserRepo;
 import com.pengrad.telegrambot.model.Update;
-import com.pengrad.telegrambot.model.request.ParseMode;
 import com.pengrad.telegrambot.request.BaseRequest;
-import com.pengrad.telegrambot.request.SendMessage;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
@@ -110,11 +108,5 @@ public class ConfigCommand implements Command {
                 user.getFloorMin(),
                 showWithFees,
                 command());
-    }
-
-    private SendMessage simpleResponse(Update update, String message) {
-        return new SendMessage(update.message().chat().id(), message)
-                .parseMode(ParseMode.Markdown)
-                .disableWebPagePreview(false);
     }
 }

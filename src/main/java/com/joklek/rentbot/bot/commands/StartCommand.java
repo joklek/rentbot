@@ -1,9 +1,7 @@
 package com.joklek.rentbot.bot.commands;
 
 import com.pengrad.telegrambot.model.Update;
-import com.pengrad.telegrambot.model.request.ParseMode;
 import com.pengrad.telegrambot.request.BaseRequest;
-import com.pengrad.telegrambot.request.SendMessage;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -20,11 +18,5 @@ public class StartCommand implements Command {
     @Override
     public BaseRequest<?, ?> handle(Update update, String payload) {
         return simpleResponse(update, MESSAGE);
-    }
-
-    private SendMessage simpleResponse(Update update, String message) {
-        return new SendMessage(update.message().chat().id(), message)
-                .parseMode(ParseMode.Markdown)
-                .disableWebPagePreview(false);
     }
 }
