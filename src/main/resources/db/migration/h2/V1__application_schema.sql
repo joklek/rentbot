@@ -1,6 +1,7 @@
 CREATE TABLE `users`
 (
-    id                 INTEGER        NOT NULL,
+    id                 INTEGER AUTO_INCREMENT,
+    telegram_id        INTEGER        NOT NULL,
     enabled            BOOL           NOT NULL,
     price_min          DECIMAL(19, 4) NOT NULL,
     price_max          DECIMAL(19, 4) NOT NULL,

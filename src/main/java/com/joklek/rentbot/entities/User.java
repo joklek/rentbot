@@ -1,8 +1,6 @@
 package com.joklek.rentbot.entities;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.Objects;
 
 
@@ -10,7 +8,9 @@ import java.util.Objects;
 @Table(name = "users")
 public class User {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private Long telegramId;
     private Boolean enabled;
     private Integer priceMin;
     private Integer priceMax;
@@ -30,6 +30,15 @@ public class User {
 
     public Long getId() {
         return id;
+    }
+
+    public Long getTelegramId() {
+        return telegramId;
+    }
+
+    public User setTelegramId(Long telegramId) {
+        this.telegramId = telegramId;
+        return this;
     }
 
     public Boolean getEnabled() {
