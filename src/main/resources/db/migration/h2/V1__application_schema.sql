@@ -3,14 +3,14 @@ CREATE TABLE `users`
     id                 INTEGER AUTO_INCREMENT,
     telegram_id        INTEGER        NOT NULL,
     enabled            BOOL           NOT NULL,
-    price_min          DECIMAL(19, 4) NOT NULL,
-    price_max          DECIMAL(19, 4) NOT NULL,
-    rooms_min          INTEGER        NOT NULL,
-    rooms_max          INTEGER        NOT NULL,
-    year_min           INTEGER        NOT NULL,
-    floor_min          INTEGER        NOT NULL,
-    show_with_fees     BOOL           NOT NULL,
-    filter_by_district BOOL           NOT NULL,
+    price_min          DECIMAL(19, 4) NULL,
+    price_max          DECIMAL(19, 4) NULL,
+    rooms_min          INTEGER        NULL,
+    rooms_max          INTEGER        NULL,
+    year_min           INTEGER        NULL,
+    floor_min          INTEGER        NULL,
+    show_with_fees     BOOL           NULL,
+    filter_by_district BOOL           NULL,
     CONSTRAINT PK__users PRIMARY KEY (id)
 );
 
