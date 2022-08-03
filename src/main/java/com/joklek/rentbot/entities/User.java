@@ -15,17 +15,24 @@ public class User {
     @NotNull
     private Long telegramId;
     @NotNull
+    @NotNull
     private Boolean enabled;
+    @NotNull
     @Min(0)
     private Integer priceMin;
+    @NotNull
     @Min(0)
     private Integer priceMax;
+    @NotNull
     @Min(0)
     private Integer roomsMin;
+    @NotNull
     @Min(0)
     private Integer roomsMax;
+    @NotNull
     @Min(0)
     private Integer yearMin;
+    @NotNull
     @Min(0)
     private Integer floorMin;
     @NotNull
@@ -33,8 +40,8 @@ public class User {
     //    @NotNull
     private Boolean filterByDistrict;
 
-    public User(Long id) {
-        this.id = id;
+    public User(Long telegramId) {
+        this.telegramId = telegramId;
     }
 
     public User() {

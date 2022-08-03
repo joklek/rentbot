@@ -53,8 +53,7 @@ public class UpdateListener {
         if (existingUser.isPresent()) {
             return;
         }
-        var newUser = new User();
-        newUser.setTelegramId(telegramId);
+        var newUser = new User(telegramId);
         newUser.setEnabled(false);
         users.save(newUser);
     }
