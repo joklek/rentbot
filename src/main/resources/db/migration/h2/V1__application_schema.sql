@@ -1,4 +1,4 @@
-CREATE TABLE `users`
+CREATE TABLE users
 (
     id                 INTEGER AUTO_INCREMENT,
     telegram_id        INTEGER        NOT NULL,
@@ -14,7 +14,7 @@ CREATE TABLE `users`
     CONSTRAINT PK__users PRIMARY KEY (id)
 );
 
-CREATE TABLE `posts`
+CREATE TABLE posts
 (
     id                INTEGER AUTO_INCREMENT,
     external_id       VARCHAR(63)    NOT NULL,
@@ -37,7 +37,7 @@ CREATE TABLE `posts`
     CONSTRAINT PK__posts PRIMARY KEY (id)
 );
 
-CREATE TABLE `districts`
+CREATE TABLE districts
 (
     id   INTEGER AUTO_INCREMENT,
     name VARCHAR(125) NULL,

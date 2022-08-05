@@ -7,9 +7,13 @@ import com.joklek.rentbot.repo.PostRepo;
 import com.joklek.rentbot.repo.UserRepo;
 import com.joklek.rentbot.scraper.AruodasScraper;
 import com.joklek.rentbot.scraper.PostDto;
+import com.pengrad.telegrambot.TelegramBot;
+import com.pengrad.telegrambot.model.request.ParseMode;
+import com.pengrad.telegrambot.request.SendMessage;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -25,15 +29,17 @@ public class ScheduledScraper {
     private final UserRepo users;
     private final PostRepo posts;
     private final PostEntityConverter postConverter;
+    private final TelegramBot bot;
 
-    public ScheduledScraper(List<AruodasScraper> scrapers, UserRepo users, PostRepo posts, PostEntityConverter postConverter) {
+    public ScheduledScraper(List<AruodasScraper> scrapers, UserRepo users, PostRepo posts, PostEntityConverter postConverter, TelegramBot bot) {
         this.scrapers = scrapers;
         this.users = users;
         this.posts = posts;
         this.postConverter = postConverter;
+        this.bot = bot;
     }
 
-    @Scheduled(fixedRateString = "5", timeUnit = TimeUnit.MINUTES)
+    @Scheduled(fixedRate = 5, initialDelay = 2, timeUnit = TimeUnit.MINUTES)
     public void scrapePosts() {
         var shuffledScrapers = new ArrayList<>(scrapers);
         Collections.shuffle(shuffledScrapers);
@@ -55,16 +61,78 @@ public class ScheduledScraper {
     }
 
     private void notifyUsers(Post post) {
-        var users = getInterestedTelegramIDs(post);
-        users.forEach(user -> sendTelegramMessage(user, post));
+        getInterestedTelegramIDs(post)
+                .forEach(user -> sendTelegramMessage(user, post));
     }
 
     private List<User> getInterestedTelegramIDs(Post post) {
-        // TODO
-        return List.of();
+        // TODO with fees
+        return users.findAllInterestedTelegramIds(post.getPrice(), post.getRooms(), post.getConstructionYear(), post.getFloor());
     }
 
     private void sendTelegramMessage(User user, Post post) {
-        // TODO
+        var sb = new StringBuilder();
+        if (post.getPhone() != null) {
+            sb.append(String.format("» *Phone number:* [%1$s](tel:%1$s)\n", post.getPhone()));
+        }
+
+        var address = getAddress(post);
+        if (address != null) {
+            sb.append(String.format("» *Address:* [%s](https://maps.google.com/?q=%s)\n", address, address));
+        }
+
+        if (post.getPrice() != null && post.getArea() != null) {
+            sb.append(String.format("» *Price:* `%.2f€ (%.2f€/m²)`\n", post.getPrice(), post.getPrice().divide(post.getArea(), RoundingMode.UP)));
+        } else if (post.getPrice() != null) {
+            sb.append(String.format("» *Price:* `%.2f€`\n", post.getPrice()));
+        }
+
+        if (post.getRooms() != null && post.getArea() != null) {
+            sb.append(String.format("» *Rooms:* `%d (%.2fm²)`\n", post.getRooms(), post.getArea()));
+        } else if (post.getRooms() != null) {
+            sb.append(String.format("» *Rooms:* `%d`\n", post.getRooms()));
+        }
+
+        if (post.getConstructionYear() != null) {
+            sb.append(String.format("» *Contruction year:* `%d`\n", post.getConstructionYear()));
+        }
+
+        if (post.getHeating() != null) {
+            sb.append(String.format("» *Heating type:* `%s`\n", post.getHeating()));
+        }
+
+        if (post.getFloor() != null && post.getTotalFloors() != null) {
+            sb.append(String.format("» *Floor:* `%d/%d`\n", post.getFloor(), post.getTotalFloors()));
+        } else if (post.getRooms() != null) {
+            sb.append(String.format("» *Floor:* `%d`\n", post.getFloor()));
+        }
+
+        if (Boolean.TRUE.equals(post.getWithFees())) {
+            sb.append("» *With fee:* yes\n");
+        } else {
+            sb.append("» *With fee:* no\n");
+        }
+
+        bot.execute(new SendMessage(user.getTelegramId(), sb.toString())
+                .parseMode(ParseMode.Markdown)
+                .disableWebPagePreview(false));
+        // TODO use internal bot, not this?
+    }
+
+    private String getAddress(Post post) {
+        var sb = new StringBuilder();
+        if (post.getDistrict() != null) {
+            sb.append(post.getDistrict()).append(" ");
+        }
+        if (post.getStreet() != null) {
+            sb.append(post.getStreet()).append(" ");
+            if (post.getHouseNumber() != null) {
+                sb.append(post.getHouseNumber());
+            }
+        }
+        if (sb.isEmpty()) {
+            return null;
+        }
+        return sb.toString().trim();
     }
 }
