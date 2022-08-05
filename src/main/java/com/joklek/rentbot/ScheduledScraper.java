@@ -124,7 +124,7 @@ public class ScheduledScraper {
         }
 
         bot.execute(new SendMessage(telegramId, sb.toString())
-                .parseMode(ParseMode.Markdown)
+                .parseMode(ParseMode.Markdown) // TODO migrate to V2 markdown and see why it don't work
                 .disableWebPagePreview(false));
         // TODO use internal bot, not this?
     }

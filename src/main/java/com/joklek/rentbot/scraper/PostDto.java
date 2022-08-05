@@ -44,7 +44,7 @@ public abstract class PostDto {
     }
 
     public PostDto setPhone(String phone) {
-        this.phone = phone.trim();
+        this.phone = phone != null ? phone.trim() : null;
         return this;
     }
 
