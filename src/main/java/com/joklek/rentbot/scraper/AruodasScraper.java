@@ -1,5 +1,6 @@
 package com.joklek.rentbot.scraper;
 
+import com.joklek.rentbot.repo.PostRepo;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -15,6 +16,12 @@ import java.util.Optional;
 @Component
 public class AruodasScraper {
     private static final URI BASE_URL = URI.create("https://m.aruodas.lt/?obj=4&FRegion=461&FDistrict=1&FOrder=AddDate&from_search=1&detailed_search=1&FShowOnly=FOwnerDbId0%2CFOwnerDbId1&act=search");
+
+    private final PostRepo posts;
+
+    public AruodasScraper(PostRepo posts) {
+        this.posts = posts;
+    }
 
     public List<PostDto> getLatestPosts() {
         var driver = new ChromeDriver();
@@ -40,6 +47,10 @@ public class AruodasScraper {
     private Optional<PostDto> processItem(WebElement rawPost, WebDriver driver) {
         var originalWindow = driver.getWindowHandle();
         var aruodasId = rawPost.getAttribute("data-id").replace("loadObject", "");
+        if (posts.existsByExternalIdAndSource(aruodasId, AruodasPost.SOURCE)) {
+            return Optional.empty();
+        }
+
         var link = URI.create(String.format("https://aruodas.lt/%s", aruodasId));
         driver.switchTo().newWindow(WindowType.TAB).get(link.toString());
 
