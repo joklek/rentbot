@@ -2,7 +2,6 @@ package com.joklek.rentbot;
 
 import com.joklek.rentbot.entities.Post;
 import com.joklek.rentbot.entities.PostEntityConverter;
-import com.joklek.rentbot.entities.User;
 import com.joklek.rentbot.repo.PostRepo;
 import com.joklek.rentbot.repo.UserRepo;
 import com.joklek.rentbot.scraper.AruodasScraper;
@@ -14,6 +13,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.math.RoundingMode;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -39,7 +40,7 @@ public class ScheduledScraper {
         this.bot = bot;
     }
 
-    @Scheduled(fixedRate = 5, initialDelay = 2, timeUnit = TimeUnit.MINUTES)
+    @Scheduled(fixedRate = 5, initialDelay = 1, timeUnit = TimeUnit.MINUTES)
     public void scrapePosts() {
         var shuffledScrapers = new ArrayList<>(scrapers);
         Collections.shuffle(shuffledScrapers);
@@ -62,23 +63,26 @@ public class ScheduledScraper {
 
     private void notifyUsers(Post post) {
         getInterestedTelegramIDs(post)
-                .forEach(user -> sendTelegramMessage(user, post));
+                .forEach(telegramId -> sendTelegramMessage(telegramId, post));
     }
 
-    private List<User> getInterestedTelegramIDs(Post post) {
+    private List<Long> getInterestedTelegramIDs(Post post) {
         // TODO with fees
         return users.findAllInterestedTelegramIds(post.getPrice(), post.getRooms(), post.getConstructionYear(), post.getFloor());
     }
 
-    private void sendTelegramMessage(User user, Post post) {
+    private void sendTelegramMessage(Long telegramId, Post post) {
         var sb = new StringBuilder();
+
+        sb.append(String.format("%d. %s\n", post.getId(), post.getLink()));
+
         if (post.getPhone() != null) {
             sb.append(String.format("» *Phone number:* [%1$s](tel:%1$s)\n", post.getPhone()));
         }
 
         var address = getAddress(post);
         if (address != null) {
-            sb.append(String.format("» *Address:* [%s](https://maps.google.com/?q=%s)\n", address, address));
+            sb.append(String.format("» *Address:* [%s](https://maps.google.com/?q=%s)\n", address, URLEncoder.encode(address, StandardCharsets.UTF_8)));
         }
 
         if (post.getPrice() != null && post.getArea() != null) {
@@ -113,7 +117,7 @@ public class ScheduledScraper {
             sb.append("» *With fee:* no\n");
         }
 
-        bot.execute(new SendMessage(user.getTelegramId(), sb.toString())
+        bot.execute(new SendMessage(telegramId, sb.toString())
                 .parseMode(ParseMode.Markdown)
                 .disableWebPagePreview(false));
         // TODO use internal bot, not this?

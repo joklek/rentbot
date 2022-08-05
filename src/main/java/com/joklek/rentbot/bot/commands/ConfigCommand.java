@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import javax.validation.ValidationException;
 import javax.validation.Validator;
+import java.math.BigDecimal;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -58,8 +59,8 @@ public class ConfigCommand implements Command {
     }
 
     private void updateSettings(User user, Matcher matcher) {
-        var priceMin = Integer.parseInt(matcher.group(1));
-        var priceMax = Integer.parseInt(matcher.group(2));
+        var priceMin = new BigDecimal(matcher.group(1));
+        var priceMax = new BigDecimal(matcher.group(2));
         var roomsMin = Integer.parseInt(matcher.group(3));
         var roomsMax = Integer.parseInt(matcher.group(4));
         var yearMin = Integer.parseInt(matcher.group(5));
@@ -74,7 +75,7 @@ public class ConfigCommand implements Command {
         user.setFloorMin(floorMin);
         user.setShowWithFees(showWithFees);
 
-        if (priceMin > priceMax) {
+        if (priceMin.compareTo(priceMax) > 0) {
             throw new ValidationException("Min price can't be bigger than max price");
         }
         if (roomsMin > roomsMax) {
@@ -94,13 +95,13 @@ public class ConfigCommand implements Command {
         var showWithFees = Boolean.TRUE.equals(user.getShowWithFees()) ? "yes" : "no";
         return String.format("*Your active settings:*\n" +
                         "» *Notifications:* %1$s\n" +
-                        "» *Price:* %2$d-%3$d€\n" +
+                        "» *Price:* %2$.0f-%3$.0f€\n" +
                         "» *Rooms:* %4$d-%5$d\n" +
                         "» *From construction year:* %6$d\n" +
                         "» *Min floor:* %7$d\n" +
                         "» *Show with extra fees:* %8$s\n" +
                         "Current config:\n" +
-                        "`%9$s %2$d %3$d %4$d %5$d %6$d %7$d %8$s`",
+                        "`%9$s %2$.0f %3$.0f %4$d %5$d %6$d %7$d %8$s`",
                 status,
                 user.getPriceMin(), user.getPriceMax(),
                 user.getRoomsMin(), user.getRoomsMax(),

@@ -21,5 +21,5 @@ public interface UserRepo extends JpaRepository<User, Long> {
             "AND :rooms >= roomsMin AND :rooms <= roomsMax " +
             "AND :year >= yearMin " +
             "AND floorMin <= :floor")
-    List<User> findAllInterestedTelegramIds(BigDecimal price, Integer rooms, Integer year, Integer floor);
+    List<Long> findAllInterestedTelegramIds(BigDecimal price, Integer rooms, Integer year, Integer floor);
 }

@@ -3,6 +3,7 @@ package com.joklek.rentbot.entities;
 import javax.persistence.*;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
 import java.util.Objects;
 
 
@@ -19,10 +20,10 @@ public class User {
     private Boolean enabled;
     @NotNull
     @Min(0)
-    private Integer priceMin;
+    private BigDecimal priceMin;
     @NotNull
     @Min(0)
-    private Integer priceMax;
+    private BigDecimal priceMax;
     @NotNull
     @Min(0)
     private Integer roomsMin;
@@ -68,19 +69,19 @@ public class User {
         this.enabled = enabled;
     }
 
-    public Integer getPriceMin() {
+    public BigDecimal getPriceMin() {
         return priceMin;
     }
 
-    public void setPriceMin(Integer priceFrom) {
+    public void setPriceMin(BigDecimal priceFrom) {
         this.priceMin = priceFrom;
     }
 
-    public Integer getPriceMax() {
+    public BigDecimal getPriceMax() {
         return priceMax;
     }
 
-    public void setPriceMax(Integer priceTo) {
+    public void setPriceMax(BigDecimal priceTo) {
         this.priceMax = priceTo;
     }
 
