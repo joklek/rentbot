@@ -22,4 +22,13 @@ public interface UserRepo extends JpaRepository<User, Long> {
             "AND :year >= yearMin " +
             "AND floorMin <= :floor")
     List<Long> findAllInterestedTelegramIds(BigDecimal price, Integer rooms, Integer year, Integer floor);
+
+    @Query(value = "SELECT telegramId FROM User " +
+            "WHERE enabled = true " +
+            "AND :price >= priceMin AND :price <= priceMax " +
+            "AND :rooms >= roomsMin AND :rooms <= roomsMax " +
+            "AND :year >= yearMin " +
+            "AND floorMin <= :floor " +
+            "AND showWithFees = true")
+    List<Long> findAllInterestedTelegramIdsWithFee(BigDecimal price, Integer rooms, Integer year, Integer floor);
 }

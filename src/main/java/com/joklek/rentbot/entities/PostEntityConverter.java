@@ -7,6 +7,9 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.Base64;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
 
 @Component
 public class PostEntityConverter {
@@ -30,7 +33,7 @@ public class PostEntityConverter {
         post.setConstructionYear(postDto.getYear());
 
         post.setLastSeen(LocalDateTime.now());
-        post.setWithFees(false);
+        post.setWithFees(isWithFees(postDto));
 
         return post;
     }
@@ -44,5 +47,60 @@ public class PostEntityConverter {
         }
         messageDigest.update(postDto.getDescription().getBytes());
         return Base64.getEncoder().encodeToString(messageDigest.digest());
+    }
+
+    private static final Map<String, String> LETTER_REPLACE_MAP = Map.of(
+            "ą", "a",
+            "č", "c",
+            "ę", "e",
+            "ė", "e",
+            "į", "i",
+            "š", "s",
+            "ų", "u",
+            "ū", "u",
+            "ž", "z",
+            "y", "i" // Replace y with i, because some people are bad at writing
+    );
+
+    private static final List<String> feeKeywords = List.of(
+            "(yra mokestis)",
+            "mokestis (jei butas",
+            "\ntaikomas tarpininkavimas",
+            "tiks vienkartinis tarpinink"
+    );
+
+    private static final List<Pattern> feePatterns = List.of(
+            Pattern.compile("(agent|tarpinink|vienkart)\\S+ mokestis[\\s:-]{0,3}\\d+"),
+            Pattern.compile("\\d+\\s?\\S+ (agent|tarpinink|vienkart)\\S+ (tarp|mokest)\\S+"),
+            Pattern.compile("\\W(ira|bus) (taikoma(s|)|imama(s|)|vienkartinis|agent\\S+)( vienkartinis|) (agent|tarpinink|mokest)\\S+"),
+            Pattern.compile("\\Wtiks[^\\s\\w]?\\s?(bus|ira|) (taikoma(s|)|imama(s|))"),
+            Pattern.compile("\\W(ira |)(taikoma(s|)|imama(s|)|vienkartinis|sutarties)( sutarties|) sudar\\S+ mokestis"),
+            Pattern.compile("(ui|ir) (ira |)(taikoma(s|)|imama(s|)) (vienkart|agent|tarpinink|mokest)\\S+"),
+            Pattern.compile("(vienkartinis |)(agent|tarpinink)\\S+ mokest\\S+,? jei"),
+            Pattern.compile("[^\\w\\s](\\s|)(taikoma(s|)|imama(s|)|vienkartinis|agent\\S+)( vienkartinis|) (agent|tarpinink|mokest)\\S+")
+    );
+
+    private boolean isWithFees(PostDto postDto) {
+        var descriptionSimplified = postDto.getDescription();
+        if (descriptionSimplified == null) {
+            return false;
+        }
+        for (var entry : LETTER_REPLACE_MAP.entrySet()) {
+            descriptionSimplified = descriptionSimplified.replace(entry.getKey(), entry.getValue());
+        }
+
+        for (var keyword : feeKeywords) {
+            if (descriptionSimplified.contains(keyword)) {
+                return true;
+            }
+        }
+
+        for (var feePattern : feePatterns) {
+            if (feePattern.matcher(descriptionSimplified).matches()) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

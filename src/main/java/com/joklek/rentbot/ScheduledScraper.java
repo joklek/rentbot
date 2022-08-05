@@ -62,12 +62,18 @@ public class ScheduledScraper {
     }
 
     private void notifyUsers(Post post) {
+        if (post.getPrice() == null) {
+            return;
+        }
+
         getInterestedTelegramIDs(post)
                 .forEach(telegramId -> sendTelegramMessage(telegramId, post));
     }
 
     private List<Long> getInterestedTelegramIDs(Post post) {
-        // TODO with fees
+        if (post.getWithFees()) {
+            return users.findAllInterestedTelegramIdsWithFee(post.getPrice(), post.getRooms(), post.getConstructionYear(), post.getFloor());
+        }
         return users.findAllInterestedTelegramIds(post.getPrice(), post.getRooms(), post.getConstructionYear(), post.getFloor());
     }
 
