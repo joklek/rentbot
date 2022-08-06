@@ -54,7 +54,6 @@ public class UpdateListener {
             return;
         }
         var newUser = new User(telegramId);
-        newUser.setEnabled(false);
         users.save(newUser);
     }
 }

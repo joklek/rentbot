@@ -5,6 +5,7 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.Objects;
+import java.util.Optional;
 
 
 @Entity
@@ -14,10 +15,9 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @NotNull
-    private Long telegramId;
+    private long telegramId;
     @NotNull
-    @NotNull
-    private Boolean enabled;
+    private boolean enabled;
     @NotNull
     @Min(0)
     private BigDecimal priceMin;
@@ -37,12 +37,13 @@ public class User {
     @Min(0)
     private Integer floorMin;
     @NotNull
-    private Boolean showWithFees;
+    private boolean showWithFees;
     //    @NotNull
-    private Boolean filterByDistrict;
+    private boolean filterByDistrict;
 
-    public User(Long telegramId) {
+    public User(long telegramId) {
         this.telegramId = telegramId;
+        this.enabled = false;
     }
 
     public User() {
@@ -52,72 +53,72 @@ public class User {
         return id;
     }
 
-    public Long getTelegramId() {
+    public long getTelegramId() {
         return telegramId;
     }
 
-    public User setTelegramId(Long telegramId) {
+    public User setTelegramId(long telegramId) {
         this.telegramId = telegramId;
         return this;
     }
 
-    public Boolean getEnabled() {
+    public boolean getEnabled() {
         return enabled;
     }
 
-    public void setEnabled(Boolean enabled) {
+    public void setEnabled(boolean enabled) {
         this.enabled = enabled;
     }
 
-    public BigDecimal getPriceMin() {
-        return priceMin;
+    public Optional<BigDecimal> getPriceMin() {
+        return Optional.ofNullable(priceMin);
     }
 
     public void setPriceMin(BigDecimal priceFrom) {
         this.priceMin = priceFrom;
     }
 
-    public BigDecimal getPriceMax() {
-        return priceMax;
+    public Optional<BigDecimal> getPriceMax() {
+        return Optional.ofNullable(priceMax);
     }
 
     public void setPriceMax(BigDecimal priceTo) {
         this.priceMax = priceTo;
     }
 
-    public Integer getRoomsMin() {
-        return roomsMin;
+    public Optional<Integer> getRoomsMin() {
+        return Optional.ofNullable(roomsMin);
     }
 
     public void setRoomsMin(Integer roomsFrom) {
         this.roomsMin = roomsFrom;
     }
 
-    public Integer getRoomsMax() {
-        return roomsMax;
+    public Optional<Integer> getRoomsMax() {
+        return Optional.ofNullable(roomsMax);
     }
 
     public void setRoomsMax(Integer roomsTo) {
         this.roomsMax = roomsTo;
     }
 
-    public Integer getYearMin() {
-        return yearMin;
+    public Optional<Integer> getYearMin() {
+        return Optional.ofNullable(yearMin);
     }
 
     public void setYearMin(Integer yearFrom) {
         this.yearMin = yearFrom;
     }
 
-    public Integer getFloorMin() {
-        return floorMin;
+    public Optional<Integer> getFloorMin() {
+        return Optional.ofNullable(floorMin);
     }
 
     public void setFloorMin(Integer minFloor) {
         this.floorMin = minFloor;
     }
 
-    public Boolean getShowWithFees() {
+    public boolean getShowWithFees() {
         return showWithFees;
     }
 
@@ -125,11 +126,11 @@ public class User {
         this.showWithFees = showWithFees;
     }
 
-    public Boolean getFilterByDistrict() {
+    public boolean getFilterByDistrict() {
         return filterByDistrict;
     }
 
-    public void setFilterByDistrict(Boolean filterByDistrict) {
+    public void setFilterByDistrict(boolean filterByDistrict) {
         this.filterByDistrict = filterByDistrict;
     }
 

@@ -91,8 +91,8 @@ public class ConfigCommand implements Command {
 
     private String activeSettings(User user) {
         // TODO what when nothing configured?
-        var status = Boolean.TRUE.equals(user.getEnabled()) ? "enabled" : "disabled";
-        var showWithFees = Boolean.TRUE.equals(user.getShowWithFees()) ? "yes" : "no";
+        var status = user.getEnabled() ? "enabled" : "disabled";
+        var showWithFees = user.getShowWithFees() ? "yes" : "no";
         return String.format("*Your active settings:*\n" +
                         "» *Notifications:* %1$s\n" +
                         "» *Price:* %2$.0f-%3$.0f€\n" +
@@ -103,10 +103,10 @@ public class ConfigCommand implements Command {
                         "Current config:\n" +
                         "`%9$s %2$.0f %3$.0f %4$d %5$d %6$d %7$d %8$s`",
                 status,
-                user.getPriceMin(), user.getPriceMax(),
-                user.getRoomsMin(), user.getRoomsMax(),
-                user.getYearMin(),
-                user.getFloorMin(),
+                user.getPriceMin().orElse(BigDecimal.ZERO), user.getPriceMax().orElse(BigDecimal.ZERO),
+                user.getRoomsMin().orElse(0), user.getRoomsMax().orElse(0),
+                user.getYearMin().orElse(0),
+                user.getFloorMin().orElse(0),
                 showWithFees,
                 command());
     }
