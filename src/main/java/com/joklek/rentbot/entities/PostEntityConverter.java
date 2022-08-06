@@ -23,6 +23,7 @@ public class PostEntityConverter {
                 .map(this::getPhone)
                 .ifPresent(post::setPhone);
         postDto.getDescription()
+                .filter(x -> !x.isBlank())
                 .map(this::getHash)
                 .ifPresent(post::setDescriptionHash);
         postDto.getStreet()
