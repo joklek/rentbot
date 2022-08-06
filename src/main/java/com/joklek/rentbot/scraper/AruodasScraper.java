@@ -63,10 +63,11 @@ public class AruodasScraper implements Scraper {
         var rawAddress = selectByCss(driver, ".main-content > .obj-cont > h1").map(s -> s.split(","));
 
         // TODO move out int parsing and stuff out to EntityConvertor to make this cleaner
-        var objDetailsRaw = driver.findElements(By.cssSelector(".obj-details :not(hr)")).stream().map(WebElement::getText).toList();
+        var objDetailsRaw = driver.findElements(By.cssSelector(".obj-details :not(hr)")).stream().toList();
         var moreInfo = objDetailsRaw.stream().collect(Collectors
                         .groupingBy(x -> objDetailsRaw.indexOf(x) / 2)).values().stream()
                 .filter(x -> x.size() == 2)
+                .map(x -> x.stream().map(WebElement::getText).toList())
                 .filter(x -> !x.get(0).equals(x.get(1)))
                 .filter(x -> !x.get(1).isBlank())
                 .collect(Collectors.toMap(x -> x.get(0), x -> x.get(1)));
