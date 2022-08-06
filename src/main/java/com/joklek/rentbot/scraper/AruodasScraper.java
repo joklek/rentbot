@@ -8,7 +8,6 @@ import org.openqa.selenium.WindowType;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
 import java.net.URI;
 import java.util.List;
 import java.util.Optional;
@@ -62,7 +61,6 @@ public class AruodasScraper implements Scraper {
         var description = selectByCss(driver, "#collapsedTextBlock > #collapsedText");
         var rawAddress = selectByCss(driver, ".main-content > .obj-cont > h1").map(s -> s.split(","));
 
-        // TODO move out int parsing and stuff out to EntityConvertor to make this cleaner
         var objDetailsRaw = driver.findElements(By.cssSelector(".obj-details :not(hr)")).stream().toList();
         var moreInfo = objDetailsRaw.stream().collect(Collectors
                         .groupingBy(x -> objDetailsRaw.indexOf(x) / 2)).values().stream()
@@ -74,25 +72,25 @@ public class AruodasScraper implements Scraper {
         var houseNumber = Optional.ofNullable(moreInfo.get("Namo numeris:"));
         var heating = Optional.ofNullable(moreInfo.get("Šildymas:"));
         var floor = Optional.ofNullable(moreInfo.get("Aukštas:"))
-                .flatMap(this::parseInt);
+                .flatMap(ScraperHelper::parseInt);
         var totalFloors = Optional.ofNullable(moreInfo.get("Aukštų sk.:"))
-                .flatMap(this::parseInt);
+                .flatMap(ScraperHelper::parseInt);
         var area = Optional.ofNullable(moreInfo.get("Plotas:"))
                 .map(x -> x.replace(" m²", ""))
-                .flatMap(this::parseBigDecimal);
+                .flatMap(ScraperHelper::parseBigDecimal);
         var price = Optional.ofNullable(moreInfo.get("Kaina mėn.:"))
                 .map(x -> x.replace("€", ""))
                 .map(x -> x.replace(" ", ""))
-                .flatMap(this::parseBigDecimal);
+                .flatMap(ScraperHelper::parseBigDecimal);
         var rooms = Optional.ofNullable(moreInfo.get("Kambarių sk.:"))
-                .flatMap(this::parseInt);
+                .flatMap(ScraperHelper::parseInt);
         var year = Optional.ofNullable(moreInfo.get("Metai:"))
                 .map(x -> x.substring(0, 4))
-                .flatMap(this::parseInt);
+                .flatMap(ScraperHelper::parseInt);
 
-        post.setExternalId(aruodasId)
-                .setLink(link)
-                .setPhone(phone);
+        post.setExternalId(aruodasId);
+        post.setLink(link);
+        post.setPhone(phone);
         rawAddress.ifPresent(splitAddress -> post.setDistrict(splitAddress[1]));
         rawAddress.ifPresent(splitAddress -> post.setStreet(splitAddress[2]));
         description.ifPresent(post::setDescription);
@@ -117,24 +115,6 @@ public class AruodasScraper implements Scraper {
             return Optional.empty();
         }
         return Optional.of(elements.get(0).getText());
-    }
-
-    private Optional<Integer> parseInt(String s) {
-        try {
-            return Optional.of(Integer.parseInt(s.trim()));
-        } catch (NumberFormatException e) {
-            // TODO log bad parse
-            return Optional.empty();
-        }
-    }
-
-    private Optional<BigDecimal> parseBigDecimal(String s) {
-        try {
-            return Optional.of(new BigDecimal(s.trim()));
-        } catch (Exception e) {
-            // TODO log bad parse
-            return Optional.empty();
-        }
     }
 
     private static class AruodasPost extends PostDto {

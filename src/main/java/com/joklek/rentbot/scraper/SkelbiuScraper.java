@@ -8,7 +8,6 @@ import org.openqa.selenium.WindowType;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
 import java.net.URI;
 import java.util.List;
 import java.util.Optional;
@@ -61,7 +60,7 @@ public class SkelbiuScraper implements Scraper {
         var price = selectByCss(driver, "p.price")
                 .map(x -> x.replace("€", ""))
                 .map(x -> x.replace(" ", ""))
-                .flatMap(this::parseBigDecimal);
+                .flatMap(ScraperHelper::parseBigDecimal);
 
         var thisPage = driver.findElement(By.cssSelector("html"));
         var moreInfo = thisPage.findElements(By.className("detail")).stream()
@@ -72,17 +71,17 @@ public class SkelbiuScraper implements Scraper {
         var houseNumber = Optional.ofNullable(moreInfo.get("Namo numeris:"));
         var heating = Optional.ofNullable(moreInfo.get("Šildymas:"));
         var floor = Optional.ofNullable(moreInfo.get("Aukštas:"))
-                .flatMap(this::parseInt);
+                .flatMap(ScraperHelper::parseInt);
         var totalFloors = Optional.ofNullable(moreInfo.get("Aukštų skaičius:"))
-                .flatMap(this::parseInt);
+                .flatMap(ScraperHelper::parseInt);
         var area = Optional.ofNullable(moreInfo.get("Plotas, m²:"))
                 .map(areaRaw -> areaRaw.replace(" m²", ""))
                 .map(areaRaw -> areaRaw.replace(",", "."))
-                .flatMap(this::parseBigDecimal);
+                .flatMap(ScraperHelper::parseBigDecimal);
         var rooms = Optional.ofNullable(moreInfo.get("Kamb. sk.:"))
-                .flatMap(this::parseInt);
+                .flatMap(ScraperHelper::parseInt);
         var year = Optional.ofNullable(moreInfo.get("Metai:"))
-                .flatMap(this::parseInt);
+                .flatMap(ScraperHelper::parseInt);
 
         post.setExternalId(skelbiuId);
         post.setLink(link);
@@ -111,24 +110,6 @@ public class SkelbiuScraper implements Scraper {
             return Optional.empty();
         }
         return Optional.of(elements.get(0).getText());
-    }
-
-    private Optional<Integer> parseInt(String s) {
-        try {
-            return Optional.of(Integer.parseInt(s.trim()));
-        } catch (NumberFormatException e) {
-            // TODO log bad parse
-            return Optional.empty();
-        }
-    }
-
-    private Optional<BigDecimal> parseBigDecimal(String s) {
-        try {
-            return Optional.of(new BigDecimal(s.trim()));
-        } catch (Exception e) {
-            // TODO log bad parse
-            return Optional.empty();
-        }
     }
 
     private static class SkelbiuPost extends PostDto {

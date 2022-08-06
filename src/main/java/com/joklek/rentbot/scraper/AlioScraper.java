@@ -7,7 +7,6 @@ import org.jsoup.nodes.Element;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.net.URI;
 import java.util.List;
 import java.util.Optional;
@@ -75,20 +74,20 @@ public class AlioScraper implements Scraper {
         }
         var heating = Optional.ofNullable(moreInfo.get("Šildymas"));
         var floor = Optional.ofNullable(moreInfo.get("Buto aukštas"))
-                .flatMap(this::parseInt);
+                .flatMap(ScraperHelper::parseInt);
         var totalFloors = Optional.ofNullable(moreInfo.get("Aukštų skaičius pastate"))
-                .flatMap(this::parseInt);
+                .flatMap(ScraperHelper::parseInt);
         var area = Optional.ofNullable(moreInfo.get("Buto plotas"))
                 .map(areaRaw -> areaRaw.trim().split(" ")[0])
-                .flatMap(this::parseBigDecimal);
+                .flatMap(ScraperHelper::parseBigDecimal);
         var price = Optional.ofNullable(moreInfo.get("Kaina, €"))
                 .map(priceRaw -> priceRaw.trim().split(" ")[0])
-                .flatMap(this::parseBigDecimal);
+                .flatMap(ScraperHelper::parseBigDecimal);
         var rooms = Optional.ofNullable(moreInfo.get("Kambarių skaičius"))
-                .flatMap(this::parseInt);
+                .flatMap(ScraperHelper::parseInt);
         var year = Optional.ofNullable(moreInfo.get("Statybos metai"))
                 .map(yearRaw -> yearRaw.trim().split(" ")[0])
-                .flatMap(this::parseInt);
+                .flatMap(ScraperHelper::parseInt);
 
         post.setExternalId(alioId);
         post.setLink(link);
@@ -121,24 +120,6 @@ public class AlioScraper implements Scraper {
                     .followRedirects(true)
                     .get());
         } catch (IOException e) {
-            return Optional.empty();
-        }
-    }
-
-    private Optional<Integer> parseInt(String s) {
-        try {
-            return Optional.of(Integer.parseInt(s.trim()));
-        } catch (NumberFormatException e) {
-            // TODO log bad parse
-            return Optional.empty();
-        }
-    }
-
-    private Optional<BigDecimal> parseBigDecimal(String s) {
-        try {
-            return Optional.of(new BigDecimal(s.trim()));
-        } catch (Exception e) {
-            // TODO log bad parse
             return Optional.empty();
         }
     }

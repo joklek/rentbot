@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -87,10 +86,10 @@ public class KampasScraper implements Scraper {
         var totalFloors = Optional.ofNullable(node.get("totalfloors")).map(JsonNode::asInt);
         var area = Optional.ofNullable(node.get("objectarea"))
                 .map(JsonNode::asText)
-                .flatMap(this::parseBigDecimal);
+                .flatMap(ScraperHelper::parseBigDecimal);
         var price = Optional.ofNullable(node.get("objectprice"))
                 .map(JsonNode::asText)
-                .flatMap(this::parseBigDecimal);
+                .flatMap(ScraperHelper::parseBigDecimal);
         var rooms = Optional.ofNullable(node.get("totalrooms")).map(JsonNode::asInt);
         var year = Optional.ofNullable(node.get("yearbuilt")).map(JsonNode::asInt);
 
@@ -140,15 +139,6 @@ public class KampasScraper implements Scraper {
             return Optional.of(mapper.readTree(response.body()));
         } catch (JsonProcessingException e) {
             LOGGER.error("Failed while fetching '{}' because of invalid json", link, e);
-            return Optional.empty();
-        }
-    }
-
-    private Optional<BigDecimal> parseBigDecimal(String s) {
-        try {
-            return Optional.of(new BigDecimal(s.trim()));
-        } catch (Exception e) {
-            // TODO log bad parse
             return Optional.empty();
         }
     }
