@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 import java.net.URI;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Component
 public class AruodasScraper implements Scraper {
@@ -62,24 +63,29 @@ public class AruodasScraper implements Scraper {
         var rawAddress = selectByCss(driver, ".main-content > .obj-cont > h1").map(s -> s.split(","));
 
         // TODO move out int parsing and stuff out to EntityConvertor to make this cleaner
-        var objDetailsLabels = driver.findElements(By.cssSelector(".obj-details > dt"));
-        var objDetailsValues = driver.findElements(By.cssSelector(".obj-details > dd"));
-        var houseNumber = objDetailsLabels.stream().filter(x -> x.getText().startsWith("Namo numeris")).findFirst().map(x -> objDetailsValues.get(objDetailsLabels.indexOf(x)).getText());
-        var heating = objDetailsLabels.stream().filter(x -> x.getText().startsWith("Šildymas")).findFirst().map(x -> objDetailsValues.get(objDetailsLabels.indexOf(x)).getText());
-        var floor = objDetailsLabels.stream().filter(x -> x.getText().startsWith("Aukštas")).findFirst().map(x -> objDetailsValues.get(objDetailsLabels.indexOf(x)).getText())
+        var objDetailsRaw = driver.findElements(By.cssSelector(".obj-details :not(hr)")).stream().map(WebElement::getText).toList();
+        var moreInfo = objDetailsRaw.stream().collect(Collectors
+                        .groupingBy(x -> objDetailsRaw.indexOf(x) / 2)).values().stream()
+                .filter(x -> x.size() == 2)
+                .filter(x -> !x.get(0).equals(x.get(1)))
+                .filter(x -> !x.get(1).isBlank())
+                .collect(Collectors.toMap(x -> x.get(0), x -> x.get(1)));
+        var houseNumber = Optional.ofNullable(moreInfo.get("Namo numeris:"));
+        var heating = Optional.ofNullable(moreInfo.get("Šildymas:"));
+        var floor = Optional.ofNullable(moreInfo.get("Aukštas:"))
                 .flatMap(this::parseInt);
-        var totalFloors = objDetailsLabels.stream().filter(x -> x.getText().startsWith("Aukštų sk.")).findFirst().map(x -> objDetailsValues.get(objDetailsLabels.indexOf(x)).getText())
+        var totalFloors = Optional.ofNullable(moreInfo.get("Aukštų sk.:"))
                 .flatMap(this::parseInt);
-        var area = objDetailsLabels.stream().filter(x -> x.getText().startsWith("Plotas")).findFirst().map(x -> objDetailsValues.get(objDetailsLabels.indexOf(x)).getText())
+        var area = Optional.ofNullable(moreInfo.get("Plotas:"))
                 .map(x -> x.replace(" m²", ""))
                 .flatMap(this::parseBigDecimal);
-        var price = objDetailsLabels.stream().filter(x -> x.getText().startsWith("Kaina mėn.")).findFirst().map(x -> objDetailsValues.get(objDetailsLabels.indexOf(x)).getText())
+        var price = Optional.ofNullable(moreInfo.get("Kaina mėn.:"))
                 .map(x -> x.replace("€", ""))
                 .map(x -> x.replace(" ", ""))
                 .flatMap(this::parseBigDecimal);
-        var rooms = objDetailsLabels.stream().filter(x -> x.getText().startsWith("Kambarių sk.")).findFirst().map(x -> objDetailsValues.get(objDetailsLabels.indexOf(x)).getText())
+        var rooms = Optional.ofNullable(moreInfo.get("Kambarių sk.:"))
                 .flatMap(this::parseInt);
-        var year = objDetailsLabels.stream().filter(x -> x.getText().startsWith("Metai")).findFirst().map(x -> objDetailsValues.get(objDetailsLabels.indexOf(x)).getText())
+        var year = Optional.ofNullable(moreInfo.get("Metai:"))
                 .map(x -> x.substring(0, 4))
                 .flatMap(this::parseInt);
 
