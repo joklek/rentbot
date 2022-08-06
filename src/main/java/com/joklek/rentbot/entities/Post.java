@@ -4,6 +4,7 @@ import javax.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.Optional;
 
 @Entity
 @Table(name = "posts")
@@ -15,7 +16,7 @@ public class Post {
     private String source;
     private String link;
     private String phone;
-    private LocalDateTime lastSeen;
+    private LocalDateTime createdAt;
     private BigDecimal price;
     private Integer rooms;
     private Integer constructionYear;
@@ -59,8 +60,8 @@ public class Post {
         this.link = link;
     }
 
-    public String getPhone() {
-        return phone;
+    public Optional<String> getPhone() {
+        return Optional.ofNullable(phone);
     }
 
     public Post setPhone(String phone) {
@@ -68,72 +69,72 @@ public class Post {
         return this;
     }
 
-    public LocalDateTime getLastSeen() {
-        return lastSeen;
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
-    public void setLastSeen(LocalDateTime lastSeen) {
-        this.lastSeen = lastSeen;
+    public void setCreatedAt(LocalDateTime lastSeen) {
+        this.createdAt = lastSeen;
     }
 
-    public BigDecimal getPrice() {
-        return price;
+    public Optional<BigDecimal> getPrice() {
+        return Optional.ofNullable(price);
     }
 
     public void setPrice(BigDecimal price) {
         this.price = price;
     }
 
-    public Integer getRooms() {
-        return rooms;
+    public Optional<Integer> getRooms() {
+        return Optional.ofNullable(rooms);
     }
 
     public void setRooms(Integer rooms) {
         this.rooms = rooms;
     }
 
-    public Integer getConstructionYear() {
-        return constructionYear;
+    public Optional<Integer> getConstructionYear() {
+        return Optional.ofNullable(constructionYear);
     }
 
     public void setConstructionYear(Integer year) {
         this.constructionYear = year;
     }
 
-    public Integer getFloor() {
-        return floor;
+    public Optional<Integer> getFloor() {
+        return Optional.ofNullable(floor);
     }
 
     public void setFloor(Integer floor) {
         this.floor = floor;
     }
 
-    public Integer getTotalFloors() {
-        return totalFloors;
+    public Optional<Integer> getTotalFloors() {
+        return Optional.ofNullable(totalFloors);
     }
 
     public void setTotalFloors(Integer totalFloors) {
         this.totalFloors = totalFloors;
     }
 
-    public Boolean getWithFees() {
+    public boolean getWithFees() {
         return isWithFees;
     }
 
-    public void setWithFees(Boolean withFees) {
+    public void setWithFees(boolean withFees) {
         isWithFees = withFees;
     }
 
-    public String getDescriptionHash() {
-        return descriptionHash;
+    public Optional<String> getDescriptionHash() {
+        return Optional.ofNullable(descriptionHash);
     }
 
     public void setDescriptionHash(String descriptionHash) {
         this.descriptionHash = descriptionHash;
     }
 
-    public String getStreet() {
-        return street;
+    public Optional<String> getStreet() {
+        return Optional.ofNullable(street);
     }
 
     public Post setStreet(String street) {
@@ -141,8 +142,8 @@ public class Post {
         return this;
     }
 
-    public String getDistrict() {
-        return district;
+    public Optional<String> getDistrict() {
+        return Optional.ofNullable(district);
     }
 
     public Post setDistrict(String district) {
@@ -150,8 +151,8 @@ public class Post {
         return this;
     }
 
-    public String getHouseNumber() {
-        return houseNumber;
+    public Optional<String> getHouseNumber() {
+        return Optional.ofNullable(houseNumber);
     }
 
     public Post setHouseNumber(String houseNumber) {
@@ -159,8 +160,8 @@ public class Post {
         return this;
     }
 
-    public String getHeating() {
-        return heating;
+    public Optional<String> getHeating() {
+        return Optional.ofNullable(heating);
     }
 
     public Post setHeating(String heating) {
@@ -168,8 +169,8 @@ public class Post {
         return this;
     }
 
-    public BigDecimal getArea() {
-        return area;
+    public Optional<BigDecimal> getArea() {
+        return Optional.ofNullable(area);
     }
 
     public Post setArea(BigDecimal area) {

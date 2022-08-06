@@ -2,6 +2,7 @@ package com.joklek.rentbot.scraper;
 
 import java.math.BigDecimal;
 import java.net.URI;
+import java.util.Optional;
 
 public abstract class PostDto {
     private String externalId;
@@ -39,8 +40,8 @@ public abstract class PostDto {
         return this;
     }
 
-    public String getPhone() {
-        return phone;
+    public Optional<String> getPhone() {
+        return Optional.ofNullable(phone);
     }
 
     public PostDto setPhone(String phone) {
@@ -48,8 +49,8 @@ public abstract class PostDto {
         return this;
     }
 
-    public String getDescription() {
-        return description;
+    public Optional<String> getDescription() {
+        return Optional.ofNullable(description);
     }
 
     public PostDto setDescription(String description) {
@@ -57,44 +58,44 @@ public abstract class PostDto {
         return this;
     }
 
-    public String getStreet() {
-        return street;
+    public Optional<String> getStreet() {
+        return Optional.ofNullable(street);
     }
 
     public PostDto setStreet(String street) {
-        this.street = street.trim();
+        this.street = street;
         return this;
     }
 
-    public String getDistrict() {
-        return district;
+    public Optional<String> getDistrict() {
+        return Optional.ofNullable(district);
     }
 
     public PostDto setDistrict(String district) {
-        this.district = district.trim();
+        this.district = district;
         return this;
     }
 
-    public String getHouseNumber() {
-        return houseNumber;
+    public Optional<String> getHouseNumber() {
+        return Optional.ofNullable(houseNumber);
     }
 
     public PostDto setHouseNumber(String houseNumber) {
-        this.houseNumber = houseNumber.trim();
+        this.houseNumber = houseNumber;
         return this;
     }
 
-    public String getHeating() {
-        return heating;
+    public Optional<String> getHeating() {
+        return Optional.ofNullable(heating);
     }
 
     public PostDto setHeating(String heating) {
-        this.heating = heating.trim();
+        this.heating = heating;
         return this;
     }
 
-    public Integer getFloor() {
-        return floor;
+    public Optional<Integer> getFloor() {
+        return Optional.ofNullable(floor);
     }
 
     public PostDto setFloor(Integer floor) {
@@ -102,8 +103,8 @@ public abstract class PostDto {
         return this;
     }
 
-    public Integer getTotalFloors() {
-        return totalFloors;
+    public Optional<Integer> getTotalFloors() {
+        return Optional.ofNullable(totalFloors);
     }
 
     public PostDto setTotalFloors(Integer totalFloors) {
@@ -111,8 +112,8 @@ public abstract class PostDto {
         return this;
     }
 
-    public BigDecimal getArea() {
-        return area;
+    public Optional<BigDecimal> getArea() {
+        return Optional.ofNullable(area);
     }
 
     public PostDto setArea(BigDecimal area) {
@@ -120,8 +121,8 @@ public abstract class PostDto {
         return this;
     }
 
-    public BigDecimal getPrice() {
-        return price;
+    public Optional<BigDecimal> getPrice() {
+        return Optional.ofNullable(price);
     }
 
     public PostDto setPrice(BigDecimal price) {
@@ -129,8 +130,8 @@ public abstract class PostDto {
         return this;
     }
 
-    public Integer getRooms() {
-        return rooms;
+    public Optional<Integer> getRooms() {
+        return Optional.ofNullable(rooms);
     }
 
     public PostDto setRooms(Integer rooms) {
@@ -138,14 +139,12 @@ public abstract class PostDto {
         return this;
     }
 
-    public Integer getYear() {
-        return year;
+    public Optional<Integer> getYear() {
+        return Optional.ofNullable(year);
     }
 
     public PostDto setYear(Integer year) {
         this.year = year;
         return this;
     }
-
-    // TODO builder with trimming, building, formatting
 }

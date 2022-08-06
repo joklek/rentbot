@@ -19,27 +19,44 @@ public class PostEntityConverter {
         post.setSource(postDto.getSource());
         post.setExternalId(postDto.getExternalId());
         post.setLink(postDto.getLink().toString());
-        post.setPhone(getPhone(postDto));
-        post.setDescriptionHash(getHash(postDto));
-        post.setStreet(postDto.getStreet().trim());
-        post.setDistrict(postDto.getDistrict().trim());
-        post.setHouseNumber(postDto.getHouseNumber().trim());
-        post.setHeating(postDto.getHeating().trim());
-        post.setFloor(postDto.getFloor());
-        post.setTotalFloors(postDto.getTotalFloors());
-        post.setArea(postDto.getArea());
-        post.setPrice(postDto.getPrice());
-        post.setRooms(postDto.getRooms());
-        post.setConstructionYear(postDto.getYear());
-
-        post.setLastSeen(LocalDateTime.now());
+        postDto.getPhone()
+                .map(this::getPhone)
+                .ifPresent(post::setPhone);
+        postDto.getDescription()
+                .map(this::getHash)
+                .ifPresent(post::setDescriptionHash);
+        postDto.getStreet()
+                .map(street -> street.trim())
+                .ifPresent(post::setStreet);
+        postDto.getDistrict()
+                .map(street -> street.trim())
+                .ifPresent(post::setDistrict);
+        postDto.getHouseNumber()
+                .map(street -> street.trim())
+                .ifPresent(post::setHouseNumber);
+        postDto.getHeating()
+                .map(street -> street.trim())
+                .ifPresent(post::setHeating);
+        postDto.getFloor()
+                .ifPresent(post::setFloor);
+        postDto.getTotalFloors()
+                .ifPresent(post::setTotalFloors);
+        postDto.getArea()
+                .ifPresent(post::setArea);
+        postDto.getPrice()
+                .ifPresent(post::setPrice);
+        postDto.getRooms()
+                .ifPresent(post::setRooms);
+        postDto.getYear()
+                .ifPresent(post::setConstructionYear);
         post.setWithFees(isWithFees(postDto));
+
+        post.setCreatedAt(LocalDateTime.now());
 
         return post;
     }
 
-    private String getPhone(PostDto postDto) {
-        var phone = postDto.getPhone();
+    private String getPhone(String phone) {
         phone = phone.replace(" ", "");
         if (phone.startsWith("00")) {
             phone = phone.replaceFirst("00", "");
@@ -52,14 +69,14 @@ public class PostEntityConverter {
         return phone.trim();
     }
 
-    private String getHash(PostDto postDto) {
+    private String getHash(String description) {
         MessageDigest messageDigest;
         try {
             messageDigest = MessageDigest.getInstance("SHA-256");
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
-        messageDigest.update(postDto.getDescription().getBytes());
+        messageDigest.update(description.getBytes());
         return Base64.getEncoder().encodeToString(messageDigest.digest());
     }
 
@@ -95,10 +112,10 @@ public class PostEntityConverter {
     );
 
     private boolean isWithFees(PostDto postDto) {
-        var descriptionSimplified = postDto.getDescription();
-        if (descriptionSimplified == null) {
+        if (postDto.getDescription().isEmpty()) {
             return false;
         }
+        var descriptionSimplified = postDto.getDescription().get();
         for (var entry : LETTER_REPLACE_MAP.entrySet()) {
             descriptionSimplified = descriptionSimplified.replace(entry.getKey(), entry.getValue());
         }

@@ -19,7 +19,7 @@ CREATE TABLE posts
     external_id       VARCHAR(63)    NOT NULL,
     source            VARCHAR(63)    NOT NULL,
     link              VARCHAR(1023)  NOT NULL,
-    last_seen         TIMESTAMP      NOT NULL,
+    created_at        TIMESTAMP      NOT NULL,
     is_with_fees      BOOL           NOT NULL,
     phone             VARCHAR(63)    NULL,
     price             DECIMAL(19, 4) NULL,
