@@ -31,7 +31,6 @@ public class AlioScraper implements Scraper {
     public List<PostDto> getLatestPosts() {
         var maybeDoc = getDocument(BASE_URL);
         if (maybeDoc.isEmpty()) {
-            // TODO log empty
             return List.of();
         }
         var doc = maybeDoc.get();

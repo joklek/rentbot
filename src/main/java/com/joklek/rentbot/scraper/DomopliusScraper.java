@@ -32,7 +32,6 @@ public class DomopliusScraper implements Scraper {
     public List<PostDto> getLatestPosts() {
         var maybeDoc = getDocument(BASE_URL);
         if (maybeDoc.isEmpty()) {
-            // TODO log empty
             return List.of();
         }
         var doc = maybeDoc.get();
@@ -55,7 +54,6 @@ public class DomopliusScraper implements Scraper {
 
         var maybeExactPost = getDocument(URI.create(rawPost.select("li a").attr("href"))); // Not using created link because even with redirects turned on it doesn't work properly :/
         if (maybeExactPost.isEmpty()) {
-            // TODO log empty
             return Optional.empty();
         }
         var exactPost = maybeExactPost.get();
