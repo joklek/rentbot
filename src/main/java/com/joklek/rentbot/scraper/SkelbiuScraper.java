@@ -6,6 +6,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.WindowType;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
 import java.net.URI;
@@ -13,8 +14,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static org.slf4j.LoggerFactory.getLogger;
+
 @Component
 public class SkelbiuScraper implements Scraper {
+    private static final Logger LOGGER = getLogger(AruodasScraper.class);
     private static final URI BASE_URL = URI.create("https://www.skelbiu.lt/skelbimai/?cities=465&category_id=322&cities=465&district=0&cost_min=&cost_max=&status=0&space_min=&space_max=&rooms_min=&rooms_max=&building=0&year_min=&year_max=&floor_min=&floor_max=&floor_type=0&user_type=0&type=1&orderBy=1&import=2&keywords=");
 
     private final PostRepo posts;
@@ -38,6 +42,11 @@ public class SkelbiuScraper implements Scraper {
     private List<PostDto> getPosts(WebDriver driver) {
         driver.get(BASE_URL.toString());
         var rawPosts = driver.findElements(By.cssSelector("#itemsList > ul > li.simpleAds:not(.passivatedItem)"));
+        if (rawPosts.isEmpty()) {
+            LOGGER.error("Cant fetch posts, might be blocked");
+            return List.of();
+        }
+
         return rawPosts.stream()
                 .map(rawPost -> processItem(rawPost, driver))
                 .filter(Optional::isPresent)

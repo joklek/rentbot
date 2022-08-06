@@ -6,6 +6,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.WindowType;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
 import java.net.URI;
@@ -13,8 +14,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static org.slf4j.LoggerFactory.getLogger;
+
 @Component
 public class AruodasScraper implements Scraper {
+    private static final Logger LOGGER = getLogger(AruodasScraper.class);
     private static final URI BASE_URL = URI.create("https://m.aruodas.lt/?obj=4&FRegion=461&FDistrict=1&FOrder=AddDate&from_search=1&detailed_search=1&FShowOnly=FOwnerDbId0%2CFOwnerDbId1&act=search");
 
     private final PostRepo posts;
@@ -38,6 +42,11 @@ public class AruodasScraper implements Scraper {
     private List<PostDto> getPosts(WebDriver driver) {
         driver.get(BASE_URL.toString());
         var rawPosts = driver.findElements(By.cssSelector("ul.search-result-list-v2 > li.result-item-v3:not([style='display: none'])"));
+        if (rawPosts.isEmpty()) {
+            LOGGER.error("Cant fetch posts, might be blocked");
+            return List.of();
+        }
+
         return rawPosts.stream()
                 .map(rawPost -> processItem(rawPost, driver))
                 .filter(Optional::isPresent)

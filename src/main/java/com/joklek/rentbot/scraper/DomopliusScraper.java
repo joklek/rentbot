@@ -4,6 +4,7 @@ import com.joklek.rentbot.repo.PostRepo;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -13,8 +14,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static org.slf4j.LoggerFactory.getLogger;
+
 @Component
 public class DomopliusScraper implements Scraper {
+    private static final Logger LOGGER = getLogger(DomopliusScraper.class);
     private static final URI BASE_URL = URI.create("https://m.domoplius.lt/skelbimai/butai?action_type=3&address_1=461&sell_price_from=&sell_price_to=&qt=");
     private static final String DEFAULT_USER_AGENT = "Mozilla/5.0 (Android 9; Mobile; rv:103.0) Gecko/103.0 Firefox/103.0";
 
@@ -145,6 +149,7 @@ public class DomopliusScraper implements Scraper {
                     .followRedirects(true)
                     .get());
         } catch (IOException e) {
+            LOGGER.error("Failed while fetching '{}'", link, e);
             return Optional.empty();
         }
     }
