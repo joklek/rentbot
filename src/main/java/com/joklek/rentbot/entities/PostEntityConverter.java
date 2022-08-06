@@ -19,12 +19,12 @@ public class PostEntityConverter {
         post.setSource(postDto.getSource());
         post.setExternalId(postDto.getExternalId());
         post.setLink(postDto.getLink().toString());
-        post.setPhone(postDto.getPhone());
+        post.setPhone(getPhone(postDto));
         post.setDescriptionHash(getHash(postDto));
-        post.setStreet(postDto.getStreet());
-        post.setDistrict(postDto.getDistrict());
-        post.setHouseNumber(postDto.getHouseNumber());
-        post.setHeating(postDto.getHeating());
+        post.setStreet(postDto.getStreet().trim());
+        post.setDistrict(postDto.getDistrict().trim());
+        post.setHouseNumber(postDto.getHouseNumber().trim());
+        post.setHeating(postDto.getHeating().trim());
         post.setFloor(postDto.getFloor());
         post.setTotalFloors(postDto.getTotalFloors());
         post.setArea(postDto.getArea());
@@ -36,6 +36,20 @@ public class PostEntityConverter {
         post.setWithFees(isWithFees(postDto));
 
         return post;
+    }
+
+    private String getPhone(PostDto postDto) {
+        var phone = postDto.getPhone();
+        phone = phone.replace(" ", "");
+        if (phone.startsWith("00")) {
+            phone = phone.replaceFirst("00", "");
+        }
+        if (phone.startsWith("370")) {
+            phone = "+" + phone;
+        } else if (phone.startsWith("86")) {
+            phone = phone.replaceFirst("86", "+3706");
+        }
+        return phone.trim();
     }
 
     private String getHash(PostDto postDto) {
