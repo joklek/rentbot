@@ -16,7 +16,7 @@ public interface Command {
 
     default SendMessage simpleResponse(Update update, String message) {
         return new SendMessage(update.message().chat().id(), message)
-                .parseMode(ParseMode.Markdown)
+                .parseMode(ParseMode.Markdown) // TODO migrate to V2 markdown and see why it don't work
                 .disableWebPagePreview(false);
     }
 }

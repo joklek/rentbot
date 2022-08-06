@@ -41,20 +41,20 @@ public class ConfigCommand implements Command {
         var telegramId = update.message().chat().id();
         var user = users.getByTelegramId(telegramId);
         if (payload.isBlank()) {
-            return simpleResponse(update, String.format("%s%n%s", CONFIG_TEXT, activeSettings(user)));
+            return simpleResponse(update, String.format("%s\n%s", CONFIG_TEXT, activeSettings(user)));
         }
         var matcher = CONFIG_PATTERN.matcher(payload);
         if (!matcher.matches()) {
-            return simpleResponse(update, String.format("%s%n%s", "Wrong input!", CONFIG_TEXT));
+            return simpleResponse(update, String.format("%s\n%s", "Wrong input!", CONFIG_TEXT));
         }
         try {
             updateSettings(user, matcher);
             return simpleResponse(update, String.format("Config updated!\n\n%s", activeSettings(user)));
         } catch (NumberFormatException | ValidationException e) {
-            return simpleResponse(update, String.format("%s%n%s", "Wrong input!", CONFIG_TEXT));
+            return simpleResponse(update, String.format("%s\n%s", "Wrong input!", CONFIG_TEXT));
         } catch (Exception e) {
             LOGGER.warn("Error while updating user settings", e);
-            return simpleResponse(update, String.format("%s%n%s", "Wrong input!", CONFIG_TEXT));
+            return simpleResponse(update, String.format("%s\n%s", "Wrong input!", CONFIG_TEXT));
         }
     }
 

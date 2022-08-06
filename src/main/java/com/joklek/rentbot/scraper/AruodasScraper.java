@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Component
-public class AruodasScraper {
+public class AruodasScraper implements Scraper {
     private static final URI BASE_URL = URI.create("https://m.aruodas.lt/?obj=4&FRegion=461&FDistrict=1&FOrder=AddDate&from_search=1&detailed_search=1&FShowOnly=FOwnerDbId0%2CFOwnerDbId1&act=search");
 
     private final PostRepo posts;
@@ -23,6 +23,7 @@ public class AruodasScraper {
         this.posts = posts;
     }
 
+    @Override
     public List<PostDto> getLatestPosts() {
         var driver = new ChromeDriver();
         try {

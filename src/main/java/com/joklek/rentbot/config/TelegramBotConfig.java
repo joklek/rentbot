@@ -1,16 +1,13 @@
 package com.joklek.rentbot.config;
 
-import com.joklek.rentbot.bot.CommandRecognizer;
 import com.joklek.rentbot.bot.UpdateListener;
-import com.joklek.rentbot.bot.commands.Command;
 import com.pengrad.telegrambot.TelegramBot;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
+@Profile("!test")
 @Configuration
 public class TelegramBotConfig {
 
@@ -20,12 +17,5 @@ public class TelegramBotConfig {
         bot.setUpdatesListener(updates -> updateListener.process(bot, updates));
 
         return bot;
-    }
-
-    @Bean
-    public CommandRecognizer defaultRecognizer(List<Command> commands) {
-        var commandsMapped = commands.stream().collect(Collectors.toMap(Command::command, x -> x));
-        Command errorsHandler = null;
-        return new CommandRecognizer(commandsMapped, errorsHandler); // TODO error handler
     }
 }
