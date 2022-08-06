@@ -114,7 +114,7 @@ public class AruodasScraper implements Scraper {
 
     private Optional<Integer> parseInt(String s) {
         try {
-            return Optional.of(Integer.parseInt(s));
+            return Optional.of(Integer.parseInt(s.trim()));
         } catch (NumberFormatException e) {
             // TODO log bad parse
             return Optional.empty();
@@ -123,7 +123,7 @@ public class AruodasScraper implements Scraper {
 
     private Optional<BigDecimal> parseBigDecimal(String s) {
         try {
-            return Optional.of(new BigDecimal(s));
+            return Optional.of(new BigDecimal(s.trim()));
         } catch (Exception e) {
             // TODO log bad parse
             return Optional.empty();

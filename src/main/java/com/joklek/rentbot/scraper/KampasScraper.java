@@ -146,7 +146,7 @@ public class KampasScraper implements Scraper {
 
     private Optional<BigDecimal> parseBigDecimal(String s) {
         try {
-            return Optional.of(new BigDecimal(s));
+            return Optional.of(new BigDecimal(s.trim()));
         } catch (Exception e) {
             // TODO log bad parse
             return Optional.empty();

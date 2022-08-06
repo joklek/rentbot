@@ -9,18 +9,19 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URI;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
-public class AlioScraper implements Scraper {
-    private static final URI BASE_URL = URI.create("https://www.alio.lt/paieska/?category_id=1393&city_id=228626&search_block=1&search[eq][adresas_1]=228626&order=ad_id");
+public class DomopliusScraper implements Scraper {
+    private static final URI BASE_URL = URI.create("https://m.domoplius.lt/skelbimai/butai?action_type=3&address_1=461&sell_price_from=&sell_price_to=&qt=");
     private static final String DEFAULT_USER_AGENT = "Mozilla/5.0 (Android 9; Mobile; rv:103.0) Gecko/103.0 Firefox/103.0";
 
     private final PostRepo posts;
 
-    public AlioScraper(PostRepo posts) {
+    public DomopliusScraper(PostRepo posts) {
         this.posts = posts;
     }
 
@@ -33,7 +34,7 @@ public class AlioScraper implements Scraper {
         }
         var doc = maybeDoc.get();
 
-        var rawPosts = doc.select("#main_left_b > #main-content-center > div.result");
+        var rawPosts = doc.select("ul.list > li[id^='ann_']");
 
         return rawPosts.stream()
                 .map(rawPost -> processItem(rawPost))
@@ -43,46 +44,65 @@ public class AlioScraper implements Scraper {
     }
 
     private Optional<PostDto> processItem(Element rawPost) {
-        var alioId = rawPost.attr("id").replace("lv_ad_id_", "");
-        var link = URI.create(String.format("https://www.alio.lt/skelbimai/ID%s.html", alioId));
-        if (posts.existsByExternalIdAndSource(alioId, AlioPost.SOURCE)) {
+        var domoId = rawPost.attr("id").replace("ann_", "");
+        var link = URI.create(String.format("https://domoplius.lt/skelbimai/-%s.html", domoId));
+        if (posts.existsByExternalIdAndSource(domoId, DomopliusPost.SOURCE)) {
             return Optional.empty();
         }
 
-        var maybeExactPost = getDocument(link);
+        var maybeExactPost = getDocument(URI.create(rawPost.select("li a").attr("href"))); // Not using created link because even with redirects turned on it doesn't work properly :/
         if (maybeExactPost.isEmpty()) {
             // TODO log empty
             return Optional.empty();
         }
         var exactPost = maybeExactPost.get();
-        var post = new AlioPost();
-        var phone = Optional.ofNullable(exactPost.select("#phone_val_value").first()).map(Element::text);
-        var description = Optional.ofNullable(exactPost.select("#adv_description_b > .a_line_val").first()).map(Element::text);
+        var post = new DomopliusPost();
+        var phone = Optional.ofNullable(exactPost.select("#phone_button_4 > span").first())
+                .map(el -> el.attr("data-value"))
+                .map(dataEncoded -> decode(dataEncoded));
+        var description = Optional.ofNullable(exactPost.select("div.container > div.group-comments").first())
+                .map(Element::text);
 
-        var moreInfo = exactPost.select(".data_moreinfo_b").stream()
-                .collect(Collectors.toMap(x -> x.select(".a_line_key").text(), x -> x.select(".a_line_val").text()));
-
-
-        var rawAddress = Optional.ofNullable(moreInfo.get("Adresas"));
+        var addressRaw = exactPost.select(".breadcrumb-item > a > span[itemprop=name]");
         Optional<String> district = Optional.empty();
         Optional<String> street = Optional.empty();
-        if (rawAddress.isPresent()) {
-            var splitAddress = rawAddress.get().split(", ");
-            district = Optional.of(splitAddress[1]);
-            if (splitAddress.length > 2) {
-                street = Optional.of(splitAddress[2]);
+        if (addressRaw.size() > 1) {
+            district = Optional.of(addressRaw.get(1).text());
+        }
+        if (addressRaw.size() > 2) {
+            street = Optional.of(addressRaw.get(2).text());
+        }
+
+        var price = Optional.ofNullable(exactPost.select(".field-price > .price-column > .h1").first())
+                .map(Element::text)
+                .map(priceRaw -> priceRaw.trim().split(" ")[0])
+                .flatMap(this::parseBigDecimal);
+        var moreInfo = exactPost.select(".view-field").stream()
+                .filter(el -> !el.attr("title").isBlank())
+                .collect(Collectors.toMap(x -> x.attr("title"), x -> x.textNodes().get(0).text().trim()));
+
+
+        var houseNumber = Optional.ofNullable(moreInfo.get("Namo numeris"));
+        var heating = Optional.ofNullable(moreInfo.get("Šildymas"));
+
+        String rawFloor = null;
+        String rawTotalFloors = null;
+        var rawFloorInfo = moreInfo.get("Aukštas");
+        if (rawFloorInfo != null) {
+            if (rawFloorInfo.contains("aukštų pastate")) {
+                var splitFloor = rawFloorInfo.replace("aukštų pastate", "").split(",");
+                rawFloor = splitFloor[0];
+                rawTotalFloors = splitFloor[1];
+            } else {
+                rawFloor = rawFloorInfo.split(" ")[0];
             }
         }
-        var heating = Optional.ofNullable(moreInfo.get("Šildymas"));
-        var floor = Optional.ofNullable(moreInfo.get("Buto aukštas"))
+        var floor = Optional.ofNullable(rawFloor)
                 .flatMap(this::parseInt);
-        var totalFloors = Optional.ofNullable(moreInfo.get("Aukštų skaičius pastate"))
+        var totalFloors = Optional.ofNullable(rawTotalFloors)
                 .flatMap(this::parseInt);
-        var area = Optional.ofNullable(moreInfo.get("Buto plotas"))
+        var area = Optional.ofNullable(moreInfo.get("Buto plotas (kv. m)"))
                 .map(areaRaw -> areaRaw.trim().split(" ")[0])
-                .flatMap(this::parseBigDecimal);
-        var price = Optional.ofNullable(moreInfo.get("Kaina, €"))
-                .map(priceRaw -> priceRaw.trim().split(" ")[0])
                 .flatMap(this::parseBigDecimal);
         var rooms = Optional.ofNullable(moreInfo.get("Kambarių skaičius"))
                 .flatMap(this::parseInt);
@@ -90,13 +110,14 @@ public class AlioScraper implements Scraper {
                 .map(yearRaw -> yearRaw.trim().split(" ")[0])
                 .flatMap(this::parseInt);
 
-        post.setExternalId(alioId);
+        post.setExternalId(domoId);
         post.setLink(link);
 
         phone.ifPresent(post::setPhone);
         description.ifPresent(post::setDescription);
         district.ifPresent(post::setDistrict);
         street.ifPresent(post::setStreet);
+        houseNumber.ifPresent(post::setHouseNumber);
         heating.ifPresent(post::setHeating);
         floor.ifPresent(post::setFloor);
         totalFloors.ifPresent(post::setTotalFloors);
@@ -106,6 +127,10 @@ public class AlioScraper implements Scraper {
         year.ifPresent(post::setYear);
 
         return Optional.of(post);
+    }
+
+    private String decode(String dataEncoded) {
+        return new String(Base64.getDecoder().decode(dataEncoded.substring(2)));
     }
 
     private Optional<Document> getDocument(URI link) {
@@ -143,8 +168,8 @@ public class AlioScraper implements Scraper {
         }
     }
 
-    private static class AlioPost extends PostDto {
-        private static final String SOURCE = "ALIO";
+    private static class DomopliusPost extends PostDto {
+        private static final String SOURCE = "DOMOPLIUS";
 
         @Override
         public String getSource() {
