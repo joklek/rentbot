@@ -16,3 +16,14 @@ spring:
 application:
   telegram:
     token: ${TELEGRAM_TOKEN}
+
+logging:
+  level:
+    org:
+      asynchttpclient:
+        netty:
+          handler: error
+      openqa:
+        selenium:
+          remote:
+            http: error
