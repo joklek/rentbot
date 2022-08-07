@@ -50,7 +50,8 @@ public class PostEntityConverter {
                 .ifPresent(post::setRooms);
         postDto.getYear()
                 .ifPresent(post::setConstructionYear);
-        post.setWithFees(isWithFees(postDto));
+        postDto.getDescription()
+                .ifPresent(description -> post.setWithFees(isWithFees(description)));
 
         post.setCreatedAt(LocalDateTime.now());
 
@@ -112,11 +113,8 @@ public class PostEntityConverter {
             Pattern.compile("[^\\w\\s](\\s|)(taikoma(s|)|imama(s|)|vienkartinis|agent\\S+)( vienkartinis|) (agent|tarpinink|mokest)\\S+")
     );
 
-    private boolean isWithFees(PostDto postDto) {
-        if (postDto.getDescription().isEmpty()) {
-            return false;
-        }
-        var descriptionSimplified = postDto.getDescription().get();
+    private boolean isWithFees(String description) {
+        var descriptionSimplified = description;
         for (var entry : LETTER_REPLACE_MAP.entrySet()) {
             descriptionSimplified = descriptionSimplified.replace(entry.getKey(), entry.getValue());
         }
@@ -128,7 +126,7 @@ public class PostEntityConverter {
         }
 
         for (var feePattern : feePatterns) {
-            if (feePattern.matcher(descriptionSimplified).matches()) {
+            if (feePattern.matcher(descriptionSimplified).find()) {
                 return true;
             }
         }
