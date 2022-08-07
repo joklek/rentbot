@@ -50,8 +50,8 @@ public class PostEntityConverter {
                 .ifPresent(post::setRooms);
         postDto.getYear()
                 .ifPresent(post::setConstructionYear);
-        postDto.getDescription()
-                .ifPresent(description -> post.setWithFees(isWithFees(description)));
+        post.setWithFees(postDto.getDescription()
+                .map(this::isWithFees).orElse(false));
 
         post.setCreatedAt(LocalDateTime.now());
 
