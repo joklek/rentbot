@@ -76,7 +76,9 @@ public class DomopliusScraper implements Scraper {
 
         var price = Optional.ofNullable(exactPost.select(".field-price > .price-column > .h1").first())
                 .map(Element::text)
-                .map(priceRaw -> priceRaw.trim().split(" ")[0])
+                .map(priceRaw -> priceRaw.trim()
+                        .replace(" ", "")
+                        .replace("€", ""))
                 .flatMap(ScraperHelper::parseBigDecimal);
         var moreInfo = exactPost.select(".view-field").stream()
                 .filter(el -> !el.attr("title").isBlank())
