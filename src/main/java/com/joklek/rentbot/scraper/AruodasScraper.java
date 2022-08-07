@@ -86,6 +86,7 @@ public class AruodasScraper implements Scraper {
                 .flatMap(ScraperHelper::parseInt);
         var area = Optional.ofNullable(moreInfo.get("Plotas:"))
                 .map(x -> x.replace(" m²", ""))
+                .map(x -> x.replace(",", "."))
                 .flatMap(ScraperHelper::parseBigDecimal);
         var price = Optional.ofNullable(moreInfo.get("Kaina mėn.:"))
                 .map(x -> x.replace("€", ""))
