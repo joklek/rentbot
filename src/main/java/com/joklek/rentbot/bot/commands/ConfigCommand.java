@@ -7,6 +7,7 @@ import com.pengrad.telegrambot.request.BaseRequest;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
+import javax.validation.ConstraintViolationException;
 import javax.validation.ValidationException;
 import javax.validation.Validator;
 import java.math.BigDecimal;
@@ -20,7 +21,7 @@ public class ConfigCommand implements Command {
 
     private static final Logger LOGGER = getLogger(ConfigCommand.class);
 
-    private static final Pattern CONFIG_PATTERN = Pattern.compile("^(\\d{1,5}) (\\d{1,5}) (\\d{1,2}) (\\d{1,2}) (\\d{4}) (\\d{1,3}) (yes|no)$");
+    private static final Pattern CONFIG_PATTERN = Pattern.compile("^(\\d+) (\\d+) (\\d+) (\\d+) (\\d+) (\\d+) (yes|no)$");
     private static final String CONFIG_TEXT = "Use this format to configure your settings:\n\n```\n/config <price_from> <price_to> <rooms_from> <rooms_to> <year_from> <min_flor> <show with fee?(yes/no)>\n```\nHere's how your message might look like:\n```\n/config 200 330 1 2 2000 2 yes\n\n```Here you'd search for flats between 200 and 330 eur, 1-2 rooms, built after 2000, starting on the second floor, and you're ok with seeing listings with agency fees\n";
 
     private final UserRepo users;
@@ -50,8 +51,17 @@ public class ConfigCommand implements Command {
         try {
             updateSettings(user, matcher);
             return simpleResponse(update, String.format("Config updated!\n\n%s", activeSettings(user)));
-        } catch (NumberFormatException | ValidationException e) {
-            return simpleResponse(update, String.format("%s\n%s", "Wrong input!", CONFIG_TEXT));
+        } catch (NumberFormatException e) {
+            return simpleResponse(update, String.format("%s\n%s", "Wrong input! Check if all numbers are written correctly", CONFIG_TEXT));
+        } catch (ConstraintViolationException e) {
+            var firstViolation = e.getConstraintViolations().stream().findFirst().get();
+            var errorPath = firstViolation.getPropertyPath().toString();
+            var errorMessage = firstViolation.getMessage();
+            var badValue = firstViolation.getInvalidValue();
+            var errorDescription = String.format("There's an error in %s: %s, but was %s.", errorPath, errorMessage, badValue);
+            return simpleResponse(update, String.format("%s %s\n%s", "Wrong input!", errorDescription, CONFIG_TEXT));
+        } catch (ValidationException e) {
+            return simpleResponse(update, String.format("%s %s\n%s", "Wrong input!", e.getMessage(), CONFIG_TEXT));
         } catch (Exception e) {
             LOGGER.warn("Error while updating user settings", e);
             return simpleResponse(update, String.format("%s\n%s", "Wrong input!", CONFIG_TEXT));
@@ -59,6 +69,8 @@ public class ConfigCommand implements Command {
     }
 
     private void updateSettings(User user, Matcher matcher) {
+        var isFirstTimeSettingUp = user.getPriceMin().isEmpty();
+
         var priceMin = new BigDecimal(matcher.group(1));
         var priceMax = new BigDecimal(matcher.group(2));
         var roomsMin = Integer.parseInt(matcher.group(3));
@@ -74,6 +86,9 @@ public class ConfigCommand implements Command {
         user.setYearMin(yearMin);
         user.setFloorMin(floorMin);
         user.setShowWithFees(showWithFees);
+        if (isFirstTimeSettingUp) {
+            user.setEnabled(true);
+        }
 
         if (priceMin.compareTo(priceMax) > 0) {
             throw new ValidationException("Min price can't be bigger than max price");
@@ -83,7 +98,7 @@ public class ConfigCommand implements Command {
         }
         var results = validator.validate(user);
         if (!results.isEmpty()) {
-            throw new ValidationException("Error while validating: " + results);
+            throw new ConstraintViolationException(results);
         }
 
         users.save(user);

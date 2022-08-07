@@ -96,7 +96,7 @@ public class PostEntityConverter {
     );
 
     private static final List<String> feeKeywords = List.of(
-            "(yra mokestis)",
+            "(ira mokestis)",
             "mokestis (jei butas",
             "\ntaikomas tarpininkavimas",
             "tiks vienkartinis tarpinink"

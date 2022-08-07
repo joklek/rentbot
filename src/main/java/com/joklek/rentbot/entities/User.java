@@ -1,6 +1,7 @@
 package com.joklek.rentbot.entities;
 
 import javax.persistence.*;
+import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
@@ -20,21 +21,27 @@ public class User {
     private boolean enabled;
     @NotNull
     @Min(0)
+    @Max(100000)
     private BigDecimal priceMin;
     @NotNull
     @Min(0)
+    @Max(100000)
     private BigDecimal priceMax;
     @NotNull
     @Min(0)
+    @Max(100)
     private Integer roomsMin;
     @NotNull
     @Min(0)
+    @Max(100)
     private Integer roomsMax;
     @NotNull
-    @Min(0)
+    @Min(1000)
+    @Max(3000)
     private Integer yearMin;
     @NotNull
     @Min(0)
+    @Max(100)
     private Integer floorMin;
     @NotNull
     private boolean showWithFees;
