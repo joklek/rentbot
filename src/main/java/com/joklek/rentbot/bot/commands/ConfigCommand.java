@@ -21,7 +21,7 @@ public class ConfigCommand implements Command {
     private static final Logger LOGGER = getLogger(ConfigCommand.class);
 
     private static final Pattern CONFIG_PATTERN = Pattern.compile("^(\\d{1,5}) (\\d{1,5}) (\\d{1,2}) (\\d{1,2}) (\\d{4}) (\\d{1,3}) (yes|no)$");
-    private static final String CONFIG_TEXT = "Use this format:\n\n```\n/config <price_from> <price_to> <rooms_from> <rooms_to> <year_from> <min_flor> <show with fee?(yes/no)>\n```\nExample:\n```\n/config 200 330 1 2 2000 2 yes\n```";
+    private static final String CONFIG_TEXT = "Use this format to configure your settings:\n\n```\n/config <price_from> <price_to> <rooms_from> <rooms_to> <year_from> <min_flor> <show with fee?(yes/no)>\n```\nHere's how your message might look like:\n```\n/config 200 330 1 2 2000 2 yes\n\n```Here you'd search for flats between 200 and 330 eur, 1-2 rooms, built after 2000, starting on the second floor, and you're ok with seeing listings with agency fees\n";
 
     private final UserRepo users;
     private final Validator validator;
