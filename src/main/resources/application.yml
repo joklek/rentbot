@@ -24,6 +24,4 @@ logging:
         netty:
           handler: error
       openqa:
-        selenium:
-          remote:
-            http: error
+        selenium: error
