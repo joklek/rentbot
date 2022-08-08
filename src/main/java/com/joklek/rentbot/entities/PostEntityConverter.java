@@ -103,14 +103,14 @@ public class PostEntityConverter {
     );
 
     private static final List<Pattern> feePatterns = List.of(
-            Pattern.compile("(agent|tarpinink|vienkart)\\S+ mokestis[\\s:-]{0,3}\\d+"),
-            Pattern.compile("\\d+\\s?\\S+ (agent|tarpinink|vienkart)\\S+ (tarp|mokest)\\S+"),
-            Pattern.compile("\\W(ira|bus) (taikoma(s|)|imama(s|)|vienkartinis|agent\\S+)( vienkartinis|) (agent|tarpinink|mokest)\\S+"),
-            Pattern.compile("\\Wtiks[^\\s\\w]?\\s?(bus|ira|) (taikoma(s|)|imama(s|))"),
-            Pattern.compile("\\W(ira |)(taikoma(s|)|imama(s|)|vienkartinis|sutarties)( sutarties|) sudar\\S+ mokestis"),
-            Pattern.compile("(ui|ir) (ira |)(taikoma(s|)|imama(s|)) (vienkart|agent|tarpinink|mokest)\\S+"),
-            Pattern.compile("(vienkartinis |)(agent|tarpinink)\\S+ mokest\\S+,? jei"),
-            Pattern.compile("[^\\w\\s](\\s|)(taikoma(s|)|imama(s|)|vienkartinis|agent\\S+)( vienkartinis|) (agent|tarpinink|mokest)\\S+")
+            Pattern.compile("(agent|tarpinink|vienkart)\\S+ mokestis[\\s:-]{0,3}\\d+", Pattern.CASE_INSENSITIVE),
+            Pattern.compile("\\d+\\s?\\S+ (agent|tarpinink|vienkart)\\S+ (tarp|mokest)\\S+", Pattern.CASE_INSENSITIVE),
+            Pattern.compile("\\W(ira|bus) (taikoma(s|)|imama(s|)|vienkartinis|agent\\S+)( vienkartinis|) (agent|tarpinink|mokest)\\S+", Pattern.CASE_INSENSITIVE),
+            Pattern.compile("\\Wtiks[^\\s\\w]?\\s?(bus|ira|) (taikoma(s|)|imama(s|))", Pattern.CASE_INSENSITIVE),
+            Pattern.compile("\\W(ira |)(taikoma(s|)|imama(s|)|vienkartinis|sutarties)( sutarties|) sudar\\S+ mokestis", Pattern.CASE_INSENSITIVE),
+            Pattern.compile("(ui|ir) (ira |)(taikoma(s|)|imama(s|)) (vienkart|agent|tarpinink|mokest)\\S+", Pattern.CASE_INSENSITIVE),
+            Pattern.compile("(vienkartinis |)(agent|tarpinink)\\S+ mokest\\S+,? jei", Pattern.CASE_INSENSITIVE),
+            Pattern.compile("[^\\w\\s](\\s|)(taikoma(s|)|imama(s|)|vienkartinis|agent\\S+)( vienkartinis|) (agent|tarpinink|mokest)\\S+", Pattern.CASE_INSENSITIVE)
     );
 
     private boolean isWithFees(String description) {
