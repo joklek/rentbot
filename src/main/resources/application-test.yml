@@ -1,0 +1,10 @@
+spring:
+  datasource:
+    url: jdbc:sqlite:rentbot-test.db
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        generate_statistics: false #Turn it on only when you need for analysing queries. Do not leave it on!
+    show-sql: false #Turn it on only when you need for analysing queries. Do not leave it on!
