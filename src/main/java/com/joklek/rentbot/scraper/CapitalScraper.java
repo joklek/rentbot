@@ -38,7 +38,7 @@ public class CapitalScraper extends JsoupScraper {
 
     private Optional<PostDto> processItem(Element rawPost) {
         var capitalId = rawPost.attr("id").replace("item-", "");
-        var link = URI.create(rawPost.attr("href"));
+        var link = URI.create(String.format("https://www.capital.lt/lt/p%s", capitalId));
         if (posts.existsByExternalIdAndSource(capitalId, CapitalPost.SOURCE)) {
             return Optional.empty();
         }
