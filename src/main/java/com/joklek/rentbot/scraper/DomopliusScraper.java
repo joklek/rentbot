@@ -1,26 +1,18 @@
 package com.joklek.rentbot.scraper;
 
 import com.joklek.rentbot.repo.PostRepo;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.net.URI;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static org.slf4j.LoggerFactory.getLogger;
-
 @Component
-public class DomopliusScraper implements Scraper {
-    private static final Logger LOGGER = getLogger(DomopliusScraper.class);
+public class DomopliusScraper extends JsoupScraper {
     private static final URI BASE_URL = URI.create("https://m.domoplius.lt/skelbimai/butai?action_type=3&address_1=461&sell_price_from=&sell_price_to=&qt=");
-    private static final String DEFAULT_USER_AGENT = "Mozilla/5.0 (Android 9; Mobile; rv:103.0) Gecko/103.0 Firefox/103.0";
 
     private final PostRepo posts;
 
@@ -134,24 +126,6 @@ public class DomopliusScraper implements Scraper {
 
     private String decode(String dataEncoded) {
         return new String(Base64.getDecoder().decode(dataEncoded.substring(2)));
-    }
-
-    private Optional<Document> getDocument(URI link) {
-        try {
-            return Optional.of(Jsoup.connect(link.toString())
-                    .header("Host", link.getHost())
-                    .userAgent(DEFAULT_USER_AGENT)
-                    .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8")
-                    .header("Accept-Language", "en-US")
-                    .header("Accept-Encoding", "gzip, deflate")
-                    .header("Connection", "keep-alive")
-                    .header("Upgrade-Insecure-Requests", "1")
-                    .followRedirects(true)
-                    .get());
-        } catch (IOException e) {
-            LOGGER.error("Failed while fetching '{}'", link, e);
-            return Optional.empty();
-        }
     }
 
     private static class DomopliusPost extends PostDto {

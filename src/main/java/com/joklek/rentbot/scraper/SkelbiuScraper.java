@@ -18,7 +18,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 @Component
 public class SkelbiuScraper implements Scraper {
-    private static final Logger LOGGER = getLogger(AruodasScraper.class);
+    private static final Logger LOGGER = getLogger(SkelbiuScraper.class);
     private static final URI BASE_URL = URI.create("https://www.skelbiu.lt/skelbimai/?cities=465&category_id=322&cities=465&district=0&cost_min=&cost_max=&status=0&space_min=&space_max=&rooms_min=&rooms_max=&building=0&year_min=&year_max=&floor_min=&floor_max=&floor_type=0&user_type=0&type=1&orderBy=1&import=2&keywords=");
 
     private final PostRepo posts;

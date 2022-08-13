@@ -1,13 +1,10 @@
 package com.joklek.rentbot.scraper;
 
 import com.joklek.rentbot.repo.PostRepo;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 import java.util.Optional;
@@ -16,10 +13,9 @@ import java.util.stream.Collectors;
 import static org.slf4j.LoggerFactory.getLogger;
 
 @Component
-public class AlioScraper implements Scraper {
+public class AlioScraper extends JsoupScraper {
     private static final Logger LOGGER = getLogger(AlioScraper.class);
     private static final URI BASE_URL = URI.create("https://www.alio.lt/paieska/?category_id=1393&city_id=228626&search_block=1&search[eq][adresas_1]=228626&order=ad_id");
-    private static final String DEFAULT_USER_AGENT = "Mozilla/5.0 (Android 9; Mobile; rv:103.0) Gecko/103.0 Firefox/103.0";
 
     private final PostRepo posts;
 
@@ -108,24 +104,6 @@ public class AlioScraper implements Scraper {
         year.ifPresent(post::setYear);
 
         return Optional.of(post);
-    }
-
-    private Optional<Document> getDocument(URI link) {
-        try {
-            return Optional.of(Jsoup.connect(link.toString())
-                    .header("Host", link.getHost())
-                    .userAgent(DEFAULT_USER_AGENT)
-                    .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8")
-                    .header("Accept-Language", "en-US")
-                    .header("Accept-Encoding", "gzip, deflate")
-                    .header("Connection", "keep-alive")
-                    .header("Upgrade-Insecure-Requests", "1")
-                    .followRedirects(true)
-                    .get());
-        } catch (IOException e) {
-            LOGGER.error("Failed while fetching '{}'", link, e);
-            return Optional.empty();
-        }
     }
 
     private static class AlioPost extends PostDto {
