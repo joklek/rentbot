@@ -5,11 +5,7 @@ import com.pengrad.telegrambot.model.request.ParseMode;
 import com.pengrad.telegrambot.request.BaseRequest;
 import com.pengrad.telegrambot.request.SendMessage;
 
-/*
-TODO is this really a command? Maybe it's an action. Command itself could be configured in config.
- Then multiple commands could share actions and it would be more obvious what's controlled where
- */
-public interface Command {
+public interface CommandResponder {
     String command();
 
     BaseRequest<?, ?> handle(Update update, String payload);

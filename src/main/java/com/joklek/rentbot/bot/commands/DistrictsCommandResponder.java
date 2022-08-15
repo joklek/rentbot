@@ -12,12 +12,12 @@ import com.pengrad.telegrambot.request.SendMessage;
 import org.springframework.stereotype.Component;
 
 @Component
-public class DistrictsCommand implements Command {
+public class DistrictsCommandResponder implements CommandResponder {
 
     private final UserRepo users;
     private final DistrictRepo districts;
 
-    public DistrictsCommand(UserRepo users, DistrictRepo districts) {
+    public DistrictsCommandResponder(UserRepo users, DistrictRepo districts) {
         this.users = users;
         this.districts = districts;
     }

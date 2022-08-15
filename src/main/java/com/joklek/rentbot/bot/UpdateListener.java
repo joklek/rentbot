@@ -23,20 +23,35 @@ public class UpdateListener {
         ensureUsersInDb(updates);
 
         updates.forEach(update -> {
-            if (update.message() == null) {
-                return;
+            if (update.message() != null) {
+                handleMessage(bot, update);
+            } else if (update.callbackQuery() != null) {
+                handleCallback(bot, update);
             }
-            var rawText = update.message().text();
-            var handler = commandRecognizer.getHandler(rawText);
-            if (handler == null) {
-                return; // TODO add error handler
-            }
-            var payload = commandRecognizer.getPayload(rawText);
-            var message = handler.handle(update, payload);
-
-            bot.execute(message);
         });
         return UpdatesListener.CONFIRMED_UPDATES_ALL;
+    }
+
+    private void handleMessage(TelegramBot bot, Update update) {
+        var rawText = update.message().text();
+        var handler = commandRecognizer.getHandler(rawText);
+        if (handler == null) {
+            return;
+        }
+        var payload = commandRecognizer.getPayload(rawText);
+        var message = handler.handle(update, payload);
+
+        bot.execute(message);
+    }
+
+    private void handleCallback(TelegramBot bot, Update update) {
+        var callbackData = update.callbackQuery().data();
+        var handler = commandRecognizer.getHandler(callbackData);
+        if (handler == null) {
+            return;
+        }
+        var payload = commandRecognizer.getPayload(callbackData);
+//        handler.handle(update, payload, bot);
     }
 
     private void ensureUsersInDb(List<Update> updates) {

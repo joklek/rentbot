@@ -20,10 +20,10 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
-class ConfigCommandTest extends IntegrationTest {
+class ConfigCommandResponderTest extends IntegrationTest {
 
     @Autowired
-    private ConfigCommand command;
+    private ConfigCommandResponder command;
 
     @Autowired
     private UserRepo users;
