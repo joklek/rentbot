@@ -1,7 +1,9 @@
 package com.joklek.rentbot.entities;
 
 import javax.persistence.*;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Table(name = "districts")
@@ -10,6 +12,9 @@ public class District {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
+
+    @ManyToMany(mappedBy = "districts")
+    private Set<User> users = new HashSet<>();
 
     public Long getId() {
         return id;
@@ -21,6 +26,15 @@ public class District {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Set<User> getUsers() {
+        return users;
+    }
+
+    public District setUsers(Set<User> users) {
+        this.users = users;
+        return this;
     }
 
     @Override

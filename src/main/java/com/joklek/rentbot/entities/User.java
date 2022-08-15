@@ -5,8 +5,10 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 
 @Entity
@@ -47,6 +49,16 @@ public class User {
     private boolean showWithFees;
     //    @NotNull
     private boolean filterByDistrict;
+
+    @ManyToMany(cascade = {
+            CascadeType.PERSIST,
+            CascadeType.MERGE
+    })
+    @JoinTable(name = "user_districts",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "district_id")
+    )
+    private Set<District> districts = new HashSet<>();
 
     public User(long telegramId) {
         this.telegramId = telegramId;
@@ -139,6 +151,15 @@ public class User {
 
     public void setFilterByDistrict(boolean filterByDistrict) {
         this.filterByDistrict = filterByDistrict;
+    }
+
+    public Set<District> getDistricts() {
+        return districts;
+    }
+
+    public User setDistricts(Set<District> districts) {
+        this.districts = districts;
+        return this;
     }
 
     @Override

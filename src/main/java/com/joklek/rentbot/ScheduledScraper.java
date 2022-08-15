@@ -2,6 +2,7 @@ package com.joklek.rentbot;
 
 import com.joklek.rentbot.entities.Post;
 import com.joklek.rentbot.entities.PostEntityConverter;
+import com.joklek.rentbot.repo.DistrictRepo;
 import com.joklek.rentbot.repo.PostRepo;
 import com.joklek.rentbot.repo.UserRepo;
 import com.joklek.rentbot.scraper.PostDto;
@@ -20,6 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.function.Predicate.not;
@@ -34,14 +36,16 @@ public class ScheduledScraper {
     private final List<Scraper> scrapers;
     private final UserRepo users;
     private final PostRepo posts;
+    private final DistrictRepo districts;
     private final PostEntityConverter postConverter;
     private final TelegramBot bot;
     private final Random random;
 
-    public ScheduledScraper(List<Scraper> scrapers, UserRepo users, PostRepo posts, PostEntityConverter postConverter, TelegramBot bot) {
+    public ScheduledScraper(List<Scraper> scrapers, UserRepo users, PostRepo posts, DistrictRepo districts, PostEntityConverter postConverter, TelegramBot bot) {
         this.scrapers = scrapers;
         this.users = users;
         this.posts = posts;
+        this.districts = districts;
         this.postConverter = postConverter;
         this.bot = bot;
         this.random = new Random();
@@ -92,7 +96,7 @@ public class ScheduledScraper {
             return;
         }
 
-        getInterestedTelegramIDs(post)
+        getInterestedTelegramIds(post)
                 .forEach(telegramId -> {
                     try {
                         sendTelegramMessage(telegramId, post);
@@ -102,11 +106,52 @@ public class ScheduledScraper {
                 });
     }
 
-    private List<Long> getInterestedTelegramIDs(Post post) {
-        if (post.getWithFees()) {
-            return users.findAllInterestedTelegramIdsWithFee(post.getPrice().orElse(null), post.getRooms().orElse(null), post.getConstructionYear().orElse(null), post.getFloor().orElse(null));
+    private List<Long> getInterestedTelegramIds(Post post) {
+        if (post.getDistrict().isEmpty() || !districts.existsByName(post.getDistrict().get())) {
+            return getDistrictlessInterestedTelegramIds(post);
         }
-        return users.findAllInterestedTelegramIds(post.getPrice().orElse(null), post.getRooms().orElse(null), post.getConstructionYear().orElse(null), post.getFloor().orElse(null));
+        return getInterestedWithDistrict(post);
+    }
+
+    private List<Long> getDistrictlessInterestedTelegramIds(Post post) {
+        var price = post.getPrice().orElse(null);
+        var rooms = post.getRooms().orElse(null);
+        var year = post.getConstructionYear().orElse(null);
+        var floor = post.getFloor().orElse(null);
+        if (post.getWithFees()) {
+            return users.findAllTelegramIdsInterestedWithFee(price, rooms, year, floor);
+        }
+        return users.findAllTelegramIdsInterested(price, rooms, year, floor);
+    }
+
+    private List<Long> getInterestedWithDistrict(Post post) {
+        var interestedInDistrict = findAllTelegramIdsInterestedInDistrict(post);
+        var districtless = findAllTelegramIdsNotInterestedInDistricts(post);
+        return Stream.concat(interestedInDistrict.stream(), districtless.stream()).toList();
+    }
+
+    private List<Long> findAllTelegramIdsInterestedInDistrict(Post post) {
+        var price = post.getPrice().orElse(null);
+        var rooms = post.getRooms().orElse(null);
+        var year = post.getConstructionYear().orElse(null);
+        var floor = post.getFloor().orElse(null);
+        var district = post.getDistrict().orElse(null);
+        if (post.getWithFees()) {
+            return users.findAllTelegramIdsInterestedInDistrictWithFee(price, rooms, year, floor, district);
+        }
+        return users.findAllTelegramIdsInterestedInDistrict(price, rooms, year, floor, district);
+    }
+
+    private List<Long> findAllTelegramIdsNotInterestedInDistricts(Post post) {
+        var price = post.getPrice().orElse(null);
+        var rooms = post.getRooms().orElse(null);
+        var year = post.getConstructionYear().orElse(null);
+        var floor = post.getFloor().orElse(null);
+        var district = post.getDistrict().orElse(null);
+        if (post.getWithFees()) {
+            return users.findAllTelegramIdsNotInterestedInDistrictsWithFee(price, rooms, year, floor);
+        }
+        return users.findAllTelegramIdsNotInterestedInDistricts(price, rooms, year, floor);
     }
 
     private void sendTelegramMessage(Long telegramId, Post post) {
