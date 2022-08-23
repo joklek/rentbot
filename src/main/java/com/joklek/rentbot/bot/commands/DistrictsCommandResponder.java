@@ -1,5 +1,6 @@
 package com.joklek.rentbot.bot.commands;
 
+import com.joklek.rentbot.bot.callbacks.DistrictsCallback;
 import com.joklek.rentbot.entities.User;
 import com.joklek.rentbot.repo.DistrictRepo;
 import com.joklek.rentbot.repo.UserRepo;
@@ -31,21 +32,22 @@ public class DistrictsCommandResponder implements CommandResponder {
     public BaseRequest<?, ?> handle(Update update, String payload) {
         var telegramId = update.message().chat().id();
         var user = users.getByTelegramId(telegramId);
-        if (user.getFilterByDistrict()) {
-            var message = "There is a possibility to filter listings by district. Listings without any district will always be shown. Please note that some sites have different district classifications or names.";
-            var content = showTurnedOffPage(user);
-            return inlineResponse(update, message, content);
+        String message;
+        InlineKeyboardMarkup content;
+        if (!user.getFilterByDistrict()) {
+            message = "There is a possibility to filter listings by district. Listings without any district will always be shown. Please note that some sites have different district classifications or names.";
+            content = showTurnedOffPage();
         } else {
-            var message = "Please select your wanted districts. If none are selected all listings will be shown. Listings without any district will always be shown. Please note that some sites have different district classifications or names.";
-            var content = showPagedDistricts(user, 0);
-            return inlineResponse(update, message, content);
+            message = "Please select your wanted districts. If none are selected all listings will be shown. Listings without any district will always be shown. Please note that some sites have different district classifications or names.";
+            content = showPagedDistricts(user, 0);
         }
+        return inlineResponse(update, message, content);
     }
 
-    private InlineKeyboardMarkup showTurnedOffPage(User user) {
+    private InlineKeyboardMarkup showTurnedOffPage() {
         var keyboard = new InlineKeyboardMarkup();
         var turnOnButton = new InlineKeyboardButton("✅ Turn on");
-        turnOnButton.callbackData("\\f:districts:on");
+        turnOnButton.callbackData(DistrictsCallback.TurnOn.CALLBACK_KEY);
         keyboard.addRow(turnOnButton);
         return keyboard;
     }
@@ -68,24 +70,24 @@ public class DistrictsCommandResponder implements CommandResponder {
         var firstRowButtons = firstRowDistricts.stream().map(district -> {
             var name = userDistricts.contains(district) ? String.format("✅%s", district.getName()) : district.getName();
             var districtButton = new InlineKeyboardButton(name);
-            districtButton.callbackData(String.format("\\f:districts:%d", district.getId()));
+            districtButton.callbackData(String.format("/f:districts:%d", district.getId()));
             return districtButton;
         }).toList();
         var secondRowButtons = secondRowDistricts.stream().map(district -> {
             var name = userDistricts.contains(district) ? String.format("✅%s", district.getName()) : district.getName();
             var districtButton = new InlineKeyboardButton(name);
-            districtButton.callbackData(String.format("\\f:districts:%d", district.getId()));
+            districtButton.callbackData(String.format("/f:districts:%d", district.getId()));
             return districtButton;
         }).toList();
 
         var prevButton = new InlineKeyboardButton("⬅");
-        prevButton.callbackData(String.format("\\f:districts:page:%d", prevPage));
+        prevButton.callbackData(String.format("/f:districts:page:%d", prevPage));
         var nextButton = new InlineKeyboardButton("➡");
-        nextButton.callbackData(String.format("\\f:districts:page:%d", nextPage));
+        nextButton.callbackData(String.format("/f:districts:page:%d", nextPage));
         var resetButton = new InlineKeyboardButton("\uD83D\uDD04");
-        resetButton.callbackData("\\f:districts:reset");
+        resetButton.callbackData(DistrictsCallback.Reset.CALLBACK_KEY);
         var turnOffButton = new InlineKeyboardButton("❌");
-        turnOffButton.callbackData("\\f:districts:off");
+        turnOffButton.callbackData(DistrictsCallback.TurnOff.CALLBACK_KEY);
         keyboard.addRow(firstRowButtons.toArray(InlineKeyboardButton[]::new));
         keyboard.addRow(secondRowButtons.toArray(InlineKeyboardButton[]::new));
         keyboard.addRow(prevButton, nextButton, resetButton, turnOffButton); // control row

@@ -8,14 +8,17 @@ import com.pengrad.telegrambot.model.Update;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 
 @Component
 public class UpdateListener {
     private final CommandRecognizer commandRecognizer;
+    private final CallbackRecognizer callbackRecognizer;
     private final UserRepo users;
 
-    public UpdateListener(CommandRecognizer commandRecognizer, UserRepo users) {
+    public UpdateListener(CommandRecognizer commandRecognizer, CallbackRecognizer callbackRecognizer, UserRepo users) {
         this.commandRecognizer = commandRecognizer;
+        this.callbackRecognizer = callbackRecognizer;
         this.users = users;
     }
 
@@ -46,19 +49,20 @@ public class UpdateListener {
 
     private void handleCallback(TelegramBot bot, Update update) {
         var callbackData = update.callbackQuery().data();
-        var handler = commandRecognizer.getHandler(callbackData);
+        var handler = callbackRecognizer.getHandler(callbackData);
         if (handler == null) {
             return;
         }
-        var payload = commandRecognizer.getPayload(callbackData);
-//        handler.handle(update, payload, bot);
+        var payload = callbackRecognizer.getPayload(callbackData);
+        handler.handle(update, bot, payload);
     }
 
     private void ensureUsersInDb(List<Update> updates) {
         updates.stream()
-                .filter(update -> update.message() != null)
-                .filter(update -> update.message().chat() != null)
-                .map(update -> update.message().chat().id())
+                .filter(update -> update.message() != null || update.callbackQuery() != null)
+                .map(update -> Optional.ofNullable(update.message()).orElseGet(() -> update.callbackQuery().message()))
+                .filter(message -> message.chat() != null)
+                .map(message -> message.chat().id())
                 .distinct()
                 .forEach(this::ensureUserInDb);
     }
