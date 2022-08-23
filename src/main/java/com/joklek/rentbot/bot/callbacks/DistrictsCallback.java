@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -35,7 +36,8 @@ public class DistrictsCallback implements CallbackResponder {
         this.actions = Stream.of(
                 new TurnOff(users),
                 new TurnOn(users),
-                new Reset(users)
+                new Reset(users),
+                new Page(users)
         ).collect(Collectors.toMap(CallbackAction::key, x -> x));
     }
 
@@ -56,7 +58,8 @@ public class DistrictsCallback implements CallbackResponder {
         }
         var telegramId = update.callbackQuery().message().chat().id();
         var user = users.getByTelegramId(telegramId);
-        action.action(user, update, bot);
+        var payloadForAction = Arrays.copyOfRange(payload, 1, payload.length);
+        action.action(user, update, bot, payloadForAction);
 
         return null;
     }
@@ -98,9 +101,9 @@ public class DistrictsCallback implements CallbackResponder {
         }).toList();
 
         var prevButton = new InlineKeyboardButton("⬅");
-        prevButton.callbackData(String.format("/f:districts:page:%d", prevPage));
+        prevButton.callbackData(DistrictsCallback.Page.callbackKey(prevPage));
         var nextButton = new InlineKeyboardButton("➡");
-        nextButton.callbackData(String.format("/f:districts:page:%d", nextPage));
+        nextButton.callbackData(DistrictsCallback.Page.callbackKey(nextPage));
         var resetButton = new InlineKeyboardButton("\uD83D\uDD04");
         resetButton.callbackData(Reset.CALLBACK_KEY);
         var turnOffButton = new InlineKeyboardButton("❌");
@@ -112,7 +115,7 @@ public class DistrictsCallback implements CallbackResponder {
     }
 
     public interface CallbackAction {
-        void action(User user, Update update, TelegramBot bot);
+        void action(User user, Update update, TelegramBot bot, String... payload);
 
         String callbackKey();
 
@@ -140,7 +143,7 @@ public class DistrictsCallback implements CallbackResponder {
         }
 
         @Override
-        public void action(User user, Update update, TelegramBot bot) {
+        public void action(User user, Update update, TelegramBot bot, String... payload) {
             user.setFilterByDistrict(true);
             users.save(user);
 
@@ -183,7 +186,7 @@ public class DistrictsCallback implements CallbackResponder {
         }
 
         @Override
-        public void action(User user, Update update, TelegramBot bot) {
+        public void action(User user, Update update, TelegramBot bot, String... payload) {
             user.setFilterByDistrict(false);
             users.save(user);
 
@@ -227,7 +230,7 @@ public class DistrictsCallback implements CallbackResponder {
 
         @Override
         @Transactional
-        public void action(User user, Update update, TelegramBot bot) {
+        public void action(User user, Update update, TelegramBot bot, String... payload) {
 //            user.getDistricts().clear(); // TODO
 //            users.save(user);
 
@@ -248,6 +251,46 @@ public class DistrictsCallback implements CallbackResponder {
                 public void onFailure(EditMessageText request, IOException e) {
                 }
             });
+        }
+    }
+
+    public class Page implements CallbackAction {
+        public static final String KEY = "page";
+        public static final String CALLBACK_KEY = String.format("/f%s:%s", NAME, KEY);
+
+        private final UserRepo users;
+
+        public Page(UserRepo users) {
+            this.users = users;
+        }
+
+
+        @Override
+        public String key() {
+            return KEY;
+        }
+
+        @Override
+        public String callbackKey() {
+            return CALLBACK_KEY;
+        }
+
+        public static String callbackKey(int page) {
+            return String.format("%s:%s", CALLBACK_KEY, page);
+        }
+
+        @Override
+        @Transactional
+        public void action(User user, Update update, TelegramBot bot, String... payload) {
+            if (payload.length == 0) {
+                return;
+            }
+            var pageRaw = payload[0];
+            var page = Integer.parseInt(pageRaw); // TODO validate pls
+
+            var updateMarkupRequest = new EditMessageReplyMarkup(update.callbackQuery().message().chat().id(), update.callbackQuery().message().messageId());
+            updateMarkupRequest.replyMarkup(showPagedDistricts(user, page));
+            bot.execute(updateMarkupRequest);
         }
     }
 }

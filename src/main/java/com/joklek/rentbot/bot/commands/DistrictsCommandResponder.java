@@ -81,9 +81,9 @@ public class DistrictsCommandResponder implements CommandResponder {
         }).toList();
 
         var prevButton = new InlineKeyboardButton("⬅");
-        prevButton.callbackData(String.format("/f:districts:page:%d", prevPage));
+        prevButton.callbackData(DistrictsCallback.Page.callbackKey(prevPage));
         var nextButton = new InlineKeyboardButton("➡");
-        nextButton.callbackData(String.format("/f:districts:page:%d", nextPage));
+        nextButton.callbackData(DistrictsCallback.Page.callbackKey(nextPage));
         var resetButton = new InlineKeyboardButton("\uD83D\uDD04");
         resetButton.callbackData(DistrictsCallback.Reset.CALLBACK_KEY);
         var turnOffButton = new InlineKeyboardButton("❌");
