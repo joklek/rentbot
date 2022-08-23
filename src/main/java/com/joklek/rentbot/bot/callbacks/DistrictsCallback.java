@@ -1,5 +1,6 @@
 package com.joklek.rentbot.bot.callbacks;
 
+import com.joklek.rentbot.entities.District;
 import com.joklek.rentbot.entities.User;
 import com.joklek.rentbot.repo.DistrictRepo;
 import com.joklek.rentbot.repo.UserRepo;
@@ -37,7 +38,8 @@ public class DistrictsCallback implements CallbackResponder {
                 new TurnOff(users),
                 new TurnOn(users),
                 new Reset(users),
-                new Page(users)
+                new Page(users),
+                new Toggle(users, districts)
         ).collect(Collectors.toMap(CallbackAction::key, x -> x));
     }
 
@@ -47,6 +49,7 @@ public class DistrictsCallback implements CallbackResponder {
     }
 
     @Override
+    @Transactional
     public BaseRequest<?, ?> handle(Update update, TelegramBot bot, String... payload) {
         if (payload.length == 0) {
             return null;
@@ -90,13 +93,13 @@ public class DistrictsCallback implements CallbackResponder {
         var firstRowButtons = firstRowDistricts.stream().map(district -> {
             var name = userDistricts.contains(district) ? String.format("✅%s", district.getName()) : district.getName();
             var districtButton = new InlineKeyboardButton(name);
-            districtButton.callbackData(String.format("/f:districts:%d", district.getId()));
+            districtButton.callbackData(DistrictsCallback.Toggle.callbackKey(district.getId()));
             return districtButton;
         }).toList();
         var secondRowButtons = secondRowDistricts.stream().map(district -> {
             var name = userDistricts.contains(district) ? String.format("✅%s", district.getName()) : district.getName();
             var districtButton = new InlineKeyboardButton(name);
-            districtButton.callbackData(String.format("/f:districts:%d", district.getId()));
+            districtButton.callbackData(DistrictsCallback.Toggle.callbackKey(district.getId()));
             return districtButton;
         }).toList();
 
@@ -229,10 +232,9 @@ public class DistrictsCallback implements CallbackResponder {
         }
 
         @Override
-        @Transactional
         public void action(User user, Update update, TelegramBot bot, String... payload) {
-//            user.getDistricts().clear(); // TODO
-//            users.save(user);
+            user.getDistricts().clear(); // TODO
+            users.save(user);
 
             var updateMarkupRequest = new EditMessageReplyMarkup(update.callbackQuery().message().chat().id(), update.callbackQuery().message().messageId());
             updateMarkupRequest.replyMarkup(showPagedDistricts(user, 0));
@@ -280,7 +282,6 @@ public class DistrictsCallback implements CallbackResponder {
         }
 
         @Override
-        @Transactional
         public void action(User user, Update update, TelegramBot bot, String... payload) {
             if (payload.length == 0) {
                 return;
@@ -290,6 +291,58 @@ public class DistrictsCallback implements CallbackResponder {
 
             var updateMarkupRequest = new EditMessageReplyMarkup(update.callbackQuery().message().chat().id(), update.callbackQuery().message().messageId());
             updateMarkupRequest.replyMarkup(showPagedDistricts(user, page));
+            bot.execute(updateMarkupRequest);
+        }
+    }
+
+    public class Toggle implements CallbackAction {
+        public static final String KEY = "toggle";
+        public static final String CALLBACK_KEY = String.format("/f%s:%s", NAME, KEY);
+
+        private final UserRepo users;
+        private final DistrictRepo districts;
+
+        public Toggle(UserRepo users, DistrictRepo districts) {
+            this.users = users;
+            this.districts = districts;
+        }
+
+
+        @Override
+        public String key() {
+            return KEY;
+        }
+
+        @Override
+        public String callbackKey() {
+            return CALLBACK_KEY;
+        }
+
+        public static String callbackKey(long districtId) {
+            return String.format("%s:%s", CALLBACK_KEY, districtId);
+        }
+
+        @Override
+        public void action(User user, Update update, TelegramBot bot, String... payload) {
+            if (payload.length == 0) {
+                return;
+            }
+            var pageRaw = payload[0];
+            var districtId = Long.parseLong(pageRaw); // TODO validate pls
+
+            var district = districts.getReferenceById(districtId); // TODO catch if not exists
+
+            if (user.getDistricts().contains(district)) {
+                user.getDistricts().remove(district);
+            } else {
+                user.getDistricts().add(district);
+            }
+            users.save(user);
+
+            var page = districts.findAll().stream().map(District::getName).toList().indexOf(district.getName()) / 6;
+
+            var updateMarkupRequest = new EditMessageReplyMarkup(update.callbackQuery().message().chat().id(), update.callbackQuery().message().messageId());
+            updateMarkupRequest.replyMarkup(showPagedDistricts(user, page)); // TODO how to refresh properly?
             bot.execute(updateMarkupRequest);
         }
     }

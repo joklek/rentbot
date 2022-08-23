@@ -70,13 +70,13 @@ public class DistrictsCommandResponder implements CommandResponder {
         var firstRowButtons = firstRowDistricts.stream().map(district -> {
             var name = userDistricts.contains(district) ? String.format("✅%s", district.getName()) : district.getName();
             var districtButton = new InlineKeyboardButton(name);
-            districtButton.callbackData(String.format("/f:districts:%d", district.getId()));
+            districtButton.callbackData(DistrictsCallback.Toggle.callbackKey(district.getId()));
             return districtButton;
         }).toList();
         var secondRowButtons = secondRowDistricts.stream().map(district -> {
             var name = userDistricts.contains(district) ? String.format("✅%s", district.getName()) : district.getName();
             var districtButton = new InlineKeyboardButton(name);
-            districtButton.callbackData(String.format("/f:districts:%d", district.getId()));
+            districtButton.callbackData(DistrictsCallback.Toggle.callbackKey(district.getId()));
             return districtButton;
         }).toList();
 
