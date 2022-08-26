@@ -32,26 +32,26 @@ public interface UserRepo extends JpaRepository<User, Long> {
             "AND showWithFees = true")
     List<Long> findAllTelegramIdsInterestedWithFee(BigDecimal price, Integer rooms, Integer year, Integer floor);
 
-    @Query(value = "SELECT u.telegramId FROM User u " +
-            "LEFT JOIN District d " +
+    @Query(value = "SELECT DISTINCT u.telegramId FROM User u " +
+            "LEFT JOIN u.districts d " +
             "WHERE u.enabled = true " +
             "AND u.filterByDistrict = true " +
             "AND :price >= u.priceMin AND :price <= u.priceMax " +
             "AND :rooms >= u.roomsMin AND :rooms <= u.roomsMax " +
             "AND :year >= u.yearMin " +
             "AND u.floorMin <= :floor " +
-            "AND d.name = :district")
+            "AND lower(d.name) = lower(:district)")
     List<Long> findAllTelegramIdsInterestedInDistrict(BigDecimal price, Integer rooms, Integer year, Integer floor, String district);
 
-    @Query(value = "SELECT u.telegramId FROM User u " +
-            "LEFT JOIN District d " +
+    @Query(value = "SELECT DISTINCT u.telegramId FROM User u " +
+            "LEFT JOIN u.districts d " +
             "WHERE u.enabled = true " +
             "AND u.filterByDistrict = true " +
             "AND :price >= u.priceMin AND :price <= u.priceMax " +
             "AND :rooms >= u.roomsMin AND :rooms <= u.roomsMax " +
             "AND :year >= u.yearMin " +
             "AND u.floorMin <= :floor " +
-            "AND d.name = :district " +
+            "AND lower(d.name) = lower(:district) " +
             "AND u.showWithFees = true")
     List<Long> findAllTelegramIdsInterestedInDistrictWithFee(BigDecimal price, Integer rooms, Integer year, Integer floor, String district);
 
