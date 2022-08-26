@@ -147,7 +147,6 @@ public class ScheduledScraper {
         var rooms = post.getRooms().orElse(null);
         var year = post.getConstructionYear().orElse(null);
         var floor = post.getFloor().orElse(null);
-        var district = post.getDistrict().orElse(null);
         if (post.getWithFees()) {
             return users.findAllTelegramIdsNotInterestedInDistrictsWithFee(price, rooms, year, floor);
         }

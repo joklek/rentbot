@@ -153,7 +153,7 @@ public class DistrictsCallback implements CallbackResponder {
             var updateMarkupRequest = new EditMessageReplyMarkup(update.callbackQuery().message().chat().id(), update.callbackQuery().message().messageId());
             updateMarkupRequest.replyMarkup(showPagedDistricts(user, 0));
 
-            var updateMessageRequest = new EditMessageText(update.callbackQuery().message().chat().id(), update.callbackQuery().message().messageId(), "TODO");
+            var updateMessageRequest = new EditMessageText(update.callbackQuery().message().chat().id(), update.callbackQuery().message().messageId(), "Please select your wanted districts. If none are selected all listings will be shown. Listings without any district will always be shown. Please note that some sites have different district classifications or names.");
             bot.execute(updateMessageRequest, new Callback<EditMessageText, BaseResponse>() {
                 @Override
                 public void onResponse(EditMessageText request, BaseResponse response) {
@@ -196,7 +196,7 @@ public class DistrictsCallback implements CallbackResponder {
             var updateMarkupRequest = new EditMessageReplyMarkup(update.callbackQuery().message().chat().id(), update.callbackQuery().message().messageId());
             updateMarkupRequest.replyMarkup(showTurnedOffPage());
 
-            var updateMessageRequest = new EditMessageText(update.callbackQuery().message().chat().id(), update.callbackQuery().message().messageId(), "TODO");
+            var updateMessageRequest = new EditMessageText(update.callbackQuery().message().chat().id(), update.callbackQuery().message().messageId(), "There is a possibility to filter listings by district. Listings without any district will always be shown. Please note that some sites have different district classifications or names.");
             bot.execute(updateMessageRequest, new Callback<EditMessageText, BaseResponse>() {
                 @Override
                 public void onResponse(EditMessageText request, BaseResponse response) {
@@ -238,15 +238,15 @@ public class DistrictsCallback implements CallbackResponder {
 
             var updateMarkupRequest = new EditMessageReplyMarkup(update.callbackQuery().message().chat().id(), update.callbackQuery().message().messageId());
             updateMarkupRequest.replyMarkup(showPagedDistricts(user, 0));
-            bot.execute(updateMarkupRequest);
 
-            var updateMessageRequest = new EditMessageText(update.callbackQuery().message().chat().id(), update.callbackQuery().message().messageId(), "TODO");
+            var updateMessageRequest = new EditMessageText(update.callbackQuery().message().chat().id(), update.callbackQuery().message().messageId(), "Please select your wanted districts. If none are selected all listings will be shown. Listings without any district will always be shown. Please note that some sites have different district classifications or names.");
             bot.execute(updateMessageRequest, new Callback<EditMessageText, BaseResponse>() {
                 @Override
                 public void onResponse(EditMessageText request, BaseResponse response) {
                     var callbackResponse = new AnswerCallbackQuery(update.callbackQuery().id());
                     callbackResponse.text("List cleared");
                     bot.execute(callbackResponse);
+                    bot.execute(updateMarkupRequest);
                 }
 
                 @Override
