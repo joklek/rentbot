@@ -69,6 +69,8 @@ public class AruodasScraper implements Scraper {
                 .orElseGet(() -> selectByCss(driver, "div.phone").orElse(null));
         var description = selectByCss(driver, "#collapsedTextBlock > #collapsedText");
         var rawAddress = selectByCss(driver, ".main-content > .obj-cont > h1").map(s -> s.split(","));
+        var district = rawAddress.flatMap(x -> x.length >= 1 ? Optional.of(x[1]) : Optional.empty());
+        var street = rawAddress.flatMap(x -> x.length >= 2 ? Optional.of(x[2]) : Optional.empty());
 
         var objDetailsRaw = driver.findElements(By.cssSelector(".obj-details :not(hr)")).stream().toList();
         var moreInfo = objDetailsRaw.stream().collect(Collectors
@@ -101,10 +103,10 @@ public class AruodasScraper implements Scraper {
         post.setExternalId(aruodasId);
         post.setLink(link);
         post.setPhone(phone);
-        rawAddress.ifPresent(splitAddress -> post.setDistrict(splitAddress[1]));
-        rawAddress.ifPresent(splitAddress -> post.setStreet(splitAddress[2]));
-        description.ifPresent(post::setDescription);
+        district.ifPresent(post::setDistrict);
+        street.ifPresent(post::setStreet);
         houseNumber.ifPresent(post::setHouseNumber);
+        description.ifPresent(post::setDescription);
         heating.ifPresent(post::setHeating);
         floor.ifPresent(post::setFloor);
         totalFloors.ifPresent(post::setTotalFloors);
