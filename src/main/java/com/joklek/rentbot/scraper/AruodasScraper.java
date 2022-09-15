@@ -68,9 +68,9 @@ public class AruodasScraper implements Scraper {
         var phone = selectByCss(driver, "span.phone_item_0")
                 .orElseGet(() -> selectByCss(driver, "div.phone").orElse(null));
         var description = selectByCss(driver, "#collapsedTextBlock > #collapsedText");
-        var rawAddress = selectByCss(driver, ".main-content > .obj-cont > h1").map(s -> s.split(","));
-        var district = rawAddress.flatMap(x -> x.length >= 1 ? Optional.of(x[1]) : Optional.empty());
-        var street = rawAddress.flatMap(x -> x.length >= 2 ? Optional.of(x[2]) : Optional.empty());
+        var rawAddress = selectByCss(driver, ".main-content > .obj-cont > h1").map(s -> List.of(s.split(",")).stream().filter(x -> !x.contains("buto nuoma")).toList());
+        var district = rawAddress.flatMap(x -> x.size() >= 2 ? Optional.of(x.get(1)) : Optional.empty());
+        var street = rawAddress.flatMap(x -> x.size() >= 3 ? Optional.of(x.get(2)) : Optional.empty());
 
         var objDetailsRaw = driver.findElements(By.cssSelector(".obj-details :not(hr)")).stream().toList();
         var moreInfo = objDetailsRaw.stream().collect(Collectors
