@@ -26,9 +26,9 @@ public class UpdateListener {
         ensureUsersInDb(updates);
 
         updates.forEach(update -> {
-            if (update.message() != null) {
+            if (update.message() != null && update.message().text() != null) {
                 handleMessage(bot, update);
-            } else if (update.callbackQuery() != null) {
+            } else if (update.callbackQuery() != null && update.callbackQuery().data() != null) {
                 handleCallback(bot, update);
             }
         });
