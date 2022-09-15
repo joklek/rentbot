@@ -116,7 +116,7 @@ public class ConfigCommandResponder implements CommandResponder {
                         "» *From construction year:* %6$d\n" +
                         "» *Min floor:* %7$d\n" +
                         "» *Show with extra fees:* %8$s\n" +
-                        "» *Filter by district:* %9$s\n" +
+                        "» *Filter by district:* %9$s (/districts to configure)\n" +
                         "Current config:\n" +
                         "`%10$s %2$.0f %3$.0f %4$d %5$d %6$d %7$d %8$s`",
                 status,
