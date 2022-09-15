@@ -77,7 +77,7 @@ public class DistrictsCallback implements CallbackResponder {
 
     private InlineKeyboardMarkup showPagedDistricts(User user, int page) {
         var keyboard = new InlineKeyboardMarkup();
-        var allDistricts = districts.findAll();
+        var allDistricts = districts.findAllByOrderByNameAsc();
         var userDistricts = districts.findByUsers(user);
         var pageSize = 6;
         var rowSize = 3;
@@ -339,7 +339,7 @@ public class DistrictsCallback implements CallbackResponder {
             }
             users.save(user);
 
-            var page = districts.findAll().stream().map(District::getName).toList().indexOf(district.getName()) / 6;
+            var page = districts.findAllByOrderByNameAsc().stream().map(District::getName).toList().indexOf(district.getName()) / 6;
 
             var updateMarkupRequest = new EditMessageReplyMarkup(update.callbackQuery().message().chat().id(), update.callbackQuery().message().messageId());
             updateMarkupRequest.replyMarkup(showPagedDistricts(user, page)); // TODO how to refresh properly?

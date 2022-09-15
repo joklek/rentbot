@@ -54,7 +54,7 @@ public class DistrictsCommandResponder implements CommandResponder {
 
     private InlineKeyboardMarkup showPagedDistricts(User user, int page) {
         var keyboard = new InlineKeyboardMarkup();
-        var allDistricts = districts.findAll();
+        var allDistricts = districts.findAllByOrderByNameAsc();
         var userDistricts = districts.findByUsers(user);
         var pageSize = 6;
         var rowSize = 3;
