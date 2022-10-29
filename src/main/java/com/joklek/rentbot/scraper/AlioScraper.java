@@ -64,7 +64,7 @@ public class AlioScraper extends JsoupScraper {
         var rawAddress = Optional.ofNullable(moreInfo.get("Adresas"));
         Optional<String> district = Optional.empty();
         Optional<String> street = Optional.empty();
-        if (rawAddress.isPresent()) {
+        if (rawAddress.isPresent() && rawAddress.get().contains(",")) {
             var splitAddress = rawAddress.get().split(", ");
             district = Optional.of(splitAddress[1]);
             if (splitAddress.length > 2) {
