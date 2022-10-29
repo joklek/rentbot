@@ -34,14 +34,21 @@ public class AlioScraper extends JsoupScraper {
         var rawPosts = doc.select("#main_left_b > #main-content-center > div.result");
 
         return rawPosts.stream()
-                .map(rawPost -> processItem(rawPost))
+                .map(rawPost -> rawPost.attr("id").replace("lv_ad_id_", ""))
+                .map(alioId -> {
+                    try {
+                        return processItem(alioId);
+                    } catch (Exception e) {
+                        LOGGER.error("Can't parse post '{}'", alioId, e);
+                        return Optional.<PostDto>empty();
+                    }
+                })
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .toList();
     }
 
-    private Optional<PostDto> processItem(Element rawPost) {
-        var alioId = rawPost.attr("id").replace("lv_ad_id_", "");
+    private Optional<PostDto> processItem(String alioId) {
         var link = URI.create(String.format("https://www.alio.lt/skelbimai/ID%s.html", alioId));
         if (posts.existsByExternalIdAndSource(alioId, AlioPost.SOURCE)) {
             return Optional.empty();
