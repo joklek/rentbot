@@ -27,7 +27,7 @@ public class CapitalScraper extends JsoupScraper {
         }
         var doc = maybeDoc.get();
 
-        var rawPosts = doc.select("div.realty-items > a");
+        var rawPosts = doc.select("div.realty-items > a:not(.realty-status-rented)");
 
         return rawPosts.stream()
                 .map(rawPost -> processItem(rawPost))
