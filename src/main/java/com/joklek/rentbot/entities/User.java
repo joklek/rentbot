@@ -1,9 +1,10 @@
 package com.joklek.rentbot.entities;
 
-import javax.persistence.*;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+
 import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Objects;

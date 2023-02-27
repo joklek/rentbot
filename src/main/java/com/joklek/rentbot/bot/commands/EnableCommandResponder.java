@@ -3,10 +3,9 @@ package com.joklek.rentbot.bot.commands;
 import com.joklek.rentbot.repo.UserRepo;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.BaseRequest;
+import jakarta.transaction.Transactional;
+import jakarta.validation.Validator;
 import org.springframework.stereotype.Component;
-
-import javax.transaction.Transactional;
-import javax.validation.Validator;
 
 @Component
 public class EnableCommandResponder implements CommandResponder {

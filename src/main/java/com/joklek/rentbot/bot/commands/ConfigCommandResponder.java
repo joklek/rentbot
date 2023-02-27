@@ -7,9 +7,10 @@ import com.pengrad.telegrambot.request.BaseRequest;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
-import javax.validation.ConstraintViolationException;
-import javax.validation.ValidationException;
-import javax.validation.Validator;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.ValidationException;
+import jakarta.validation.Validator;
+
 import java.math.BigDecimal;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

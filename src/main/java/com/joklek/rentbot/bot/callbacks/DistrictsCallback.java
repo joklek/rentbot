@@ -14,9 +14,9 @@ import com.pengrad.telegrambot.request.BaseRequest;
 import com.pengrad.telegrambot.request.EditMessageReplyMarkup;
 import com.pengrad.telegrambot.request.EditMessageText;
 import com.pengrad.telegrambot.response.BaseResponse;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Component;
 
-import javax.transaction.Transactional;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;

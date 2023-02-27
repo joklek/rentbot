@@ -5,7 +5,7 @@ import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.BaseRequest;
 import org.springframework.stereotype.Component;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 
 @Component
 public class DisableCommandResponder implements CommandResponder {

@@ -1,12 +1,12 @@
 package com.joklek.rentbot.config;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
+import jakarta.annotation.PostConstruct;
 import org.openqa.selenium.chrome.ChromeDriverService;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-import javax.annotation.PostConstruct;
 
 @Profile("!test")
 @Configuration
