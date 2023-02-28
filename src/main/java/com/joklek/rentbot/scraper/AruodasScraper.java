@@ -41,7 +41,7 @@ public class AruodasScraper implements Scraper {
 
     private List<PostDto> getPosts(WebDriver driver) {
         driver.get(BASE_URL.toString());
-        var rawPosts = driver.findElements(By.cssSelector("ul.search-result-list-big_thumbs > li:not([style='display: none'])"));
+        var rawPosts = driver.findElements(By.cssSelector("ul.search-result-list-big_thumbs > li.result-item-big-thumb:not([style='display: none'])"));
         if (rawPosts.isEmpty()) {
             LOGGER.error("Cant fetch posts, might be blocked");
             return List.of();
