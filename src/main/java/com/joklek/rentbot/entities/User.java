@@ -22,33 +22,33 @@ public class User {
     private long telegramId;
     @NotNull
     private boolean enabled;
-    @NotNull
+
     @Min(0)
     @Max(100000)
     private BigDecimal priceMin;
-    @NotNull
+
     @Min(0)
     @Max(100000)
     private BigDecimal priceMax;
-    @NotNull
+
     @Min(0)
     @Max(100)
     private Integer roomsMin;
-    @NotNull
+
     @Min(0)
     @Max(100)
     private Integer roomsMax;
-    @NotNull
+
     @Min(1000)
     @Max(3000)
     private Integer yearMin;
-    @NotNull
+
     @Min(0)
     @Max(100)
     private Integer floorMin;
     @NotNull
     private boolean showWithFees;
-    //    @NotNull
+    @NotNull
     private boolean filterByDistrict;
 
     @ManyToMany(cascade = {
