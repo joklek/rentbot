@@ -54,6 +54,7 @@ public class DistrictsCommand implements Command {
         return keyboard;
     }
 
+    // TODO move out code
     private InlineKeyboardMarkup showPagedDistricts(User user, int page) {
         var keyboard = new InlineKeyboardMarkup();
         var allDistricts = districts.findAllByOrderByNameAsc();
