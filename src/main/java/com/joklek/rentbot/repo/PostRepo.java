@@ -16,10 +16,10 @@ public interface PostRepo extends JpaRepository<Post, Long> {
     @Query(value = "SELECT p FROM Post p " +
             "JOIN User u ON u.id = :userId " +
             "LEFT JOIN u.districts d " +
-            "WHERE ((p.price >= u.priceMin AND p.price <= u.priceMax) OR p.price = NULL) " +
-            "AND ((p.rooms >= u.roomsMin AND p.rooms <= u.roomsMax) OR p.rooms = NULL) " +
-            "AND ((p.constructionYear >= u.yearMin) OR p.constructionYear = NULL) " +
-            "AND ((p.floor >= u.floorMin) OR p.floor = NULL) " +
+            "WHERE ((p.price >= u.priceMin AND p.price <= u.priceMax) OR p.price IS NULL) " +
+            "AND ((p.rooms >= u.roomsMin AND p.rooms <= u.roomsMax) OR p.rooms IS NULL) " +
+            "AND ((p.constructionYear >= u.yearMin) OR p.constructionYear IS NULL) " +
+            "AND ((p.floor >= u.floorMin) OR p.floor IS NULL) " +
             "AND (u.showWithFees = true OR p.isWithFees = false) " +
             "AND (u.filterByDistrict = false OR (" +
             "   d.name = p.district OR " +
@@ -32,10 +32,10 @@ public interface PostRepo extends JpaRepository<Post, Long> {
     @Query(value = "SELECT COUNT(p) FROM Post p " +
             "JOIN User u ON u.id = :userId " +
             "LEFT JOIN u.districts d " +
-            "WHERE ((p.price >= u.priceMin AND p.price <= u.priceMax) OR p.price = NULL) " +
-            "AND ((p.rooms >= u.roomsMin AND p.rooms <= u.roomsMax) OR p.rooms = NULL) " +
-            "AND ((p.constructionYear >= u.yearMin) OR p.constructionYear = NULL) " +
-            "AND ((p.floor >= u.floorMin) OR p.floor = NULL) " +
+            "WHERE ((p.price >= u.priceMin AND p.price <= u.priceMax) OR p.price IS NULL) " +
+            "AND ((p.rooms >= u.roomsMin AND p.rooms <= u.roomsMax) OR p.rooms IS NULL) " +
+            "AND ((p.constructionYear >= u.yearMin) OR p.constructionYear IS NULL) " +
+            "AND ((p.floor >= u.floorMin) OR p.floor IS NULL) " +
             "AND (u.showWithFees = true OR p.isWithFees = false) " +
             "AND (u.filterByDistrict = false OR (" +
             "   d.name = p.district OR " +
