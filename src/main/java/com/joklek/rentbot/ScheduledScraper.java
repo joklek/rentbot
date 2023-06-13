@@ -1,5 +1,6 @@
 package com.joklek.rentbot;
 
+import com.joklek.rentbot.bot.PostResponseCreator;
 import com.joklek.rentbot.entities.Post;
 import com.joklek.rentbot.entities.PostEntityConverter;
 import com.joklek.rentbot.repo.DistrictRepo;
@@ -8,16 +9,11 @@ import com.joklek.rentbot.repo.UserRepo;
 import com.joklek.rentbot.scraper.PostDto;
 import com.joklek.rentbot.scraper.Scraper;
 import com.pengrad.telegrambot.TelegramBot;
-import com.pengrad.telegrambot.model.request.ParseMode;
-import com.pengrad.telegrambot.request.SendMessage;
 import org.slf4j.Logger;
 import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.math.RoundingMode;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -38,15 +34,17 @@ public class ScheduledScraper {
     private final PostRepo posts;
     private final DistrictRepo districts;
     private final PostEntityConverter postConverter;
+    private final PostResponseCreator postResponseCreator;
     private final TelegramBot bot;
     private final Random random;
 
-    public ScheduledScraper(List<Scraper> scrapers, UserRepo users, PostRepo posts, DistrictRepo districts, PostEntityConverter postConverter, TelegramBot bot) {
+    public ScheduledScraper(List<Scraper> scrapers, UserRepo users, PostRepo posts, DistrictRepo districts, PostEntityConverter postConverter, PostResponseCreator postResponseCreator, TelegramBot bot) {
         this.scrapers = scrapers;
         this.users = users;
         this.posts = posts;
         this.districts = districts;
         this.postConverter = postConverter;
+        this.postResponseCreator = postResponseCreator;
         this.bot = bot;
         this.random = new Random();
     }
@@ -99,7 +97,7 @@ public class ScheduledScraper {
         getInterestedTelegramIds(post)
                 .forEach(telegramId -> {
                     try {
-                        sendTelegramMessage(telegramId, post);
+                        bot.execute(postResponseCreator.createTelegramMessage(telegramId, post));
                     } catch (Exception e) {
                         LOGGER.error("Can't send telegram message to {}", telegramId, e);
                     }
@@ -151,73 +149,6 @@ public class ScheduledScraper {
             return users.findAllTelegramIdsNotInterestedInDistrictsWithFee(price, rooms, year, floor);
         }
         return users.findAllTelegramIdsNotInterestedInDistricts(price, rooms, year, floor);
-    }
-
-    private void sendTelegramMessage(Long telegramId, Post post) {
-        var sb = new StringBuilder();
-
-        sb.append(String.format("%d. %s\n", post.getId(), post.getLink()));
-
-        post.getPhone().ifPresent(phone -> sb.append(String.format("» *Phone number:* [%1$s](tel:%1$s)\n", phone)));
-
-        var address = getAddress(post);
-        if (address.isPresent()) {
-            sb.append(String.format("» *Address:* [%s](https://maps.google.com/?q=%s)\n", address.get(), URLEncoder.encode(address.get(), StandardCharsets.UTF_8)));
-        }
-
-        if (post.getPrice().isPresent() && post.getArea().isPresent()) {
-            sb.append(String.format("» *Price:* `%.2f€ (%.2f€/m²)`\n", post.getPrice().get(), post.getPrice().get().divide(post.getArea().get(), 2, RoundingMode.HALF_EVEN)));
-        } else if (post.getPrice().isPresent()) {
-            sb.append(String.format("» *Price:* `%.2f€`\n", post.getPrice().get()));
-        }
-
-        if (post.getRooms().isPresent() && post.getArea().isPresent()) {
-            sb.append(String.format("» *Rooms:* `%d (%.2fm²)`\n", post.getRooms().get(), post.getArea().get()));
-        } else if (post.getRooms().isPresent()) {
-            sb.append(String.format("» *Rooms:* `%d`\n", post.getRooms().get()));
-        }
-
-        if (post.getConstructionYear().isPresent()) {
-            sb.append(String.format("» *Contruction year:* `%d`\n", post.getConstructionYear().get()));
-        }
-
-        if (post.getHeating().isPresent()) {
-            sb.append(String.format("» *Heating type:* `%s`\n", post.getHeating().get()));
-        }
-
-        if (post.getFloor().isPresent() && post.getTotalFloors().isPresent()) {
-            sb.append(String.format("» *Floor:* `%d/%d`\n", post.getFloor().get(), post.getTotalFloors().get()));
-        } else if (post.getRooms().isPresent()) {
-            sb.append(String.format("» *Floor:* `%d`\n", post.getFloor().get()));
-        }
-
-        if (post.getWithFees()) {
-            sb.append("» *With fee:* yes\n");
-        } else {
-            sb.append("» *With fee:* no\n");
-        }
-
-        bot.execute(new SendMessage(telegramId, sb.toString())
-                .parseMode(ParseMode.Markdown) // TODO migrate to V2 markdown and see why it don't work
-                .disableWebPagePreview(false));
-        // TODO use internal bot, not this?
-    }
-
-    private Optional<String> getAddress(Post post) {
-        var sb = new StringBuilder();
-        if (post.getDistrict().isPresent()) {
-            sb.append(post.getDistrict().get()).append(" ");
-        }
-        if (post.getStreet().isPresent()) {
-            sb.append(post.getStreet().get()).append(" ");
-            if (post.getHouseNumber().isPresent()) {
-                sb.append(post.getHouseNumber().get());
-            }
-        }
-        if (sb.isEmpty()) {
-            return Optional.empty();
-        }
-        return Optional.of(sb.toString().trim());
     }
 
     private void logPost(Post post) {
