@@ -1,6 +1,7 @@
 package com.joklek.rentbot.entities;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -13,10 +14,13 @@ public class Post {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @NotNull
     private String externalId;
+    @NotNull
     private String source;
     private String link;
     private String phone;
+    @NotNull
     private LocalDateTime createdAt;
     private BigDecimal price;
     private Integer rooms;
