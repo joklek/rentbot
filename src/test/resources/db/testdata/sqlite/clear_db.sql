@@ -3,4 +3,4 @@ FROM posts;
 DELETE
 from users;
 DELETE
-from districts;
+from user_districts;
