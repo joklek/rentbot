@@ -69,6 +69,12 @@ public class User {
     public User() {
     }
 
+    public boolean isConfigured() {
+        return getPriceMin().isPresent() && getPriceMax().isPresent()
+                && getRoomsMin().isPresent() && getRoomsMax().isPresent()
+                && getYearMin().isPresent() && getFloorMin().isPresent();
+    }
+
     public Long getId() {
         return id;
     }
