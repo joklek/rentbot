@@ -1,6 +1,7 @@
 package com.joklek.rentbot.bot.commands;
 
 import com.joklek.rentbot.entities.User;
+import com.joklek.rentbot.repo.PostRepo;
 import com.joklek.rentbot.repo.UserRepo;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.BaseRequest;
@@ -12,6 +13,7 @@ import jakarta.validation.ValidationException;
 import jakarta.validation.Validator;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,10 +29,12 @@ public class ConfigCommand implements Command {
     private static final String CONFIG_TEXT = "Use this format to configure your settings:\n\n```\n/config <price_from> <price_to> <rooms_from> <rooms_to> <year_from> <min_floor> <show with fee?(yes/no)>\n```\nHere's how your message might look like:\n```\n/config 200 330 1 2 2000 2 yes\n\n```Here you'd search for flats between 200 and 330 eur, 1-2 rooms, built after 2000, starting on the second floor, and you're ok with seeing listings with agency fees\n";
 
     private final UserRepo users;
+    private final PostRepo posts;
     private final Validator validator;
 
-    public ConfigCommand(UserRepo users, Validator validator) {
+    public ConfigCommand(UserRepo users, PostRepo posts, Validator validator) {
         this.users = users;
+        this.posts = posts;
         this.validator = validator;
     }
 
@@ -111,6 +115,8 @@ public class ConfigCommand implements Command {
         var status = user.getEnabled() ? "enabled" : "disabled";
         var showWithFees = user.getShowWithFees() ? "yes" : "no";
         var filterByDistrict = user.getFilterByDistrict() ? "yes" : "no";
+        var weekBefore = LocalDateTime.now().minusDays(7);
+        var listingsDuringLastWeek = posts.getCountOfPostsForUserFromDays(user.getId(), weekBefore);
         return String.format("*Your active settings:*\n" +
                         "» *Notifications:* %1$s\n" +
                         "» *Price:* %2$.0f-%3$.0f€\n" +
@@ -120,7 +126,8 @@ public class ConfigCommand implements Command {
                         "» *Show with extra fees:* %8$s\n" +
                         "» *Filter by district:* %9$s (/districts to configure)\n" +
                         "Current config:\n" +
-                        "`%10$s %2$.0f %3$.0f %4$d %5$d %6$d %7$d %8$s`",
+                        "`%10$s %2$.0f %3$.0f %4$d %5$d %6$d %7$d %8$s`\n\n" +
+                        "You would've seen %11$d posts from last week with these settings",
                 status,
                 user.getPriceMin().orElse(BigDecimal.ZERO), user.getPriceMax().orElse(BigDecimal.ZERO),
                 user.getRoomsMin().orElse(0), user.getRoomsMax().orElse(0),
@@ -128,6 +135,7 @@ public class ConfigCommand implements Command {
                 user.getFloorMin().orElse(0),
                 showWithFees,
                 filterByDistrict,
-                command());
+                command(),
+                listingsDuringLastWeek);
     }
 }
