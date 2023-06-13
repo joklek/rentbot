@@ -1,6 +1,6 @@
 package com.joklek.rentbot.bot;
 
-import com.joklek.rentbot.bot.commands.CommandResponder;
+import com.joklek.rentbot.bot.commands.Command;
 
 import java.util.Map;
 import java.util.Optional;
@@ -8,15 +8,15 @@ import java.util.regex.Pattern;
 
 public class CommandRecognizer {
     private final Pattern commandPattern = Pattern.compile("^/(\\w)+");
-    private final Map<String, CommandResponder> handlers;
-    private final CommandResponder errorHandler;
+    private final Map<String, Command> handlers;
+    private final Command errorHandler;
 
-    public CommandRecognizer(Map<String, CommandResponder> handlers, CommandResponder errorHandler) {
+    public CommandRecognizer(Map<String, Command> handlers, Command errorHandler) {
         this.handlers = handlers;
         this.errorHandler = errorHandler;
     }
 
-    public CommandResponder getHandler(String rawCommand) {
+    public Command getHandler(String rawCommand) {
         var matcher = commandPattern.matcher(rawCommand);
         if (!matcher.find()) {
             return errorHandler;

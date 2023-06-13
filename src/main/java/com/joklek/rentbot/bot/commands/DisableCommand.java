@@ -10,10 +10,10 @@ import jakarta.transaction.Transactional;
 import java.util.List;
 
 @Component
-public class DisableCommandResponder implements CommandResponder {
+public class DisableCommand implements Command {
     private final UserRepo users;
 
-    public DisableCommandResponder(UserRepo users) {
+    public DisableCommand(UserRepo users) {
         this.users = users;
     }
 

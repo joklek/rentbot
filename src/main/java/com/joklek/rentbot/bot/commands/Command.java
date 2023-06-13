@@ -7,7 +7,7 @@ import com.pengrad.telegrambot.request.SendMessage;
 
 import java.util.List;
 
-public interface CommandResponder {
+public interface Command {
     String command();
 
     List<BaseRequest<?, ?>> handle(Update update, String payload);

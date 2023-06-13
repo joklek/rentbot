@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class ReplayCommandResponder implements CommandResponder {
+public class ReplayCommand implements Command {
 
     private static final int POSTS_FROM_PREVIOUS_DAYS = 2;
 
@@ -22,7 +22,7 @@ public class ReplayCommandResponder implements CommandResponder {
     private final UserRepo users;
     private final PostResponseCreator postResponseCreator;
 
-    public ReplayCommandResponder(PostRepo posts, UserRepo users, PostResponseCreator postResponseCreator) {
+    public ReplayCommand(PostRepo posts, UserRepo users, PostResponseCreator postResponseCreator) {
         this.posts = posts;
         this.users = users;
         this.postResponseCreator = postResponseCreator;

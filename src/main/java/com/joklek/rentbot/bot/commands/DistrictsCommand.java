@@ -15,12 +15,12 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class DistrictsCommandResponder implements CommandResponder {
+public class DistrictsCommand implements Command {
 
     private final UserRepo users;
     private final DistrictRepo districts;
 
-    public DistrictsCommandResponder(UserRepo users, DistrictRepo districts) {
+    public DistrictsCommand(UserRepo users, DistrictRepo districts) {
         this.users = users;
         this.districts = districts;
     }

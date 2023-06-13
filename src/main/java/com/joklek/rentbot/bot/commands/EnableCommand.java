@@ -10,11 +10,11 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class EnableCommandResponder implements CommandResponder {
+public class EnableCommand implements Command {
     private final UserRepo users;
     private final Validator validator;
 
-    public EnableCommandResponder(UserRepo users, Validator validator) {
+    public EnableCommand(UserRepo users, Validator validator) {
         this.users = users;
         this.validator = validator;
     }
