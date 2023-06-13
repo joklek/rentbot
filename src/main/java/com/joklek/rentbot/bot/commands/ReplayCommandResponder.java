@@ -4,37 +4,31 @@ import com.joklek.rentbot.entities.Post;
 import com.joklek.rentbot.entities.User;
 import com.joklek.rentbot.repo.PostRepo;
 import com.joklek.rentbot.repo.UserRepo;
-import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.request.ParseMode;
 import com.pengrad.telegrambot.request.BaseRequest;
 import com.pengrad.telegrambot.request.SendMessage;
-import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
 import java.math.RoundingMode;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.slf4j.LoggerFactory.getLogger;
-
 @Component
 public class ReplayCommandResponder implements CommandResponder {
-    private static final Logger LOGGER = getLogger(ReplayCommandResponder.class);
 
     private static final int POSTS_FROM_PREVIOUS_DAYS = 2;
 
     private final PostRepo posts;
     private final UserRepo users;
-    private final TelegramBot bot;
 
-    public ReplayCommandResponder(PostRepo posts, UserRepo users, TelegramBot bot) {
+    public ReplayCommandResponder(PostRepo posts, UserRepo users) {
         this.posts = posts;
         this.users = users;
-        this.bot = bot;
     }
 
     @Override
@@ -43,28 +37,25 @@ public class ReplayCommandResponder implements CommandResponder {
     }
 
     @Override
-    public BaseRequest<?, ?> handle(Update update, String payload) {
+    public List<BaseRequest<?, ?>> handle(Update update, String payload) {
         var telegramId = update.message().chat().id();
         var user = users.getByTelegramId(telegramId);
         if(!user.isConfigured()) {
-            return simpleResponse(update, "Please configure your settings with /config");
+            return simpleFinalResponse(update, "Please configure your settings with /config");
         }
 
         var posts = getPosts(user);
 
         if (posts.isEmpty()) {
-            return simpleResponse(update, String.format("No posts found in the last %d days", POSTS_FROM_PREVIOUS_DAYS));
+            return simpleFinalResponse(update, String.format("No posts found in the last %d days", POSTS_FROM_PREVIOUS_DAYS));
         }
 
-        for (Post post : posts) {
-            try {
-                sendTelegramMessage(telegramId, post);
-            } catch (Exception e) {
-                LOGGER.error("Can't send telegram message to {}", telegramId, e);
-            }
-        }
+        var messages = new ArrayList<BaseRequest<?, ?>>(posts.stream()
+                .map(post -> createTelegramMessage(telegramId, post))
+                .toList());
+        messages.add(simpleResponse(update, String.format("Replayed %d posts from last %d days", posts.size(), POSTS_FROM_PREVIOUS_DAYS)));
 
-        return simpleResponse(update, String.format("Replayed %d posts from last %d days", posts.size(), POSTS_FROM_PREVIOUS_DAYS));
+        return messages;
     }
 
     private List<Post> getPosts(User user) {
@@ -75,7 +66,7 @@ public class ReplayCommandResponder implements CommandResponder {
     }
 
     // TODO MOVE TO COMMON PLACE FROM HERE AND SCHEDULED
-    private void sendTelegramMessage(Long telegramId, Post post) {
+    private SendMessage createTelegramMessage(Long telegramId, Post post) {
         var sb = new StringBuilder();
 
         sb.append(String.format("%d. %s\n", post.getId(), post.getLink()));
@@ -119,10 +110,9 @@ public class ReplayCommandResponder implements CommandResponder {
             sb.append("» *With fee:* no\n");
         }
 
-        bot.execute(new SendMessage(telegramId, sb.toString())
+        return new SendMessage(telegramId, sb.toString())
                 .parseMode(ParseMode.Markdown) // TODO migrate to V2 markdown and see why it don't work
-                .disableWebPagePreview(false));
-        // TODO use internal bot, not this?
+                .disableWebPagePreview(false);
     }
 
     private Optional<String> getAddress(Post post) {

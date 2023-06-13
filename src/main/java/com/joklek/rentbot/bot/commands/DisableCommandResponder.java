@@ -7,6 +7,8 @@ import org.springframework.stereotype.Component;
 
 import jakarta.transaction.Transactional;
 
+import java.util.List;
+
 @Component
 public class DisableCommandResponder implements CommandResponder {
     private final UserRepo users;
@@ -22,11 +24,11 @@ public class DisableCommandResponder implements CommandResponder {
 
     @Override
     @Transactional
-    public BaseRequest<?, ?> handle(Update update, String payload) {
+    public List<BaseRequest<?, ?>> handle(Update update, String payload) {
         var telegramId = update.message().chat().id();
         var user = users.getByTelegramId(telegramId);
         user.setEnabled(false);
 
-        return simpleResponse(update, "Notifications disabled!");
+        return simpleFinalResponse(update, "Notifications disabled!");
     }
 }

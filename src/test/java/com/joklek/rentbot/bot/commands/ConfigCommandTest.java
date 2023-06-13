@@ -79,7 +79,8 @@ class ConfigCommandResponderTest extends IntegrationTest {
                 Current config:
                 `/config 0 0 0 0 0 0 no`""";
 
-        assertThat(response.getParameters()).containsEntry("text", expectedText);
+        assertThat(response).hasSize(1);
+        assertThat(response.get(0).getParameters()).containsEntry("text", expectedText);
     }
 
     @Test
@@ -99,7 +100,8 @@ class ConfigCommandResponderTest extends IntegrationTest {
                 » *Show with extra fees:* yes
                 Current config:
                 `/config 200 330 1 2 2000 2 yes`""";
-        assertThat(response.getParameters()).containsEntry("text", expectedText);
+        assertThat(response).hasSize(1);
+        assertThat(response.get(0).getParameters()).containsEntry("text", expectedText);
 
         var user = users.findByTelegramId(CHAT_ID).get();
         // Auto enables user on first config change
@@ -134,7 +136,8 @@ class ConfigCommandResponderTest extends IntegrationTest {
                 » *Show with extra fees:* yes
                 Current config:
                 `/config 200 330 1 2 2000 2 yes`""";
-        assertThat(response.getParameters()).containsEntry("text", expectedText);
+        assertThat(response).hasSize(1);
+        assertThat(response.get(0).getParameters()).containsEntry("text", expectedText);
 
         var user = users.findByTelegramId(CHAT_ID).get();
         // Does not change notification flag
@@ -168,7 +171,8 @@ class ConfigCommandResponderTest extends IntegrationTest {
                 » *Show with extra fees:* no
                 Current config:
                 `/config 200 330 1 2 2000 2 no`""";
-        assertThat(response.getParameters()).containsEntry("text", expectedText);
+        assertThat(response).hasSize(1);
+        assertThat(response.get(0).getParameters()).containsEntry("text", expectedText);
 
         var user = users.findByTelegramId(CHAT_ID).get();
         assertThat(user.getShowWithFees()).isFalse();
@@ -192,7 +196,8 @@ class ConfigCommandResponderTest extends IntegrationTest {
                                 
                 ```Here you'd search for flats between 200 and 330 eur, 1-2 rooms, built after 2000, starting on the second floor, and you're ok with seeing listings with agency fees
                 """;
-        assertThat(response.getParameters()).containsEntry("text", expectedText);
+        assertThat(response).hasSize(1);
+        assertThat(response.get(0).getParameters()).containsEntry("text", expectedText);
     }
 
     private static Stream<Arguments> invalidPayloadsAndMessages() {
@@ -227,7 +232,8 @@ class ConfigCommandResponderTest extends IntegrationTest {
                                 
                 ```Here you'd search for flats between 200 and 330 eur, 1-2 rooms, built after 2000, starting on the second floor, and you're ok with seeing listings with agency fees
                 """, message);
-        assertThat(response.getParameters()).containsEntry("text", expectedText);
+        assertThat(response).hasSize(1);
+        assertThat(response.get(0).getParameters()).containsEntry("text", expectedText);
     }
 
     private void makeUserAlreadyConfigured() {

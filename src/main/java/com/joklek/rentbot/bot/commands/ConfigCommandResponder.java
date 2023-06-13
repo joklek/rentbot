@@ -12,6 +12,7 @@ import jakarta.validation.ValidationException;
 import jakarta.validation.Validator;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -39,33 +40,33 @@ public class ConfigCommandResponder implements CommandResponder {
     }
 
     @Override
-    public BaseRequest<?, ?> handle(Update update, String payload) {
+    public List<BaseRequest<?, ?>> handle(Update update, String payload) {
         var telegramId = update.message().chat().id();
         var user = users.getByTelegramId(telegramId);
         if (payload.isBlank()) {
-            return simpleResponse(update, String.format("%s\n%s", CONFIG_TEXT, activeSettings(user)));
+            return simpleFinalResponse(update, String.format("%s\n%s", CONFIG_TEXT, activeSettings(user)));
         }
         var matcher = CONFIG_PATTERN.matcher(payload);
         if (!matcher.matches()) {
-            return simpleResponse(update, String.format("%s\n%s", "Wrong input!", CONFIG_TEXT));
+            return simpleFinalResponse(update, String.format("%s\n%s", "Wrong input!", CONFIG_TEXT));
         }
         try {
             updateSettings(user, matcher);
-            return simpleResponse(update, String.format("Config updated!\n\n%s", activeSettings(user)));
+            return simpleFinalResponse(update, String.format("Config updated!\n\n%s", activeSettings(user)));
         } catch (NumberFormatException e) {
-            return simpleResponse(update, String.format("%s\n%s", "Wrong input! Check if all numbers are written correctly", CONFIG_TEXT));
+            return simpleFinalResponse(update, String.format("%s\n%s", "Wrong input! Check if all numbers are written correctly", CONFIG_TEXT));
         } catch (ConstraintViolationException e) {
             var firstViolation = e.getConstraintViolations().stream().findFirst().get();
             var errorPath = firstViolation.getPropertyPath().toString();
             var errorMessage = firstViolation.getMessage();
             var badValue = firstViolation.getInvalidValue();
             var errorDescription = String.format("There's an error in %s: %s, but was %s.", errorPath, errorMessage, badValue);
-            return simpleResponse(update, String.format("%s %s\n%s", "Wrong input!", errorDescription, CONFIG_TEXT));
+            return simpleFinalResponse(update, String.format("%s %s\n%s", "Wrong input!", errorDescription, CONFIG_TEXT));
         } catch (ValidationException e) {
-            return simpleResponse(update, String.format("%s %s\n%s", "Wrong input!", e.getMessage(), CONFIG_TEXT));
+            return simpleFinalResponse(update, String.format("%s %s\n%s", "Wrong input!", e.getMessage(), CONFIG_TEXT));
         } catch (Exception e) {
             LOGGER.warn("Error while updating user settings", e);
-            return simpleResponse(update, String.format("%s\n%s", "Wrong input!", CONFIG_TEXT));
+            return simpleFinalResponse(update, String.format("%s\n%s", "Wrong input!", CONFIG_TEXT));
         }
     }
 

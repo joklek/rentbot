@@ -12,6 +12,8 @@ import com.pengrad.telegrambot.request.BaseRequest;
 import com.pengrad.telegrambot.request.SendMessage;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 public class DistrictsCommandResponder implements CommandResponder {
 
@@ -29,7 +31,7 @@ public class DistrictsCommandResponder implements CommandResponder {
     }
 
     @Override
-    public BaseRequest<?, ?> handle(Update update, String payload) {
+    public List<BaseRequest<?, ?>> handle(Update update, String payload) {
         var telegramId = update.message().chat().id();
         var user = users.getByTelegramId(telegramId);
         String message;
@@ -41,7 +43,7 @@ public class DistrictsCommandResponder implements CommandResponder {
             message = "Please select your wanted districts. If none are selected all listings will be shown. Listings without any district will always be shown. Please note that some sites have different district classifications or names.";
             content = showPagedDistricts(user, 0);
         }
-        return inlineResponse(update, message, content);
+        return List.of(inlineResponse(update, message, content));
     }
 
     private InlineKeyboardMarkup showTurnedOffPage() {

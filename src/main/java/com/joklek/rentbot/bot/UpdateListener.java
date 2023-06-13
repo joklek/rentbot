@@ -42,9 +42,9 @@ public class UpdateListener {
             return;
         }
         var payload = commandRecognizer.getPayload(rawText);
-        var message = handler.handle(update, payload);
+        var messages = handler.handle(update, payload);
 
-        bot.execute(message);
+        messages.forEach(bot::execute);
     }
 
     private void handleCallback(TelegramBot bot, Update update) {

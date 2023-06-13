@@ -4,6 +4,8 @@ import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.BaseRequest;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 public class StartCommandResponder implements CommandResponder {
 
@@ -18,7 +20,7 @@ public class StartCommandResponder implements CommandResponder {
     }
 
     @Override
-    public BaseRequest<?, ?> handle(Update update, String payload) {
-        return simpleResponse(update, MESSAGE);
+    public List<BaseRequest<?, ?>> handle(Update update, String payload) {
+        return simpleFinalResponse(update, MESSAGE);
     }
 }
