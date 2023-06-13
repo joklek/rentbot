@@ -76,8 +76,11 @@ class ConfigCommandTest extends IntegrationTest {
                 » *From construction year:* 0
                 » *Min floor:* 0
                 » *Show with extra fees:* no
+                » *Filter by district:* no (/districts to configure)
                 Current config:
-                `/config 0 0 0 0 0 0 no`""";
+                `/config 0 0 0 0 0 0 no`
+                                
+                You would've seen 0 posts from last week with these settings""";
 
         assertThat(response).hasSize(1);
         assertThat(response.get(0).getParameters()).containsEntry("text", expectedText);
@@ -90,7 +93,7 @@ class ConfigCommandTest extends IntegrationTest {
         // Has expected text
         var expectedText = """
                 Config updated!
-                                
+
                 *Your active settings:*
                 » *Notifications:* enabled
                 » *Price:* 200-330€
@@ -98,8 +101,11 @@ class ConfigCommandTest extends IntegrationTest {
                 » *From construction year:* 2000
                 » *Min floor:* 2
                 » *Show with extra fees:* yes
+                » *Filter by district:* no (/districts to configure)
                 Current config:
-                `/config 200 330 1 2 2000 2 yes`""";
+                `/config 200 330 1 2 2000 2 yes`
+
+                You would've seen 0 posts from last week with these settings""";
         assertThat(response).hasSize(1);
         assertThat(response.get(0).getParameters()).containsEntry("text", expectedText);
 
@@ -126,7 +132,7 @@ class ConfigCommandTest extends IntegrationTest {
         // Has expected text
         var expectedText = """
                 Config updated!
-                                
+   
                 *Your active settings:*
                 » *Notifications:* disabled
                 » *Price:* 200-330€
@@ -134,8 +140,11 @@ class ConfigCommandTest extends IntegrationTest {
                 » *From construction year:* 2000
                 » *Min floor:* 2
                 » *Show with extra fees:* yes
+                » *Filter by district:* no (/districts to configure)
                 Current config:
-                `/config 200 330 1 2 2000 2 yes`""";
+                `/config 200 330 1 2 2000 2 yes`
+
+                You would've seen 0 posts from last week with these settings""";
         assertThat(response).hasSize(1);
         assertThat(response.get(0).getParameters()).containsEntry("text", expectedText);
 
@@ -161,7 +170,7 @@ class ConfigCommandTest extends IntegrationTest {
         // Has expected text
         var expectedText = """
                 Config updated!
-                                
+
                 *Your active settings:*
                 » *Notifications:* enabled
                 » *Price:* 200-330€
@@ -169,8 +178,11 @@ class ConfigCommandTest extends IntegrationTest {
                 » *From construction year:* 2000
                 » *Min floor:* 2
                 » *Show with extra fees:* no
+                » *Filter by district:* no (/districts to configure)
                 Current config:
-                `/config 200 330 1 2 2000 2 no`""";
+                `/config 200 330 1 2 2000 2 no`
+
+                You would've seen 0 posts from last week with these settings""";
         assertThat(response).hasSize(1);
         assertThat(response.get(0).getParameters()).containsEntry("text", expectedText);
 
@@ -186,14 +198,14 @@ class ConfigCommandTest extends IntegrationTest {
         var expectedText = """
                 Wrong input!
                 Use this format to configure your settings:
-                                
+
                 ```
                 /config <price_from> <price_to> <rooms_from> <rooms_to> <year_from> <min_floor> <show with fee?(yes/no)>
                 ```
                 Here's how your message might look like:
                 ```
                 /config 200 330 1 2 2000 2 yes
-                                
+
                 ```Here you'd search for flats between 200 and 330 eur, 1-2 rooms, built after 2000, starting on the second floor, and you're ok with seeing listings with agency fees
                 """;
         assertThat(response).hasSize(1);
@@ -204,9 +216,9 @@ class ConfigCommandTest extends IntegrationTest {
         return Stream.of(
                 Arguments.of("500 100 1 2 2000 2 yes", "Min price can't be bigger than max price"),
                 Arguments.of("100 500 3 1 2000 2 yes", "Min rooms can't be bigger than max rooms"),
-                Arguments.of("100001 100002 1 2 2000 2 yes", "There's an error in priceMax: must be less than or equal to 100000, but was 100002."),
+                Arguments.of("99001 100002 1 2 2000 2 yes", "There's an error in priceMax: must be less than or equal to 100000, but was 100002."),
                 Arguments.of("100 100001 1 2 2000 2 yes", "There's an error in priceMax: must be less than or equal to 100000, but was 100001."),
-                Arguments.of("100 200 101 102 2000 2 yes", "There's an error in roomsMin: must be less than or equal to 100, but was 101."),
+                Arguments.of("100 200 99 101 2000 2 yes", "There's an error in roomsMax: must be less than or equal to 100, but was 101."),
                 Arguments.of("100 200 1 2 0 2 yes", "There's an error in yearMin: must be greater than or equal to 1000, but was 0."),
                 Arguments.of("100 200 1 2 5000 2 yes", "There's an error in yearMin: must be less than or equal to 3000, but was 5000."),
                 Arguments.of("100 200 1 2 2013 101 yes", "There's an error in floorMin: must be less than or equal to 100, but was 101.")
@@ -215,21 +227,21 @@ class ConfigCommandTest extends IntegrationTest {
 
     @ParameterizedTest
     @MethodSource("invalidPayloadsAndMessages")
-    void handle__whenMinPriceGreaterThanMaxPrice__returnsSpecificErrorMessage(String payload, String message) {
+    void handle__whenInvalidConfigOptions__returnsSpecificErrorMessage(String payload, String message) {
         var response = command.handle(update, payload);
 
         // Has expected text
         var expectedText = String.format("""
                 Wrong input! %s
                 Use this format to configure your settings:
-                                
+
                 ```
                 /config <price_from> <price_to> <rooms_from> <rooms_to> <year_from> <min_floor> <show with fee?(yes/no)>
                 ```
                 Here's how your message might look like:
                 ```
                 /config 200 330 1 2 2000 2 yes
-                                
+
                 ```Here you'd search for flats between 200 and 330 eur, 1-2 rooms, built after 2000, starting on the second floor, and you're ok with seeing listings with agency fees
                 """, message);
         assertThat(response).hasSize(1);
