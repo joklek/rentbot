@@ -32,9 +32,7 @@ cd rentbot
 mvnw -DskipTests=true package
 ```
 
-5. Create configuration file. Simply copy `config.example.yml` to a new file `config.yml` and edit accordingly.
-
-6. Run it as you prefer, I have script like this
+4. Run it as you prefer, I have script like this
 
 ```sh
 @echo off
