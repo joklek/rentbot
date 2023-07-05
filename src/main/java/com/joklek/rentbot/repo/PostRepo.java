@@ -13,7 +13,7 @@ public interface PostRepo extends JpaRepository<Post, Long> {
 
     boolean existsByExternalIdAndSource(String externalId, String source);
 
-    @Query(value = "SELECT p FROM Post p " +
+    @Query(value = "SELECT distinct p FROM Post p " +
             "JOIN User u ON u.id = :userId " +
             "LEFT JOIN u.districts d " +
             "WHERE ((p.price >= u.priceMin AND p.price <= u.priceMax) OR p.price IS NULL) " +
@@ -29,7 +29,7 @@ public interface PostRepo extends JpaRepository<Post, Long> {
             "ORDER BY p.id ASC")
     List<Post> getAllPostsForUserFromDays(Long userId, LocalDateTime afterDate);
 
-    @Query(value = "SELECT COUNT(p) FROM Post p " +
+    @Query(value = "SELECT COUNT(distinct p.id) FROM Post p " +
             "JOIN User u ON u.id = :userId " +
             "LEFT JOIN u.districts d " +
             "WHERE ((p.price >= u.priceMin AND p.price <= u.priceMax) OR p.price IS NULL) " +
