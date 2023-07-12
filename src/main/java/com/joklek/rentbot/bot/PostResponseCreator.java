@@ -47,7 +47,7 @@ public class PostResponseCreator {
 
         if (post.getFloor().isPresent() && post.getTotalFloors().isPresent()) {
             sb.append(String.format("» *Floor:* `%d/%d`\n", post.getFloor().get(), post.getTotalFloors().get()));
-        } else if (post.getRooms().isPresent()) {
+        } else if (post.getFloor().isPresent()) {
             sb.append(String.format("» *Floor:* `%d`\n", post.getFloor().get()));
         }
 
