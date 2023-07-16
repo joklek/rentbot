@@ -31,15 +31,15 @@ public class AlioScraper extends JsoupScraper {
         }
         var doc = maybeDoc.get();
 
-        var rawPosts = doc.select("#main_left_b > #main-content-center > div.result");
+        var rawPosts = doc.select("#main_left_b > #main-content-center > div.result > a");
 
         return rawPosts.stream()
-                .map(rawPost -> rawPost.attr("id").replace("lv_ad_id_", ""))
-                .map(alioId -> {
+                .map(rawPost -> rawPost.attr("href"))
+                .map(link -> {
                     try {
-                        return processItem(alioId);
+                        return processItem(URI.create(link));
                     } catch (Exception e) {
-                        LOGGER.error("Can't parse post '{}'", alioId, e);
+                        LOGGER.error("Can't parse post '{}'", link, e);
                         return Optional.<PostDto>empty();
                     }
                 })
@@ -48,13 +48,15 @@ public class AlioScraper extends JsoupScraper {
                 .toList();
     }
 
-    private Optional<PostDto> processItem(String alioId) {
+    private Optional<PostDto> processItem(URI longLink) {
+        var linkElements = longLink.toString().split("/");
+        var alioId = linkElements[linkElements.length - 1].replaceFirst(".html$", "").replaceFirst("^ID", "");
         var link = URI.create(String.format("https://www.alio.lt/skelbimai/ID%s.html", alioId));
         if (posts.existsByExternalIdAndSource(alioId, AlioPost.SOURCE)) {
             return Optional.empty();
         }
 
-        var maybeExactPost = getDocument(link);
+        var maybeExactPost = getDocument(longLink);
         if (maybeExactPost.isEmpty()) {
             // TODO log empty
             return Optional.empty();
