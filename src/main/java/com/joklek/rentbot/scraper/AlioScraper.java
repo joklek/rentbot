@@ -1,5 +1,6 @@
 package com.joklek.rentbot.scraper;
 
+import com.google.common.net.UrlEscapers;
 import com.joklek.rentbot.repo.PostRepo;
 import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
@@ -35,6 +36,7 @@ public class AlioScraper extends JsoupScraper {
 
         return rawPosts.stream()
                 .map(rawPost -> rawPost.attr("href"))
+                .map(link -> UrlEscapers.urlFragmentEscaper().escape(link))
                 .map(link -> {
                     try {
                         return processItem(URI.create(link));
