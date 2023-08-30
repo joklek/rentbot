@@ -72,7 +72,7 @@ public class AruodasScraper implements Scraper {
         var district = rawAddress.flatMap(x -> x.size() >= 2 ? Optional.of(x.get(1)) : Optional.empty());
         var street = rawAddress.flatMap(x -> x.size() >= 3 ? Optional.of(x.get(2)) : Optional.empty());
 
-        var objDetailsRaw = driver.findElements(By.cssSelector(".obj-details :not(hr)")).stream().toList();
+        var objDetailsRaw = driver.findElements(By.cssSelector(".obj-details > :not(hr)")).stream().toList();
         var moreInfo = objDetailsRaw.stream().collect(Collectors
                         .groupingBy(x -> objDetailsRaw.indexOf(x) / 2)).values().stream()
                 .filter(x -> x.size() == 2)
