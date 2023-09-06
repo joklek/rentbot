@@ -13,6 +13,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -68,7 +69,7 @@ public class AruodasScraper implements Scraper {
         var phone = selectByCss(driver, "span.phone_item_0")
                 .orElseGet(() -> selectByCss(driver, "div.phone").orElse(null));
         var description = selectByCss(driver, "#collapsedTextBlock > #collapsedText");
-        var rawAddress = selectByCss(driver, ".main-content > .obj-cont > h1").map(s -> List.of(s.split(",")).stream().filter(x -> !x.contains("buto nuoma")).toList());
+        var rawAddress = selectByCss(driver, ".main-content > .obj-cont > h1").map(s -> Stream.of(s.split(",")).filter(x -> !x.contains("nuoma")).toList());
         var district = rawAddress.flatMap(x -> x.size() >= 2 ? Optional.of(x.get(1)) : Optional.empty());
         var street = rawAddress.flatMap(x -> x.size() >= 3 ? Optional.of(x.get(2)) : Optional.empty());
 

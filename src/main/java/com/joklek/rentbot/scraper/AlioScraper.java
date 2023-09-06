@@ -71,7 +71,6 @@ public class AlioScraper extends JsoupScraper {
         var moreInfo = exactPost.select(".data_moreinfo_b").stream()
                 .collect(Collectors.toMap(x -> x.select(".a_line_key").text(), x -> x.select(".a_line_val").text()));
 
-
         var rawAddress = Optional.ofNullable(moreInfo.get("Adresas"));
         Optional<String> district = Optional.empty();
         Optional<String> street = Optional.empty();
