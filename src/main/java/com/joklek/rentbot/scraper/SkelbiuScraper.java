@@ -41,7 +41,7 @@ public class SkelbiuScraper implements Scraper {
 
     private List<PostDto> getPosts(WebDriver driver) {
         driver.get(BASE_URL.toString());
-        var rawPosts = driver.findElements(By.cssSelector("#itemsList > ul > li.simpleAds:not(.passivatedItem)"));
+        var rawPosts = driver.findElements(By.cssSelector("div.standard-list-container > div > a.standard-list-item[data-item-id]"));
         if (rawPosts.isEmpty()) {
             LOGGER.error("Cant fetch posts, might be blocked");
             return List.of();
@@ -56,7 +56,7 @@ public class SkelbiuScraper implements Scraper {
 
     private Optional<PostDto> processItem(WebElement rawPost, WebDriver driver) {
         var originalWindow = driver.getWindowHandle();
-        var skelbiuId = rawPost.findElement(By.cssSelector("a.adsImage[data-item-id]")).getAttribute("data-item-id");
+        var skelbiuId = rawPost.getAttribute("data-item-id");
         if (posts.existsByExternalIdAndSource(skelbiuId, SkelbiuPost.SOURCE)) {
             return Optional.empty();
         }
