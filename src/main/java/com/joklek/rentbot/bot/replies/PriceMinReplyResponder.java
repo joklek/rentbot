@@ -2,6 +2,8 @@ package com.joklek.rentbot.bot.replies;
 
 import com.joklek.rentbot.bot.callbacks.ConfigCallback;
 import com.joklek.rentbot.bot.providers.ConfigInfoProvider;
+import com.joklek.rentbot.entities.SentMessage;
+import com.joklek.rentbot.entities.User;
 import com.joklek.rentbot.repo.SentMessageRepo;
 import com.joklek.rentbot.repo.UserRepo;
 import com.pengrad.telegrambot.TelegramBot;
@@ -36,24 +38,26 @@ public class PriceMinReplyResponder implements ReplyResponder {
     @Override
     public void handle(Message message, TelegramBot bot) {
         var text = message.text();
-
+        var oldConfigMessage = sentMessages.findFirstByChatIdAndTypeOrderByMessageIdDesc(message.chat().id(), ConfigCallback.NAME).orElse(null);
         var matcher = PRICE_PATTERN.matcher(text);
+        var user = users.getByTelegramId(message.chat().id());
 
         if (!matcher.matches()) {
             var sendMessage = new SendMessage(message.chat().id(), "Wrong input! Please enter a number.");
             sendMessage.replyToMessageId(message.messageId());
+            sendConfigMessage(message, bot, user, oldConfigMessage);
             bot.execute(sendMessage);
             return;
         }
         var match = matcher.group(1);
         var priceMin = new BigDecimal(match);
 
-        var user = users.getByTelegramId(message.chat().id());
         if (user.getPriceMax().isPresent()) {
             var priceMax = user.getPriceMax().get();
             if (priceMin.compareTo(priceMax) > 0) {
                 var sendMessage = new SendMessage(message.chat().id(), "Min price can't be bigger than max price.");
                 sendMessage.replyToMessageId(message.messageId());
+                sendConfigMessage(message, bot, user, oldConfigMessage);
                 bot.execute(sendMessage);
                 return;
             }
@@ -76,17 +80,16 @@ public class PriceMinReplyResponder implements ReplyResponder {
 
         users.save(user);
 
-        var configMessage = sentMessages.findFirstByChatIdAndTypeOrderByMessageIdDesc(message.chat().id(), ConfigCallback.NAME);
+        sendConfigMessage(message, bot, user, oldConfigMessage);
+    }
 
+    private void sendConfigMessage(Message message, TelegramBot bot, User user, SentMessage oldConfigMessage) {
         var newConfigMessage = new SendMessage(message.chat().id(), configInfoProvider.activeSettings(user));
         newConfigMessage.replyMarkup(configInfoProvider.showConfigPage(user));
         newConfigMessage.parseMode(ParseMode.Markdown);
-
         bot.execute(newConfigMessage);
-
-        if (configMessage.isPresent()) {
-            var lastConfigMessage = configMessage.get();
-            var deleteOldConfigMessage = new DeleteMessage(lastConfigMessage.getChatId(), lastConfigMessage.getMessageId());
+        if (oldConfigMessage != null) {
+            var deleteOldConfigMessage = new DeleteMessage(oldConfigMessage.getChatId(), oldConfigMessage.getMessageId());
             bot.execute(deleteOldConfigMessage);
         }
     }
