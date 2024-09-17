@@ -144,7 +144,8 @@ public class ConfigCallback implements CallbackResponder {
             bot.execute(sendMessage, new Callback<SendMessage, SendResponse>() {
                 @Override
                 public void onResponse(SendMessage request, SendResponse response) {
-                    System.out.printf("PriceMin question in Thread %d message: %s%n", response.message().chat().id(), response.message().messageId());
+                    var sentMessage = new SentMessage(message.chat().id(), response.message().messageId(), PriceMinReplyResponder.KEY);
+                    sentMessages.save(sentMessage);
                 }
 
                 @Override
@@ -181,7 +182,8 @@ public class ConfigCallback implements CallbackResponder {
             bot.execute(sendMessage, new Callback<SendMessage, SendResponse>() {
                 @Override
                 public void onResponse(SendMessage request, SendResponse response) {
-                    System.out.printf("PriceMax question in Thread %d message: %s%n", response.message().chat().id(), response.message().messageId());
+                    var sentMessage = new SentMessage(message.chat().id(), response.message().messageId(), PriceMaxReplyResponder.KEY);
+                    sentMessages.save(sentMessage);
                 }
 
                 @Override
@@ -218,7 +220,8 @@ public class ConfigCallback implements CallbackResponder {
             bot.execute(sendMessage, new Callback<SendMessage, SendResponse>() {
                 @Override
                 public void onResponse(SendMessage request, SendResponse response) {
-                    System.out.printf("RoomsMin question in Thread %d message: %s%n", response.message().chat().id(), response.message().messageId());
+                    var sentMessage = new SentMessage(message.chat().id(), response.message().messageId(), RoomsMinReplyResponder.KEY);
+                    sentMessages.save(sentMessage);
                 }
 
                 @Override
@@ -255,7 +258,8 @@ public class ConfigCallback implements CallbackResponder {
             bot.execute(sendMessage, new Callback<SendMessage, SendResponse>() {
                 @Override
                 public void onResponse(SendMessage request, SendResponse response) {
-                    System.out.printf("RoomsMax question in Thread %d message: %s%n", response.message().chat().id(), response.message().messageId());
+                    var sentMessage = new SentMessage(message.chat().id(), response.message().messageId(), RoomsMaxReplyResponder.KEY);
+                    sentMessages.save(sentMessage);
                 }
 
                 @Override
@@ -292,7 +296,8 @@ public class ConfigCallback implements CallbackResponder {
             bot.execute(sendMessage, new Callback<SendMessage, SendResponse>() {
                 @Override
                 public void onResponse(SendMessage request, SendResponse response) {
-                    System.out.printf("ConstructionMin question in Thread %d message: %s%n", response.message().chat().id(), response.message().messageId());
+                    var sentMessage = new SentMessage(message.chat().id(), response.message().messageId(), ConstructionMinReplyResponder.KEY);
+                    sentMessages.save(sentMessage);
                 }
 
                 @Override
@@ -329,7 +334,8 @@ public class ConfigCallback implements CallbackResponder {
             bot.execute(sendMessage, new Callback<SendMessage, SendResponse>() {
                 @Override
                 public void onResponse(SendMessage request, SendResponse response) {
-                    System.out.printf("FloorMin question in Thread %d message: %s%n", response.message().chat().id(), response.message().messageId());
+                    var sentMessage = new SentMessage(message.chat().id(), response.message().messageId(), FloorMinReplyResponder.KEY);
+                    sentMessages.save(sentMessage);
                 }
 
                 @Override
