@@ -1,7 +1,10 @@
 package com.joklek.rentbot.bot.providers;
 
+import com.joklek.rentbot.bot.callbacks.ConfigCallback;
 import com.joklek.rentbot.entities.User;
 import com.joklek.rentbot.repo.PostRepo;
+import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
+import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -39,5 +42,49 @@ public class ConfigInfoProvider {
                 user.getFloorMin().orElse(0),
                 showWithFees,
                 filterByDistrict);
+    }
+
+    public InlineKeyboardMarkup showConfigPage(User user) {
+        var keyboard = new InlineKeyboardMarkup();
+        var enabledText = String.format("Notifications: %s", user.getEnabled() ? "Enabled" : "Disabled");
+        var enabledButton = new InlineKeyboardButton(enabledText);
+        enabledButton.callbackData(ConfigCallback.Toggle.CALLBACK_KEY);
+
+        var priceMinText = String.format("Price from: %.0f€", user.getPriceMin().orElse(BigDecimal.ZERO));
+        var priceMinButton = new InlineKeyboardButton(priceMinText);
+        priceMinButton.callbackData(ConfigCallback.PriceMin.CALLBACK_KEY);
+
+        var priceMaxText = String.format("Price to: %.0f€", user.getPriceMax().orElse(BigDecimal.ZERO));
+        var priceMaxButton = new InlineKeyboardButton(priceMaxText);
+        priceMaxButton.callbackData(ConfigCallback.PriceMax.CALLBACK_KEY);
+
+        var roomsMinText = String.format("Min rooms: %d", user.getRoomsMin().orElse(0));
+        var roomsMinButton = new InlineKeyboardButton(roomsMinText);
+        roomsMinButton.callbackData(ConfigCallback.RoomsMin.CALLBACK_KEY);
+
+        var roomsMaxText = String.format("Max rooms: %d", user.getRoomsMax().orElse(0));
+        var roomsMaxButton = new InlineKeyboardButton(roomsMaxText);
+        roomsMaxButton.callbackData(ConfigCallback.RoomsMax.CALLBACK_KEY);
+
+        var constructionText = String.format("From construction year: %d", user.getYearMin().orElse(0));
+        var constructionButton = new InlineKeyboardButton(constructionText);
+        constructionButton.callbackData(ConfigCallback.ConstructionMin.CALLBACK_KEY);
+
+        var floorText = String.format("Min floor: %d", user.getFloorMin().orElse(0));
+        var floorButton = new InlineKeyboardButton(floorText);
+        floorButton.callbackData(ConfigCallback.FloorMin.CALLBACK_KEY);
+
+        var extraFeesText = String.format("Show with extra fees: %s", user.getShowWithFees() ? "Enabled" : "Disabled");
+        var extraFeesButton = new InlineKeyboardButton(extraFeesText);
+        extraFeesButton.callbackData(ConfigCallback.ToggleFees.CALLBACK_KEY);
+
+        keyboard.addRow(enabledButton);
+        keyboard.addRow(priceMinButton, priceMaxButton);
+        keyboard.addRow(roomsMinButton, roomsMaxButton);
+        keyboard.addRow(constructionButton);
+        keyboard.addRow(floorButton);
+        keyboard.addRow(extraFeesButton);
+
+        return keyboard;
     }
 }

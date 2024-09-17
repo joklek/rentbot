@@ -1,6 +1,5 @@
 package com.joklek.rentbot.bot.commands;
 
-import com.joklek.rentbot.bot.callbacks.ConfigCallback;
 import com.joklek.rentbot.bot.providers.ConfigInfoProvider;
 import com.joklek.rentbot.entities.User;
 import com.joklek.rentbot.repo.UserRepo;
@@ -29,13 +28,11 @@ public class ConfigCommand implements Command {
 
     private final UserRepo users;
     private final Validator validator;
-    private final ConfigCallback configCallback;
     private final ConfigInfoProvider configInfoProvider;
 
-    public ConfigCommand(UserRepo users, Validator validator, ConfigCallback configCallback, ConfigInfoProvider configInfoProvider) {
+    public ConfigCommand(UserRepo users, Validator validator, ConfigInfoProvider configInfoProvider) {
         this.users = users;
         this.validator = validator;
-        this.configCallback = configCallback;
         this.configInfoProvider = configInfoProvider;
     }
 
@@ -49,7 +46,7 @@ public class ConfigCommand implements Command {
         var telegramId = update.message().chat().id();
         var user = users.getByTelegramId(telegramId);
         if (payload.isBlank()) {
-            return List.of(inlineResponse(update, configInfoProvider.activeSettings(user), configCallback.showConfigPage(user)));
+            return List.of(inlineResponse(update, configInfoProvider.activeSettings(user), configInfoProvider.showConfigPage(user)));
         }
         var matcher = CONFIG_PATTERN.matcher(payload);
         if (!matcher.matches()) {
@@ -57,7 +54,7 @@ public class ConfigCommand implements Command {
         }
         try {
             updateSettings(user, matcher);
-            return List.of(inlineResponse(update, String.format("Config updated!\n\n%s", configInfoProvider.activeSettings(user)), configCallback.showConfigPage(user)));
+            return List.of(inlineResponse(update, String.format("Config updated!\n\n%s", configInfoProvider.activeSettings(user)), configInfoProvider.showConfigPage(user)));
         } catch (NumberFormatException e) {
             return simpleFinalResponse(update, String.format("%s\n%s", "Wrong input! Check if all numbers are written correctly", CONFIG_TEXT));
         } catch (ConstraintViolationException e) {
@@ -76,7 +73,7 @@ public class ConfigCommand implements Command {
     }
 
     private void updateSettings(User user, Matcher matcher) {
-        var isFirstTimeSettingUp = user.getPriceMin().isEmpty();
+        var isFirstTimeSettingUp = !user.isConfigured();
 
         var priceMin = new BigDecimal(matcher.group(1));
         var priceMax = new BigDecimal(matcher.group(2));

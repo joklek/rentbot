@@ -1,35 +1,48 @@
 package com.joklek.rentbot.bot;
 
+import com.joklek.rentbot.entities.SentMessage;
 import com.joklek.rentbot.entities.User;
+import com.joklek.rentbot.repo.SentMessageRepo;
 import com.joklek.rentbot.repo.UserRepo;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.Update;
+import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Optional;
 
+import static org.slf4j.LoggerFactory.getLogger;
+
 @Component
 public class UpdateListener {
+    private static final Logger LOGGER = getLogger(UpdateListener.class);
+
     private final CommandRecognizer commandRecognizer;
     private final CallbackRecognizer callbackRecognizer;
+    private final ReplyRecognizer replyRecognizer;
     private final UserRepo users;
+    private final SentMessageRepo replyableMessages;
 
-    public UpdateListener(CommandRecognizer commandRecognizer, CallbackRecognizer callbackRecognizer, UserRepo users) {
+    public UpdateListener(CommandRecognizer commandRecognizer, CallbackRecognizer callbackRecognizer, ReplyRecognizer replyRecognizer, UserRepo users, SentMessageRepo replyableMessages) {
         this.commandRecognizer = commandRecognizer;
         this.callbackRecognizer = callbackRecognizer;
+        this.replyRecognizer = replyRecognizer;
         this.users = users;
+        this.replyableMessages = replyableMessages;
     }
 
     public int process(TelegramBot bot, List<Update> updates) {
         ensureUsersInDb(updates);
 
         updates.forEach(update -> {
-            if (update.message() != null && update.message().text() != null) {
+            if (update.message() != null && update.message().text() != null && update.message().text().startsWith("/")) {
                 handleMessage(bot, update);
             } else if (update.callbackQuery() != null && update.callbackQuery().data() != null) {
                 handleCallback(bot, update);
+            } else if (update.message().replyToMessage() != null) {
+                handleReply(bot, update);
             }
         });
         return UpdatesListener.CONFIRMED_UPDATES_ALL;
@@ -55,6 +68,17 @@ public class UpdateListener {
         }
         var payload = callbackRecognizer.getPayload(callbackData);
         handler.handle(update, bot, payload);
+    }
+
+    private void handleReply(TelegramBot bot, Update update) {
+        var maybeType = replyableMessages.findByChatIdAndMessageId(update.message().chat().id(), update.message().replyToMessage().messageId())
+                .map(SentMessage::getType);
+        if (maybeType.isEmpty()) {
+            LOGGER.warn("Message not found in db");
+            return;
+        }
+        var type = maybeType.get();
+        replyRecognizer.getHandler(type).ifPresent(handler -> handler.handle(update.message(), bot));
     }
 
     private void ensureUsersInDb(List<Update> updates) {
