@@ -80,6 +80,7 @@ public class FloorMinReplyResponder implements ReplyResponder {
         if (oldConfigMessage != null) {
             var deleteOldConfigMessage = new DeleteMessage(oldConfigMessage.getChatId(), oldConfigMessage.getMessageId());
             bot.execute(deleteOldConfigMessage);
+            sentMessages.delete(oldConfigMessage);
         }
     }
 }
