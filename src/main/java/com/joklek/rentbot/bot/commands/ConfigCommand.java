@@ -1,19 +1,18 @@
 package com.joklek.rentbot.bot.commands;
 
+import com.joklek.rentbot.bot.callbacks.ConfigCallback;
+import com.joklek.rentbot.bot.providers.ConfigInfoProvider;
 import com.joklek.rentbot.entities.User;
-import com.joklek.rentbot.repo.PostRepo;
 import com.joklek.rentbot.repo.UserRepo;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.BaseRequest;
-import org.slf4j.Logger;
-import org.springframework.stereotype.Component;
-
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.ValidationException;
 import jakarta.validation.Validator;
+import org.slf4j.Logger;
+import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -29,13 +28,15 @@ public class ConfigCommand implements Command {
     private static final String CONFIG_TEXT = "Use this format to configure your settings:\n\n```\n/config <price_from> <price_to> <rooms_from> <rooms_to> <year_from> <min_floor> <show with fee?(yes/no)>\n```\nHere's how your message might look like:\n```\n/config 200 330 1 2 2000 2 yes\n\n```Here you'd search for flats between 200 and 330 eur, 1-2 rooms, built after 2000, starting on the second floor, and you're ok with seeing listings with agency fees\n";
 
     private final UserRepo users;
-    private final PostRepo posts;
     private final Validator validator;
+    private final ConfigCallback configCallback;
+    private final ConfigInfoProvider configInfoProvider;
 
-    public ConfigCommand(UserRepo users, PostRepo posts, Validator validator) {
+    public ConfigCommand(UserRepo users, Validator validator, ConfigCallback configCallback, ConfigInfoProvider configInfoProvider) {
         this.users = users;
-        this.posts = posts;
         this.validator = validator;
+        this.configCallback = configCallback;
+        this.configInfoProvider = configInfoProvider;
     }
 
     @Override
@@ -48,7 +49,7 @@ public class ConfigCommand implements Command {
         var telegramId = update.message().chat().id();
         var user = users.getByTelegramId(telegramId);
         if (payload.isBlank()) {
-            return simpleFinalResponse(update, String.format("%s\n%s", CONFIG_TEXT, activeSettings(user)));
+            return List.of(inlineResponse(update, configInfoProvider.activeSettings(user), configCallback.showConfigPage(user)));
         }
         var matcher = CONFIG_PATTERN.matcher(payload);
         if (!matcher.matches()) {
@@ -56,7 +57,7 @@ public class ConfigCommand implements Command {
         }
         try {
             updateSettings(user, matcher);
-            return simpleFinalResponse(update, String.format("Config updated!\n\n%s", activeSettings(user)));
+            return List.of(inlineResponse(update, String.format("Config updated!\n\n%s", configInfoProvider.activeSettings(user)), configCallback.showConfigPage(user)));
         } catch (NumberFormatException e) {
             return simpleFinalResponse(update, String.format("%s\n%s", "Wrong input! Check if all numbers are written correctly", CONFIG_TEXT));
         } catch (ConstraintViolationException e) {
@@ -108,34 +109,5 @@ public class ConfigCommand implements Command {
         }
 
         users.save(user);
-    }
-
-    private String activeSettings(User user) {
-        // TODO what when nothing configured?
-        var status = user.getEnabled() ? "enabled" : "disabled";
-        var showWithFees = user.getShowWithFees() ? "yes" : "no";
-        var filterByDistrict = user.getFilterByDistrict() ? "yes" : "no";
-        var weekBefore = LocalDateTime.now().minusDays(7);
-        var listingsDuringLastWeek = posts.getCountOfPostsForUserFromDays(user.getId(), weekBefore);
-        return String.format("*Your active settings:*\n" +
-                        "» *Notifications:* %1$s\n" +
-                        "» *Price:* %2$.0f-%3$.0f€\n" +
-                        "» *Rooms:* %4$d-%5$d\n" +
-                        "» *From construction year:* %6$d\n" +
-                        "» *Min floor:* %7$d\n" +
-                        "» *Show with extra fees:* %8$s\n" +
-                        "» *Filter by district:* %9$s (/districts to configure)\n" +
-                        "Current config:\n" +
-                        "`%10$s %2$.0f %3$.0f %4$d %5$d %6$d %7$d %8$s`\n\n" +
-                        "You would've seen %11$d posts from last week with these settings",
-                status,
-                user.getPriceMin().orElse(BigDecimal.ZERO), user.getPriceMax().orElse(BigDecimal.ZERO),
-                user.getRoomsMin().orElse(0), user.getRoomsMax().orElse(0),
-                user.getYearMin().orElse(0),
-                user.getFloorMin().orElse(0),
-                showWithFees,
-                filterByDistrict,
-                command(),
-                listingsDuringLastWeek);
     }
 }
