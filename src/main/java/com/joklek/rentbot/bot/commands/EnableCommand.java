@@ -2,7 +2,7 @@ package com.joklek.rentbot.bot.commands;
 
 import com.joklek.rentbot.repo.UserRepo;
 import com.pengrad.telegrambot.model.Update;
-import com.pengrad.telegrambot.request.BaseRequest;
+import com.pengrad.telegrambot.request.SendMessage;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Component;
 
@@ -23,7 +23,7 @@ public class EnableCommand implements Command {
 
     @Override
     @Transactional
-    public List<BaseRequest<?, ?>> handle(Update update, String payload) {
+    public List<SendMessage> handle(Update update, String payload) {
         var telegramId = update.message().chat().id();
         var user = users.getByTelegramId(telegramId);
         if (!user.isConfigured()) {

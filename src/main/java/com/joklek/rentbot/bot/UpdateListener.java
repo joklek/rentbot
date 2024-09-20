@@ -4,12 +4,16 @@ import com.joklek.rentbot.entities.SentMessage;
 import com.joklek.rentbot.entities.User;
 import com.joklek.rentbot.repo.SentMessageRepo;
 import com.joklek.rentbot.repo.UserRepo;
+import com.pengrad.telegrambot.Callback;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.Update;
+import com.pengrad.telegrambot.request.SendMessage;
+import com.pengrad.telegrambot.response.SendResponse;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -57,7 +61,19 @@ public class UpdateListener {
         var payload = commandRecognizer.getPayload(rawText);
         var messages = handler.handle(update, payload);
 
-        messages.forEach(bot::execute);
+        messages.forEach(request -> bot.execute(request, new Callback<SendMessage, SendResponse>() {
+            @Override
+            public void onResponse(SendMessage request, SendResponse response) {
+                if (!response.isOk()) {
+                    LOGGER.error("Failed to send message: {}", response.description());
+                }
+            }
+
+            @Override
+            public void onFailure(SendMessage request, IOException e) {
+                LOGGER.error("Failed to send message", e);
+            }
+        }));
     }
 
     private void handleCallback(TelegramBot bot, Update update) {

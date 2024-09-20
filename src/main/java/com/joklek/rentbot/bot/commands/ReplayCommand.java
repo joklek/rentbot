@@ -6,7 +6,7 @@ import com.joklek.rentbot.entities.User;
 import com.joklek.rentbot.repo.PostRepo;
 import com.joklek.rentbot.repo.UserRepo;
 import com.pengrad.telegrambot.model.Update;
-import com.pengrad.telegrambot.request.BaseRequest;
+import com.pengrad.telegrambot.request.SendMessage;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -34,7 +34,7 @@ public class ReplayCommand implements Command {
     }
 
     @Override
-    public List<BaseRequest<?, ?>> handle(Update update, String payload) {
+    public List<SendMessage> handle(Update update, String payload) {
         var telegramId = update.message().chat().id();
         var user = users.getByTelegramId(telegramId);
         if(!user.isConfigured()) {
@@ -47,7 +47,7 @@ public class ReplayCommand implements Command {
             return simpleFinalResponse(update, String.format("No posts found in the last %d days", POSTS_FROM_PREVIOUS_DAYS));
         }
 
-        var messages = new ArrayList<BaseRequest<?, ?>>(posts.stream()
+        var messages = new ArrayList<>(posts.stream()
                 .map(post -> postResponseCreator.createTelegramMessage(telegramId, post))
                 .toList());
         messages.add(simpleResponse(update, String.format("Replayed %d posts from last %d days", posts.size(), POSTS_FROM_PREVIOUS_DAYS)));

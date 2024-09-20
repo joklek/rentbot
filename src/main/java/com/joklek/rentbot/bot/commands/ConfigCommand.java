@@ -4,7 +4,7 @@ import com.joklek.rentbot.bot.providers.ConfigInfoProvider;
 import com.joklek.rentbot.entities.User;
 import com.joklek.rentbot.repo.UserRepo;
 import com.pengrad.telegrambot.model.Update;
-import com.pengrad.telegrambot.request.BaseRequest;
+import com.pengrad.telegrambot.request.SendMessage;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.ValidationException;
 import jakarta.validation.Validator;
@@ -42,7 +42,7 @@ public class ConfigCommand implements Command {
     }
 
     @Override
-    public List<BaseRequest<?, ?>> handle(Update update, String payload) {
+    public List<SendMessage> handle(Update update, String payload) {
         var telegramId = update.message().chat().id();
         var user = users.getByTelegramId(telegramId);
         if (payload.isBlank()) {

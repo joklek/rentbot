@@ -4,7 +4,7 @@ import com.joklek.rentbot.bot.providers.DistrictsPageProvider;
 import com.joklek.rentbot.repo.UserRepo;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
-import com.pengrad.telegrambot.request.BaseRequest;
+import com.pengrad.telegrambot.request.SendMessage;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -26,7 +26,7 @@ public class DistrictsCommand implements Command {
     }
 
     @Override
-    public List<BaseRequest<?, ?>> handle(Update update, String payload) {
+    public List<SendMessage> handle(Update update, String payload) {
         var telegramId = update.message().chat().id();
         var user = users.getByTelegramId(telegramId);
         String message;
