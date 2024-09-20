@@ -42,7 +42,7 @@ public class RoomsMinReplyResponder implements ReplyResponder {
         var user = users.getByTelegramId(message.chat().id());
 
         if (!matcher.matches()) {
-            var sendMessage = new SendMessage(message.chat().id(), "Wrong input! Please enter a number.");
+            var sendMessage = new SendMessage(message.chat().id(), "❌ Wrong input! Please enter a number");
             sendMessage.replyToMessageId(message.messageId());
             sendConfigMessage(message, bot, user, oldConfigMessage);
             bot.execute(sendMessage);
@@ -54,7 +54,7 @@ public class RoomsMinReplyResponder implements ReplyResponder {
         if (user.getRoomsMax().isPresent()) {
             var roomsMax = user.getRoomsMax().get();
             if (roomsMin > roomsMax) {
-                var sendMessage = new SendMessage(message.chat().id(), "Min rooms can't be bigger than max rooms.");
+                var sendMessage = new SendMessage(message.chat().id(), "❌ Min rooms can't be bigger than max rooms");
                 sendMessage.replyToMessageId(message.messageId());
                 sendConfigMessage(message, bot, user, oldConfigMessage);
                 bot.execute(sendMessage);
@@ -66,10 +66,8 @@ public class RoomsMinReplyResponder implements ReplyResponder {
         var results = validator.validate(user);
         if (!results.isEmpty()) {
             var firstViolation = results.stream().findFirst().get();
-            var errorPath = firstViolation.getPropertyPath().toString();
             var errorMessage = firstViolation.getMessage();
-            var badValue = firstViolation.getInvalidValue();
-            var errorDescription = String.format("There's an error in %s: %s, but was %s.", errorPath, errorMessage, badValue);
+            var errorDescription = String.format("❌ Min rooms %s", errorMessage);
 
             var sendMessage = new SendMessage(message.chat().id(), errorDescription);
             sendMessage.replyToMessageId(message.messageId());

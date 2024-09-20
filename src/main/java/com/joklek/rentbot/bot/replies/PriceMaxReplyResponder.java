@@ -43,7 +43,7 @@ public class PriceMaxReplyResponder implements ReplyResponder {
         var user = users.getByTelegramId(message.chat().id());
 
         if (!matcher.matches()) {
-            var sendMessage = new SendMessage(message.chat().id(), "Wrong input! Please enter a number.");
+            var sendMessage = new SendMessage(message.chat().id(), "❌ Wrong input! Please enter a number");
             sendMessage.replyToMessageId(message.messageId());
             sendConfigMessage(message, bot, user, oldConfigMessage);
             bot.execute(sendMessage);
@@ -55,7 +55,7 @@ public class PriceMaxReplyResponder implements ReplyResponder {
         if (user.getPriceMin().isPresent()) {
             var priceMin = user.getPriceMin().get();
             if (priceMax.compareTo(priceMin) < 0) {
-                var sendMessage = new SendMessage(message.chat().id(), "Max price can't be smaller than min price.");
+                var sendMessage = new SendMessage(message.chat().id(), "❌ Max price can't be smaller than min price");
                 sendMessage.replyToMessageId(message.messageId());
                 sendConfigMessage(message, bot, user, oldConfigMessage);
                 bot.execute(sendMessage);
@@ -67,10 +67,8 @@ public class PriceMaxReplyResponder implements ReplyResponder {
         var results = validator.validate(user);
         if (!results.isEmpty()) {
             var firstViolation = results.stream().findFirst().get();
-            var errorPath = firstViolation.getPropertyPath().toString();
             var errorMessage = firstViolation.getMessage();
-            var badValue = firstViolation.getInvalidValue();
-            var errorDescription = String.format("There's an error in %s: %s, but was %s.", errorPath, errorMessage, badValue);
+            var errorDescription = String.format("❌ Max price %s", errorMessage);
 
             var sendMessage = new SendMessage(message.chat().id(), errorDescription);
             sendMessage.replyToMessageId(message.messageId());

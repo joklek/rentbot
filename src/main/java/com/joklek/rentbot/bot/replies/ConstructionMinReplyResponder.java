@@ -14,7 +14,6 @@ import com.pengrad.telegrambot.request.SendMessage;
 import jakarta.validation.Validator;
 import org.springframework.stereotype.Component;
 
-import java.util.Optional;
 import java.util.regex.Pattern;
 
 @Component(ConstructionMinReplyResponder.KEY)
@@ -43,7 +42,7 @@ public class ConstructionMinReplyResponder implements ReplyResponder {
         var user = users.getByTelegramId(message.chat().id());
 
         if (!matcher.matches()) {
-            var sendMessage = new SendMessage(message.chat().id(), "Wrong input! Please enter a number.");
+            var sendMessage = new SendMessage(message.chat().id(), "❌ Wrong input! Please enter a number");
             sendMessage.replyToMessageId(message.messageId());
             sendConfigMessage(message, bot, user, oldConfigMessage);
             bot.execute(sendMessage);
@@ -56,10 +55,8 @@ public class ConstructionMinReplyResponder implements ReplyResponder {
         var results = validator.validate(user);
         if (!results.isEmpty()) {
             var firstViolation = results.stream().findFirst().get();
-            var errorPath = firstViolation.getPropertyPath().toString();
             var errorMessage = firstViolation.getMessage();
-            var badValue = firstViolation.getInvalidValue();
-            var errorDescription = String.format("There's an error in %s: %s, but was %s.", errorPath, errorMessage, badValue);
+            var errorDescription = String.format("❌ Construction year %s", errorMessage);
 
             var sendMessage = new SendMessage(message.chat().id(), errorDescription);
             sendMessage.replyToMessageId(message.messageId());

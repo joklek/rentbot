@@ -14,6 +14,12 @@ import java.time.LocalDateTime;
 public class ConfigInfoProvider {
 
     private final PostRepo posts;
+    private static final String SHARE_TEXT = """
+                🔗 Share your settings with other people by sharing this command:
+                ```
+                /config %1$.0f %2$.0f %3$d %4$d %5$d %6$d %7$s
+                ```
+                """;
 
     public ConfigInfoProvider(PostRepo posts) {
         this.posts = posts;
@@ -25,22 +31,24 @@ public class ConfigInfoProvider {
         var filterByDistrict = user.getFilterByDistrict() ? "yes" : "no";
         var weekBefore = LocalDateTime.now().minusDays(7);
         var listingsDuringLastWeek = posts.getCountOfPostsForUserFromDays(user.getId(), weekBefore);
-        var statsText = user.isConfigured() ? String.format("You would've seen %d posts from last week with these settings\n", listingsDuringLastWeek) : "";
+        var statsText = user.isConfigured() ? String.format("\uD83D\uDCCA You would've seen %d posts from last week with these settings.\n", listingsDuringLastWeek) : "";
+        var shareText = user.isConfigured() ?
+                String.format(SHARE_TEXT, user.getPriceMin().orElse(BigDecimal.ZERO),
+                        user.getPriceMax().orElse(BigDecimal.ZERO),
+                        user.getRoomsMin().orElse(0), user.getRoomsMax().orElse(0),
+                        user.getYearMin().orElse(0),
+                        user.getFloorMin().orElse(0),
+                        showWithFees
+                ) : "";
+
         return String.format(
                 """
-                %1$sShare your settings with other people by sharing this command:
-                ```
-                /config %2$.0f %3$.0f %4$d %5$d %6$d %7$d %8$s
-                ```
-                
-                » *Filter by district:* %9$s (/districts to configure)
+                %1$s
+                %2$s
+                🔄 *Filter by district*: %3$s (/districts to configure)
                 """,
                 statsText,
-                user.getPriceMin().orElse(BigDecimal.ZERO), user.getPriceMax().orElse(BigDecimal.ZERO),
-                user.getRoomsMin().orElse(0), user.getRoomsMax().orElse(0),
-                user.getYearMin().orElse(0),
-                user.getFloorMin().orElse(0),
-                showWithFees,
+                shareText,
                 filterByDistrict);
     }
 
