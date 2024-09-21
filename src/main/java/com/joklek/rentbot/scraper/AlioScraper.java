@@ -32,7 +32,7 @@ public class AlioScraper extends JsoupScraper {
         }
         var doc = maybeDoc.get();
 
-        var rawPosts = doc.select("#main_left_b > #main-content-center > div.result > a");
+        var rawPosts = doc.select("#main_left_b > #main-content-center > a.result");
 
         return rawPosts.stream()
                 .map(rawPost -> rawPost.attr("href"))
