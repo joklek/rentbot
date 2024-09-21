@@ -17,7 +17,7 @@ public class ConfigInfoProvider {
     private static final String SHARE_TEXT = """
                 🔗 Share your settings with other people by sharing this command:
                 ```
-                /config %1$s %2$s %3$s %4$s %5$s %6$s %7$s
+                /config %1$s %2$s %3$s %4$s %5$s %6$s %7$s %8$s
                 ```
                 """;
 
@@ -38,6 +38,7 @@ public class ConfigInfoProvider {
                         user.getPriceMax().map(x -> String.format("%.0f", x)).orElse("any"),
                         user.getRoomsMin().map(Object::toString).orElse("any"),
                         user.getRoomsMax().map(Object::toString).orElse("any"),
+                        user.getAreaMin().orElse(0),
                         user.getYearMin().map(Object::toString).orElse("any"),
                         user.getFloorMin().map(Object::toString).orElse("any"),
                         showWithFees
@@ -87,6 +88,10 @@ public class ConfigInfoProvider {
         var floorButton = new InlineKeyboardButton(floorText);
         floorButton.callbackData(ConfigCallback.FloorMin.CALLBACK_KEY);
 
+        var areaText = String.format("Min area: %s m²", user.getAreaMin().map(Object::toString).orElse("any"));
+        var areaButton = new InlineKeyboardButton(areaText);
+        areaButton.callbackData(ConfigCallback.AreaMin.CALLBACK_KEY);
+
         var extraFeesText = String.format("Show with extra fees: %s", user.getShowWithFees() ? "Enabled" : "Disabled");
         var extraFeesButton = new InlineKeyboardButton(extraFeesText);
         extraFeesButton.callbackData(ConfigCallback.ToggleFees.CALLBACK_KEY);
@@ -95,7 +100,7 @@ public class ConfigInfoProvider {
         keyboard.addRow(priceMinButton, priceMaxButton);
         keyboard.addRow(roomsMinButton, roomsMaxButton);
         keyboard.addRow(constructionButton);
-        keyboard.addRow(floorButton);
+        keyboard.addRow(floorButton, areaButton);
         keyboard.addRow(extraFeesButton);
 
         return keyboard;

@@ -39,6 +39,10 @@ public class User {
     @Max(100)
     private Integer roomsMax;
 
+    @Min(0)
+    @Max(1_000)
+    private Integer areaMin;
+
     @Min(1000)
     @Max(3000)
     private Integer yearMin;
@@ -71,7 +75,7 @@ public class User {
 
     public boolean isConfigured() {
         return getPriceMin().isPresent() || getPriceMax().isPresent()
-                || getRoomsMin().isPresent() || getRoomsMax().isPresent()
+                || getRoomsMin().isPresent() || getRoomsMax().isPresent() || getAreaMin().isPresent()
                 || getYearMin().isPresent() || getFloorMin().isPresent();
     }
 
@@ -126,6 +130,14 @@ public class User {
 
     public void setRoomsMax(Integer roomsTo) {
         this.roomsMax = roomsTo;
+    }
+
+    public Optional<Integer> getAreaMin() {
+        return Optional.ofNullable(areaMin);
+    }
+
+    public void setAreaMin(Integer areaMin) {
+        this.areaMin = areaMin;
     }
 
     public Optional<Integer> getYearMin() {
