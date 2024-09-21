@@ -30,6 +30,7 @@ public class SkelbiuScraper implements Scraper {
 
     @Override
     public List<PostDto> getLatestPosts() {
+        LOGGER.info("SkelbiuScraper.getLatestPosts");
         var options = new FirefoxOptions().addArguments("-headless");
         var driver = new FirefoxDriver(options);
         try {
@@ -74,8 +75,9 @@ public class SkelbiuScraper implements Scraper {
                 .flatMap(ScraperHelper::parseBigDecimal);
 
         var thisPage = driver.findElement(By.cssSelector("html"));
-        var moreInfo = thisPage.findElements(By.className("detail")).stream()
-                .collect(Collectors.toMap(x -> By.className("title").findElement(x).getText(), x -> By.className("value").findElement(x).getText()));
+        var moreInfo = thisPage.findElements(By.cssSelector(".details-row:not(.features-list)")).stream()
+                .collect(Collectors.toMap(x -> By.tagName("label").findElement(x).getText(),
+                        x -> By.tagName("span").findElement(x).getText()));
 
         var district = Optional.ofNullable(moreInfo.get("Mikrorajonas:"));
         var street = Optional.ofNullable(moreInfo.get("Gatvė:"));
