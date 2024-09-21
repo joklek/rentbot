@@ -20,6 +20,7 @@ public interface PostRepo extends JpaRepository<Post, Long> {
             "AND ((p.rooms >= u.roomsMin AND p.rooms <= u.roomsMax) OR p.rooms IS NULL) " +
             "AND ((p.constructionYear >= u.yearMin) OR p.constructionYear IS NULL) " +
             "AND ((p.floor >= u.floorMin) OR p.floor IS NULL) " +
+            "AND ((p.area >= u.areaMin) OR p.area IS NULL) " +
             "AND (u.showWithFees = true OR p.isWithFees = false) " +
             "AND (u.filterByDistrict = false OR (" +
             "   d.name = p.district OR " +
@@ -36,6 +37,7 @@ public interface PostRepo extends JpaRepository<Post, Long> {
             "AND ((p.rooms >= u.roomsMin AND p.rooms <= u.roomsMax) OR p.rooms IS NULL) " +
             "AND ((p.constructionYear >= u.yearMin) OR p.constructionYear IS NULL) " +
             "AND ((p.floor >= u.floorMin) OR p.floor IS NULL) " +
+            "AND ((p.area >= u.areaMin) OR p.area IS NULL) " +
             "AND (u.showWithFees = true OR p.isWithFees = false) " +
             "AND (u.filterByDistrict = false OR (" +
             "   d.name = p.district OR " +

@@ -36,6 +36,7 @@ public class ConfigInfoProvider {
                 String.format(SHARE_TEXT, user.getPriceMin().orElse(BigDecimal.ZERO),
                         user.getPriceMax().orElse(BigDecimal.ZERO),
                         user.getRoomsMin().orElse(0), user.getRoomsMax().orElse(0),
+                        user.getAreaMin().orElse(0),
                         user.getYearMin().orElse(0),
                         user.getFloorMin().orElse(0),
                         showWithFees
@@ -82,6 +83,10 @@ public class ConfigInfoProvider {
         var floorButton = new InlineKeyboardButton(floorText);
         floorButton.callbackData(ConfigCallback.FloorMin.CALLBACK_KEY);
 
+        var areaText = String.format("Min area m²: %d", user.getAreaMin().orElse(0));
+        var areaButton = new InlineKeyboardButton(areaText);
+        areaButton.callbackData(ConfigCallback.AreaMin.CALLBACK_KEY);
+
         var extraFeesText = String.format("Show with extra fees: %s", user.getShowWithFees() ? "Enabled" : "Disabled");
         var extraFeesButton = new InlineKeyboardButton(extraFeesText);
         extraFeesButton.callbackData(ConfigCallback.ToggleFees.CALLBACK_KEY);
@@ -90,7 +95,7 @@ public class ConfigInfoProvider {
         keyboard.addRow(priceMinButton, priceMaxButton);
         keyboard.addRow(roomsMinButton, roomsMaxButton);
         keyboard.addRow(constructionButton);
-        keyboard.addRow(floorButton);
+        keyboard.addRow(floorButton, areaButton);
         keyboard.addRow(extraFeesButton);
 
         return keyboard;
