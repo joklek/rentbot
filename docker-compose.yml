@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   rentbot:
     image: rentbot:latest
