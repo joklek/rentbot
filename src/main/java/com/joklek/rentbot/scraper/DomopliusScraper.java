@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 @Component
 public class DomopliusScraper extends JsoupScraper {
-    private static final URI BASE_URL = URI.create("https://m.domoplius.lt/skelbimai/butai?action_type=3&address_1=461&sell_price_from=&sell_price_to=&qt=");
+    private static final URI BASE_URL = URI.create("https://m.domoplius.lt/skelbimai/butai?action_type=1&address_1=461&category=1&order_by=1&order_direction=DESC");
 
     private final PostRepo posts;
 

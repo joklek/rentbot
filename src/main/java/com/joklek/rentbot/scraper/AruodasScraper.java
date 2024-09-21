@@ -21,7 +21,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 @Component
 public class AruodasScraper implements Scraper {
     private static final Logger LOGGER = getLogger(AruodasScraper.class);
-    private static final URI BASE_URL = URI.create("https://m.aruodas.lt/?obj=4&FRegion=461&FDistrict=1&FOrder=AddDate&from_search=1&detailed_search=1&FShowOnly=FOwnerDbId0%2CFOwnerDbId1&act=search");
+    private static final URI BASE_URL = URI.create("https://m.aruodas.lt/butai/vilniuje/?change_region=1&FOrder=AddDate");
 
     private final PostRepo posts;
 
@@ -75,6 +75,10 @@ public class AruodasScraper implements Scraper {
         var district = rawAddress.flatMap(x -> x.size() >= 2 ? Optional.of(x.get(1)) : Optional.empty());
         var street = rawAddress.flatMap(x -> x.size() >= 3 ? Optional.of(x.get(2)) : Optional.empty());
 
+        var price = selectByCss(driver, "span.price-eur")
+                .map(rawPrice -> rawPrice.replace("€", "").replace(" ", "").trim())
+                .flatMap(ScraperHelper::parseBigDecimal);
+
         var objDetailsRaw = driver.findElements(By.cssSelector(".obj-details > :not(hr)")).stream().toList();
         var moreInfo = objDetailsRaw.stream().collect(Collectors
                         .groupingBy(x -> objDetailsRaw.indexOf(x) / 2)).values().stream()
@@ -92,10 +96,6 @@ public class AruodasScraper implements Scraper {
         var area = Optional.ofNullable(moreInfo.get("Plotas:"))
                 .map(x -> x.replace(" m²", ""))
                 .map(x -> x.replace(",", "."))
-                .flatMap(ScraperHelper::parseBigDecimal);
-        var price = Optional.ofNullable(moreInfo.get("Kaina mėn.:"))
-                .map(x -> x.replace("€", ""))
-                .map(x -> x.replace(" ", ""))
                 .flatMap(ScraperHelper::parseBigDecimal);
         var rooms = Optional.ofNullable(moreInfo.get("Kambarių sk.:"))
                 .flatMap(ScraperHelper::parseInt);

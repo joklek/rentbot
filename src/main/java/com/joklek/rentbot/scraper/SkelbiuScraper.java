@@ -20,7 +20,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 @Component
 public class SkelbiuScraper implements Scraper {
     private static final Logger LOGGER = getLogger(SkelbiuScraper.class);
-    private static final URI BASE_URL = URI.create("https://www.skelbiu.lt/skelbimai/?cities=465&category_id=322&cities=465&district=0&cost_min=&cost_max=&status=0&space_min=&space_max=&rooms_min=&rooms_max=&building=0&year_min=&year_max=&floor_min=&floor_max=&floor_type=0&user_type=0&type=1&orderBy=1&import=2&keywords=");
+    private static final URI BASE_URL = URI.create("https://www.skelbiu.lt/skelbimai/?autocompleted=1&keywords=&cost_min=&cost_max=&type=0&district=0&quarter=0&streets=0&ignorestreets=0&ignore_district=0&space_min=&space_max=&rooms_min=&rooms_max=&year_min=&year_max=&floor_min=&floor_max=&price_per_unit_min=&price_per_unit_max=&searchAddress=&cities=465&distance=0&mainCity=1&search=1&category_id=41&user_type=0&ad_since_min=0&ad_since_max=0&visited_page=1&orderBy=1&detailsSearch=1");
 
     private final PostRepo posts;
 

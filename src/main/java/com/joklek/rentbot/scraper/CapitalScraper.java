@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 @Component
 public class CapitalScraper extends JsoupScraper {
-    private static final URI BASE_URL = URI.create("https://www.capital.lt/lt/nekilnojamas-turtas/butai-nuomai/vilniaus-m-sav/vilnius");
+    private static final URI BASE_URL = URI.create("https://www.capital.lt/lt/nekilnojamas-turtas/butai-pardavimui/vilniaus-m-sav/vilnius");
 
     private final PostRepo posts;
 
@@ -57,7 +57,7 @@ public class CapitalScraper extends JsoupScraper {
         var price = Optional.ofNullable(exactPost.select(".realty-price-info > strong").first())
                 .map(Element::text)
                 .map(priceRaw -> priceRaw.trim()
-                        .replace("Nuoma:", "")
+                        .replace("Kaina:", "")
                         .replace(" ", "")
                         .replace(",", "")
                         .replace("€", ""))

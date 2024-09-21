@@ -49,7 +49,7 @@ public class ScheduledScraper {
         this.random = new Random();
     }
 
-    @Scheduled(fixedRate = 5, initialDelay = 0L, timeUnit = TimeUnit.MINUTES)
+    @Scheduled(fixedRate = 15, initialDelay = 0L, timeUnit = TimeUnit.MINUTES)
     public void scrapePosts() throws InterruptedException {
         if (isNightTime()) {
             return;

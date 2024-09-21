@@ -24,11 +24,11 @@ public class User {
     private boolean enabled;
 
     @Min(0)
-    @Max(100000)
+    @Max(3_000_000)
     private BigDecimal priceMin;
 
     @Min(0)
-    @Max(100000)
+    @Max(3_000_000)
     private BigDecimal priceMax;
 
     @Min(0)

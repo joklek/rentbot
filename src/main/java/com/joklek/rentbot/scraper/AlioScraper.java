@@ -86,7 +86,7 @@ public class AlioScraper extends JsoupScraper {
                 .flatMap(ScraperHelper::parseInt);
         var totalFloors = Optional.ofNullable(moreInfo.get("Aukštų skaičius pastate"))
                 .flatMap(ScraperHelper::parseInt);
-        var area = Optional.ofNullable(moreInfo.get("Buto plotas"))
+        var area = Optional.ofNullable(moreInfo.get("Būsto plotas"))
                 .map(areaRaw -> areaRaw.trim().split(" ")[0])
                 .flatMap(ScraperHelper::parseBigDecimal);
         var price = Optional.ofNullable(moreInfo.get("Kaina, €"))

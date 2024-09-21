@@ -9,5 +9,5 @@ services:
     volumes:
       - ./data:/app/data
     environment:
-      SPRING_DATASOURCE_URL: jdbc:sqlite:/app/data/rentbot.db
+      SPRING_DATASOURCE_URL: jdbc:sqlite:/app/data/buybot.db
       TELEGRAM_TOKEN: ${TELEGRAM_TOKEN}

@@ -20,7 +20,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 @Component
 public class KampasScraper implements Scraper {
-    private static final URI BASE_URL = create("https://www.kampas.lt/api/classifieds/search-new?query=%7B%22municipality%22%3A%2258%22%2C%22settlement%22%3A19220%2C%22page%22%3A1%2C%22sort%22%3A%22new%22%2C%22section%22%3A%22bustas-nuomai%22%2C%22type%22%3A%22flat%22%7D");
+    private static final URI BASE_URL = create("https://www.kampas.lt/api/classifieds/search-new?query=%7B%22sort%22%3A%22new%22%2C%22municipality%22%3A58%2C%22settlement%22%3A19220%2C%22type%22%3A%22flat%22%2C%22taxonomyslug%22%3A%22sale%22%7D");
     private static final String DEFAULT_USER_AGENT = "Mozilla/5.0 (Android 9; Mobile; rv:103.0) Gecko/103.0 Firefox/103.0";
     private static final Logger LOGGER = getLogger(KampasScraper.class);
 
