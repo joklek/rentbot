@@ -21,20 +21,20 @@ config - Configure bot settings
 districts - Configure district settings
 replay - replay posts from last 2 days
 ```
-Once you set-up bot, you should have your bot's Telegram **API key**.
+Once you setup bot, you should have your bot's Telegram **API key**.
 
-2. [Install Java](https://adoptium.net/download/).
+2. Set up the secrets 
+Add a `.env` file in the root of the project with the following content:
+```
+TELEGRAM_TOKEN=your_token
+```
 
 3. Build it
-```
-git clone https://github.com/joklek/rentbot.git
-cd rentbot
-mvnw -DskipTests=true package
+```shell
+docker compose build
 ```
 
-4. Run it as you prefer, I have script like this
-
-```sh
-@echo off
-java -D"TELEGRAM_TOKEN=API_TOKEN" -jar rentbot-0.0.1-SNAPSHOT.jar >> OUTPUT.txt 2>&1
+3. Run it
+```shell
+docker compose up
 ```
