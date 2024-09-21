@@ -30,7 +30,6 @@ public class SkelbiuScraper implements Scraper {
 
     @Override
     public List<PostDto> getLatestPosts() {
-        LOGGER.info("SkelbiuScraper.getLatestPosts");
         var options = new FirefoxOptions().addArguments("-headless");
         var driver = new FirefoxDriver(options);
         try {
