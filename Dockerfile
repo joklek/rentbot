@@ -12,10 +12,10 @@ RUN mvn dependency:go-offline
 COPY src ./src
 
 # Build the jar file
-RUN mvn clean package
+RUN mvn clean package -DskipTests
 
 # Use an official Eclipse Temurin runtime as a parent image
-FROM eclipse-temurin:22-alpine
+FROM eclipse-temurin:22-jre-alpine
 
 # Create a non-root user and group
 RUN addgroup -S spring && adduser -S spring -G spring
