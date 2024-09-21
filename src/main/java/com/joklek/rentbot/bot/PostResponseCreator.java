@@ -1,6 +1,7 @@
 package com.joklek.rentbot.bot;
 
 import com.joklek.rentbot.entities.Post;
+import com.pengrad.telegrambot.model.LinkPreviewOptions;
 import com.pengrad.telegrambot.model.request.ParseMode;
 import com.pengrad.telegrambot.request.SendMessage;
 import org.springframework.stereotype.Component;
@@ -58,8 +59,8 @@ public class PostResponseCreator {
         }
 
         return new SendMessage(telegramId, sb.toString())
-                .parseMode(ParseMode.Markdown) // TODO migrate to V2 markdown and see why it don't work
-                .disableWebPagePreview(false);
+                .parseMode(ParseMode.Markdown)
+                .linkPreviewOptions(new LinkPreviewOptions().isDisabled(true));
     }
 
     private Optional<String> getAddress(Post post) {
