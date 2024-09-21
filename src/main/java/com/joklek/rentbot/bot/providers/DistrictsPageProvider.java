@@ -27,7 +27,7 @@ public class DistrictsPageProvider {
         var keyboard = new InlineKeyboardMarkup();
         var allDistricts = districts.findAllByOrderByNameAsc();
         var userDistricts = districts.findByUsers(user);
-        var pageSize = 6;
+        var pageSize = 9;
         var rowSize = 3;
         var pageCount = allDistricts.size() / pageSize;
         var nextPage = Math.min(page + 1, pageCount);
@@ -37,6 +37,7 @@ public class DistrictsPageProvider {
 
         var firstRowDistricts = allDistricts.stream().skip(fromIndex).limit(rowSize).toList();
         var secondRowDistricts = allDistricts.stream().skip(fromIndex + rowSize).limit(rowSize).toList();
+        var thirdRowDistricts = allDistricts.stream().skip(fromIndex + rowSize + rowSize).limit(rowSize).toList();
 
         var firstRowButtons = firstRowDistricts.stream().map(district -> {
             var name = userDistricts.contains(district) ? String.format("✅%s", district.getName()) : district.getName();
@@ -45,6 +46,12 @@ public class DistrictsPageProvider {
             return districtButton;
         }).toList();
         var secondRowButtons = secondRowDistricts.stream().map(district -> {
+            var name = userDistricts.contains(district) ? String.format("✅%s", district.getName()) : district.getName();
+            var districtButton = new InlineKeyboardButton(name);
+            districtButton.callbackData(DistrictsCallback.Toggle.callbackKey(district.getId()));
+            return districtButton;
+        }).toList();
+        var thirdRowButtons = thirdRowDistricts.stream().map(district -> {
             var name = userDistricts.contains(district) ? String.format("✅%s", district.getName()) : district.getName();
             var districtButton = new InlineKeyboardButton(name);
             districtButton.callbackData(DistrictsCallback.Toggle.callbackKey(district.getId()));
@@ -61,6 +68,7 @@ public class DistrictsPageProvider {
         turnOffButton.callbackData(DistrictsCallback.TurnOff.CALLBACK_KEY);
         keyboard.addRow(firstRowButtons.toArray(InlineKeyboardButton[]::new));
         keyboard.addRow(secondRowButtons.toArray(InlineKeyboardButton[]::new));
+        keyboard.addRow(thirdRowButtons.toArray(InlineKeyboardButton[]::new));
         keyboard.addRow(prevButton, nextButton, resetButton, turnOffButton); // control row
         return keyboard;
     }

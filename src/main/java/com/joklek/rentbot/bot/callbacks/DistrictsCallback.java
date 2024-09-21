@@ -253,7 +253,7 @@ public class DistrictsCallback implements CallbackResponder {
             }
             users.save(user);
 
-            var page = districts.findAllByOrderByNameAsc().stream().map(District::getName).toList().indexOf(district.getName()) / 6;
+            var page = districts.findAllByOrderByNameAsc().stream().map(District::getName).toList().indexOf(district.getName()) / 9;
 
             var updateMarkupRequest = new EditMessageReplyMarkup(update.callbackQuery().maybeInaccessibleMessage().chat().id(), update.callbackQuery().maybeInaccessibleMessage().messageId());
             updateMarkupRequest.replyMarkup(districtsPageProvider.showPagedDistricts(user, page)); // TODO how to refresh properly?
