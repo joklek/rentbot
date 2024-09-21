@@ -5,7 +5,8 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.WindowType;
-import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxOptions;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
@@ -29,7 +30,8 @@ public class SkelbiuScraper implements Scraper {
 
     @Override
     public List<PostDto> getLatestPosts() {
-        var driver = new ChromeDriver();
+        var options = new FirefoxOptions().addArguments("-headless");
+        var driver = new FirefoxDriver(options);
         try {
             return getPosts(driver);
         } catch (Exception e) {

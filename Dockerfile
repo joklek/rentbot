@@ -17,6 +17,9 @@ RUN mvn clean package -DskipTests
 # Use an official Eclipse Temurin runtime as a parent image
 FROM eclipse-temurin:22-jre-alpine
 
+# Install Firefox
+RUN apk --update --upgrade add firefox && apk cache clean
+
 # Create a non-root user and group
 RUN addgroup -S spring && adduser -S spring -G spring
 USER spring:spring

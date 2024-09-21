@@ -15,7 +15,6 @@ public class ScheduleConfig {
 
     @PostConstruct
     public void initScraper() {
-        WebDriverManager.chromedriver().setup();
-        System.setProperty(ChromeDriverService.CHROME_DRIVER_SILENT_OUTPUT_PROPERTY, "true");
+        WebDriverManager.firefoxdriver().setup();
     }
 }
