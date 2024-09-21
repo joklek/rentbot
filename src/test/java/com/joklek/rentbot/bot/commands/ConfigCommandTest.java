@@ -6,6 +6,8 @@ import com.joklek.rentbot.repo.UserRepo;
 import com.pengrad.telegrambot.model.Chat;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Update;
+import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
+import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -58,32 +60,21 @@ class ConfigCommandTest extends IntegrationTest {
         var response = command.handle(update, emptyPayload);
 
         var expectedText = """
-                Use this format to configure your settings:
-
-                ```
-                /config <price_from> <price_to> <rooms_from> <rooms_to> <year_from> <min_floor> <show with fee?(yes/no)>
-                ```
-                Here's how your message might look like:
-                ```
-                /config 200 330 1 2 2000 2 yes
-                                
-                ```Here you'd search for flats between 200 and 330 eur, 1-2 rooms, built after 2000, starting on the second floor, and you're ok with seeing listings with agency fees
-
-                *Your active settings:*
-                » *Notifications:* disabled
-                » *Price:* 0-0€
-                » *Rooms:* 0-0
-                » *From construction year:* 0
-                » *Min floor:* 0
-                » *Show with extra fees:* no
-                » *Filter by district:* no (/districts to configure)
-                Current config:
-                `/config 0 0 0 0 0 0 no`
-                                
-                You would've seen 0 posts from last week with these settings""";
+                
+                
+                🔄 *Filter by district*: no (/districts to configure)
+                """;
 
         assertThat(response).hasSize(1);
-        assertThat(response.get(0).getParameters()).containsEntry("text", expectedText);
+        var message = response.get(0);
+        assertThat(message.getParameters()).containsEntry("text", expectedText);
+        assertThat(message.getParameters()).containsEntry("parse_mode", "Markdown");
+        assertThat(message.getParameters()).hasEntrySatisfying("reply_markup", new Condition<>() {
+            @Override
+            public boolean matches(Object value) {
+                return value instanceof InlineKeyboardMarkup;
+            }
+        });
     }
 
     @Test
@@ -93,21 +84,24 @@ class ConfigCommandTest extends IntegrationTest {
         // Has expected text
         var expectedText = """
                 Config updated!
-
-                *Your active settings:*
-                » *Notifications:* enabled
-                » *Price:* 200-330€
-                » *Rooms:* 1-2
-                » *From construction year:* 2000
-                » *Min floor:* 2
-                » *Show with extra fees:* yes
-                » *Filter by district:* no (/districts to configure)
-                Current config:
-                `/config 200 330 1 2 2000 2 yes`
-
-                You would've seen 0 posts from last week with these settings""";
+                
+                📊 You would've seen 0 posts from last week with these settings.
+                
+                🔗 Share your settings with other people by sharing this command:
+                ```
+                /config 200 330 1 2 2000 2 yes
+                ```
+                
+                🔄 *Filter by district*: no (/districts to configure)
+                """;
         assertThat(response).hasSize(1);
         assertThat(response.get(0).getParameters()).containsEntry("text", expectedText);
+        assertThat(response.get(0).getParameters()).hasEntrySatisfying("reply_markup", new Condition<>() {
+            @Override
+            public boolean matches(Object value) {
+                return value instanceof InlineKeyboardMarkup;
+            }
+        });
 
         var user = users.findByTelegramId(CHAT_ID).get();
         // Auto enables user on first config change
@@ -132,21 +126,24 @@ class ConfigCommandTest extends IntegrationTest {
         // Has expected text
         var expectedText = """
                 Config updated!
-   
-                *Your active settings:*
-                » *Notifications:* disabled
-                » *Price:* 200-330€
-                » *Rooms:* 1-2
-                » *From construction year:* 2000
-                » *Min floor:* 2
-                » *Show with extra fees:* yes
-                » *Filter by district:* no (/districts to configure)
-                Current config:
-                `/config 200 330 1 2 2000 2 yes`
-
-                You would've seen 0 posts from last week with these settings""";
+                
+                📊 You would've seen 0 posts from last week with these settings.
+                
+                🔗 Share your settings with other people by sharing this command:
+                ```
+                /config 200 330 1 2 2000 2 yes
+                ```
+                
+                🔄 *Filter by district*: no (/districts to configure)
+                """;
         assertThat(response).hasSize(1);
         assertThat(response.get(0).getParameters()).containsEntry("text", expectedText);
+        assertThat(response.get(0).getParameters()).hasEntrySatisfying("reply_markup", new Condition<>() {
+            @Override
+            public boolean matches(Object value) {
+                return value instanceof InlineKeyboardMarkup;
+            }
+        });
 
         var user = users.findByTelegramId(CHAT_ID).get();
         // Does not change notification flag
@@ -170,21 +167,24 @@ class ConfigCommandTest extends IntegrationTest {
         // Has expected text
         var expectedText = """
                 Config updated!
-
-                *Your active settings:*
-                » *Notifications:* enabled
-                » *Price:* 200-330€
-                » *Rooms:* 1-2
-                » *From construction year:* 2000
-                » *Min floor:* 2
-                » *Show with extra fees:* no
-                » *Filter by district:* no (/districts to configure)
-                Current config:
-                `/config 200 330 1 2 2000 2 no`
-
-                You would've seen 0 posts from last week with these settings""";
+                
+                📊 You would've seen 0 posts from last week with these settings.
+                
+                🔗 Share your settings with other people by sharing this command:
+                ```
+                /config 200 330 1 2 2000 2 no
+                ```
+                
+                🔄 *Filter by district*: no (/districts to configure)
+                """;
         assertThat(response).hasSize(1);
         assertThat(response.get(0).getParameters()).containsEntry("text", expectedText);
+        assertThat(response.get(0).getParameters()).hasEntrySatisfying("reply_markup", new Condition<>() {
+            @Override
+            public boolean matches(Object value) {
+                return value instanceof InlineKeyboardMarkup;
+            }
+        });
 
         var user = users.findByTelegramId(CHAT_ID).get();
         assertThat(user.getShowWithFees()).isFalse();
