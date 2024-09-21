@@ -27,8 +27,5 @@ WORKDIR /app
 # Copy the jar file from the build stage
 COPY --from=build /app/target/rentbot-0.0.1-SNAPSHOT.jar /app/rentbot.jar
 
-# Expose the port the application runs on
-EXPOSE 8080
-
 # Run the jar file
 ENTRYPOINT ["java", "-jar", "rentbot.jar"]
