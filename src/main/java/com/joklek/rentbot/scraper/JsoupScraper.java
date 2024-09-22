@@ -12,7 +12,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 public abstract class JsoupScraper implements Scraper {
     private static final Logger LOGGER = getLogger(JsoupScraper.class);
-    private static final String DEFAULT_USER_AGENT = "Mozilla/5.0 (Android 9; Mobile; rv:103.0) Gecko/103.0 Firefox/103.0";
+    private static final String DEFAULT_USER_AGENT = "Mozilla/5.0 (Android 14; Mobile; rv:129.0) Gecko/129.0 Firefox/129.0";
 
     protected Optional<Document> getDocument(URI link) {
         try {
