@@ -19,9 +19,6 @@ public class PostEntityConverter {
         post.setSource(postDto.getSource());
         post.setExternalId(postDto.getExternalId());
         post.setLink(postDto.getLink().toString());
-        postDto.getPhone()
-                .map(this::getPhone)
-                .ifPresent(post::setPhone);
         postDto.getDescription()
                 .filter(x -> !x.isBlank())
                 .map(x -> x.replace("<br>", "\n")
@@ -58,19 +55,6 @@ public class PostEntityConverter {
         post.setCreatedAt(LocalDateTime.now());
 
         return post;
-    }
-
-    private String getPhone(String phone) {
-        phone = phone.replace(" ", "");
-        if (phone.startsWith("00")) {
-            phone = phone.replaceFirst("00", "");
-        }
-        if (phone.startsWith("370")) {
-            phone = "+" + phone;
-        } else if (phone.startsWith("86")) {
-            phone = phone.replaceFirst("86", "+3706");
-        }
-        return phone.trim();
     }
 
     private String getHash(String description) {

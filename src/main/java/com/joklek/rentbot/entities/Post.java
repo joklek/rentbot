@@ -19,7 +19,6 @@ public class Post {
     @NotNull
     private String source;
     private String link;
-    private String phone;
     @NotNull
     private LocalDateTime createdAt;
     private BigDecimal price;
@@ -64,15 +63,6 @@ public class Post {
 
     public void setLink(String link) {
         this.link = link;
-    }
-
-    public Optional<String> getPhone() {
-        return Optional.ofNullable(phone);
-    }
-
-    public Post setPhone(String phone) {
-        this.phone = phone;
-        return this;
     }
 
     public LocalDateTime getCreatedAt() {

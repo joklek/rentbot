@@ -68,8 +68,6 @@ public class AruodasScraper implements Scraper {
         driver.switchTo().newWindow(WindowType.TAB).get(link.toString());
 
         var post = new AruodasPost();
-        var phone = selectByCss(driver, "span.phone_item_0")
-                .orElseGet(() -> selectByCss(driver, "div.phone").orElse(null));
         var description = selectByCss(driver, "#collapsedTextBlock > #collapsedText");
         var rawAddress = selectByCss(driver, ".main-content > .obj-cont > h1").map(s -> Stream.of(s.split(",")).filter(x -> !x.contains("nuoma")).toList());
         var district = rawAddress.flatMap(x -> x.size() >= 2 ? Optional.of(x.get(1)) : Optional.empty());
@@ -107,7 +105,6 @@ public class AruodasScraper implements Scraper {
 
         post.setExternalId(aruodasId);
         post.setLink(link);
-        post.setPhone(phone);
         district.ifPresent(post::setDistrict);
         street.ifPresent(post::setStreet);
         houseNumber.ifPresent(post::setHouseNumber);

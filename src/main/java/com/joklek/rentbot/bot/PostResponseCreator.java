@@ -19,8 +19,6 @@ public class PostResponseCreator {
 
         sb.append(String.format("%d. %s\n", post.getId(), post.getLink()));
 
-        post.getPhone().ifPresent(phone -> sb.append(String.format("» *Phone number:* [%1$s](tel:%1$s)\n", phone)));
-
         var address = getAddress(post);
         if (address.isPresent()) {
             sb.append(String.format("» *Address:* [%s](https://maps.google.com/?q=%s)\n", address.get(), URLEncoder.encode(address.get(), StandardCharsets.UTF_8)));

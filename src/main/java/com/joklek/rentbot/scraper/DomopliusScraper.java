@@ -50,9 +50,6 @@ public class DomopliusScraper extends JsoupScraper {
         }
         var exactPost = maybeExactPost.get();
         var post = new DomopliusPost();
-        var phone = Optional.ofNullable(exactPost.select("#phone_button_4 > span").first())
-                .map(el -> el.attr("data-value"))
-                .map(dataEncoded -> decode(dataEncoded));
         var description = Optional.ofNullable(exactPost.select("div.container > div.group-comments").first())
                 .map(Element::text);
 
@@ -110,7 +107,6 @@ public class DomopliusScraper extends JsoupScraper {
         post.setExternalId(domoId);
         post.setLink(link);
 
-        phone.ifPresent(post::setPhone);
         description.ifPresent(post::setDescription);
         district.ifPresent(post::setDistrict);
         street.ifPresent(post::setStreet);

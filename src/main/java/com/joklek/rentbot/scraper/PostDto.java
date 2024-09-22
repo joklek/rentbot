@@ -7,7 +7,6 @@ import java.util.Optional;
 public abstract class PostDto {
     private String externalId;
     private URI link;
-    private String phone;
     private String description;
     private String street;
     private String district;
@@ -39,15 +38,6 @@ public abstract class PostDto {
 
     public PostDto setLink(URI link) {
         this.link = link;
-        return this;
-    }
-
-    public Optional<String> getPhone() {
-        return Optional.ofNullable(phone);
-    }
-
-    public PostDto setPhone(String phone) {
-        this.phone = phone;
         return this;
     }
 

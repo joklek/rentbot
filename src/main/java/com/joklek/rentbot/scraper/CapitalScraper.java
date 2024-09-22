@@ -49,8 +49,6 @@ public class CapitalScraper extends JsoupScraper {
         }
         var exactPost = maybeExactPost.get();
         var post = new CapitalPost();
-        var phone = Optional.ofNullable(exactPost.select(".estate-phone-sticker a").first())
-                .map(Element::text);
         var description = Optional.ofNullable(exactPost.select(".realty-description").first())
                 .map(Element::text);
 
@@ -103,7 +101,6 @@ public class CapitalScraper extends JsoupScraper {
         post.setExternalId(capitalId);
         post.setLink(link);
 
-        phone.ifPresent(post::setPhone);
         description.ifPresent(post::setDescription);
         district.ifPresent(post::setDistrict);
         street.ifPresent(post::setStreet);

@@ -65,7 +65,6 @@ public class AlioScraper extends JsoupScraper {
         }
         var exactPost = maybeExactPost.get();
         var post = new AlioPost();
-        var phone = Optional.ofNullable(exactPost.select("#phone_val_value").first()).map(Element::text);
         var description = Optional.ofNullable(exactPost.select("#adv_description_b > .a_line_val").first()).map(Element::text);
 
         var moreInfo = exactPost.select(".data_moreinfo_b").stream()
@@ -103,7 +102,6 @@ public class AlioScraper extends JsoupScraper {
         post.setExternalId(alioId);
         post.setLink(link);
 
-        phone.ifPresent(post::setPhone);
         description.ifPresent(post::setDescription);
         district.ifPresent(post::setDistrict);
         street.ifPresent(post::setStreet);
