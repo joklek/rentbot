@@ -52,8 +52,6 @@ public class PostEntityConverter {
                 .ifPresent(post::setRooms);
         postDto.getYear()
                 .ifPresent(post::setConstructionYear);
-        post.setWithFees(postDto.getDescription()
-                .map(this::isWithFees).orElse(false));
         post.setBuildingMaterial(postDto.getBuildingMaterial().orElse(null));
         post.setBuildingState(postDto.getBuildingState().orElse(null));
 
@@ -84,57 +82,5 @@ public class PostEntityConverter {
         }
         messageDigest.update(description.getBytes());
         return Base64.getEncoder().encodeToString(messageDigest.digest());
-    }
-
-    private static final Map<String, String> LETTER_REPLACE_MAP = Map.of(
-            "ą", "a",
-            "č", "c",
-            "ę", "e",
-            "ė", "e",
-            "į", "i",
-            "š", "s",
-            "ų", "u",
-            "ū", "u",
-            "ž", "z",
-            "y", "i" // Replace y with i, because some people are bad at writing
-    );
-
-    private static final List<String> feeKeywords = List.of(
-            "(ira mokestis)",
-            "mokestis (jei butas",
-            "\ntaikomas tarpininkavimas",
-            "tiks vienkartinis tarpinink"
-    );
-
-    private static final List<Pattern> feePatterns = List.of(
-            Pattern.compile("(agent|tarpinink|vienkart)\\S+ mokestis[\\s:-]{0,3}\\d+", Pattern.CASE_INSENSITIVE),
-            Pattern.compile("\\d+\\s?\\S+ (agent|tarpinink|vienkart)\\S+ (tarp|mokest)\\S+", Pattern.CASE_INSENSITIVE),
-            Pattern.compile("\\W(ira|bus) (taikoma(s|)|imama(s|)|vienkartinis|agent\\S+)( vienkartinis|) (agent|tarpinink|mokest)\\S+", Pattern.CASE_INSENSITIVE),
-            Pattern.compile("\\Wtiks[^\\s\\w]?\\s?(bus|ira|) (taikoma(s|)|imama(s|))", Pattern.CASE_INSENSITIVE),
-            Pattern.compile("\\W(ira |)(taikoma(s|)|imama(s|)|vienkartinis|sutarties)( sutarties|) sudar\\S+ mokestis", Pattern.CASE_INSENSITIVE),
-            Pattern.compile("(ui|ir) (ira |)(taikoma(s|)|imama(s|)) (vienkart|agent|tarpinink|mokest)\\S+", Pattern.CASE_INSENSITIVE),
-            Pattern.compile("(vienkartinis |)(agent|tarpinink)\\S+ mokest\\S+,? jei", Pattern.CASE_INSENSITIVE),
-            Pattern.compile("[^\\w\\s](\\s|)(taikoma(s|)|imama(s|)|vienkartinis|agent\\S+)( vienkartinis|) (agent|tarpinink|mokest)\\S+", Pattern.CASE_INSENSITIVE)
-    );
-
-    private boolean isWithFees(String description) {
-        var descriptionSimplified = description;
-        for (var entry : LETTER_REPLACE_MAP.entrySet()) {
-            descriptionSimplified = descriptionSimplified.replace(entry.getKey(), entry.getValue());
-        }
-
-        for (var keyword : feeKeywords) {
-            if (descriptionSimplified.contains(keyword)) {
-                return true;
-            }
-        }
-
-        for (var feePattern : feePatterns) {
-            if (feePattern.matcher(descriptionSimplified).find()) {
-                return true;
-            }
-        }
-
-        return false;
     }
 }

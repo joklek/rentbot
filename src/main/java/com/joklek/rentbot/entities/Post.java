@@ -27,7 +27,6 @@ public class Post {
     private Integer constructionYear;
     private Integer floor;
     private Integer totalFloors;
-    private Boolean isWithFees;
     private String descriptionHash;
     private String street;
     private String district;
@@ -122,14 +121,6 @@ public class Post {
 
     public void setTotalFloors(Integer totalFloors) {
         this.totalFloors = totalFloors;
-    }
-
-    public boolean getWithFees() {
-        return isWithFees;
-    }
-
-    public void setWithFees(boolean withFees) {
-        isWithFees = withFees;
     }
 
     public Optional<String> getDescriptionHash() {

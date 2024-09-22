@@ -21,7 +21,6 @@ public interface PostRepo extends JpaRepository<Post, Long> {
             "AND ((p.constructionYear >= u.yearMin) OR p.constructionYear IS NULL) " +
             "AND ((p.floor >= u.floorMin) OR p.floor IS NULL) " +
             "AND ((p.area >= u.areaMin) OR p.area IS NULL) " +
-            "AND (u.showWithFees = true OR p.isWithFees = false) " +
             "AND (u.filterByDistrict = false OR (" +
             "   d.name = p.district OR " +
             "   NOT EXISTS(SELECT 1 FROM District WHERE name = p.district)" +
@@ -38,7 +37,6 @@ public interface PostRepo extends JpaRepository<Post, Long> {
             "AND ((p.constructionYear >= u.yearMin) OR p.constructionYear IS NULL) " +
             "AND ((p.floor >= u.floorMin) OR p.floor IS NULL) " +
             "AND ((p.area >= u.areaMin) OR p.area IS NULL) " +
-            "AND (u.showWithFees = true OR p.isWithFees = false) " +
             "AND (u.filterByDistrict = false OR (" +
             "   d.name = p.district OR " +
             "   NOT EXISTS(SELECT 1 FROM District WHERE name = p.district)" +

@@ -79,7 +79,7 @@ class ConfigCommandTest extends IntegrationTest {
 
     @Test
     void handle__whenNormalPayloadAndFirstTime__hasExpectedTextAndChangesConfig() {
-        var response = command.handle(update, "200 330 1 2 50 2000 2 yes");
+        var response = command.handle(update, "200 330 1 2 50 2000 2");
 
         // Has expected text
         var expectedText = """
@@ -89,7 +89,7 @@ class ConfigCommandTest extends IntegrationTest {
                 
                 🔗 Share your settings with other people by sharing this command:
                 ```
-                /config 200 330 1 2 50 2000 2 yes
+                /config 200 330 1 2 50 2000 2
                 ```
                 
                 🔄 *Filter by district*: no (/districts to configure)
@@ -113,7 +113,6 @@ class ConfigCommandTest extends IntegrationTest {
         assertThat(user.getRoomsMax()).hasValueSatisfying(roomsMax -> assertThat(roomsMax).isEqualTo(2));
         assertThat(user.getYearMin()).hasValueSatisfying(yearMin -> assertThat(yearMin).isEqualTo(2000));
         assertThat(user.getFloorMin()).hasValueSatisfying(yearMin -> assertThat(yearMin).isEqualTo(2));
-        assertThat(user.getShowWithFees()).isTrue();
 
         assertThat(user.getFilterByDistrict()).isFalse(); // This shouldn't change
     }
@@ -121,7 +120,7 @@ class ConfigCommandTest extends IntegrationTest {
     @Test
     void handle__whenNormalPayloadAndNotFirstTime__hasExpectedTextAndChangesConfig() {
         makeUserAlreadyConfigured();
-        var response = command.handle(update, "200 330 1 2 50 2000 2 yes");
+        var response = command.handle(update, "200 330 1 2 50 2000 2");
 
         // Has expected text
         var expectedText = """
@@ -131,7 +130,7 @@ class ConfigCommandTest extends IntegrationTest {
                 
                 🔗 Share your settings with other people by sharing this command:
                 ```
-                /config 200 330 1 2 50 2000 2 yes
+                /config 200 330 1 2 50 2000 2
                 ```
                 
                 🔄 *Filter by district*: no (/districts to configure)
@@ -156,39 +155,8 @@ class ConfigCommandTest extends IntegrationTest {
         assertThat(user.getYearMin()).hasValueSatisfying(yearMin -> assertThat(yearMin).isEqualTo(2000));
         assertThat(user.getFloorMin()).hasValueSatisfying(yearMin -> assertThat(yearMin).isEqualTo(2));
         assertThat(user.getAreaMin()).hasValueSatisfying(areaMin -> assertThat(areaMin).isEqualTo(50));
-        assertThat(user.getShowWithFees()).isTrue();
 
         assertThat(user.getFilterByDistrict()).isFalse(); // This shouldn't change
-    }
-
-    @Test
-    void handle__whenNotInterestedInListingsWithFees__hasPropertyCorrectlySet() {
-        var response = command.handle(update, "200 330 1 2 50 2000 2 no");
-
-        // Has expected text
-        var expectedText = """
-                Config updated!
-                
-                📊 You would've seen 0 posts from last week with these settings.
-                
-                🔗 Share your settings with other people by sharing this command:
-                ```
-                /config 200 330 1 2 50 2000 2 no
-                ```
-                
-                🔄 *Filter by district*: no (/districts to configure)
-                """;
-        assertThat(response).hasSize(1);
-        assertThat(response.get(0).getParameters()).containsEntry("text", expectedText);
-        assertThat(response.get(0).getParameters()).hasEntrySatisfying("reply_markup", new Condition<>() {
-            @Override
-            public boolean matches(Object value) {
-                return value instanceof InlineKeyboardMarkup;
-            }
-        });
-
-        var user = users.findByTelegramId(CHAT_ID).get();
-        assertThat(user.getShowWithFees()).isFalse();
     }
 
     @Test
@@ -201,13 +169,13 @@ class ConfigCommandTest extends IntegrationTest {
                 Use this format to configure your settings:
                 
                 ```
-                /config <price_from> <price_to> <rooms_from> <rooms_to> <min_area> <year_from> <min_floor> <show with fee?(yes/no)>
+                /config <price_from> <price_to> <rooms_from> <rooms_to> <min_area> <year_from> <min_floor>
                 ```
                 Here's how your message might look like:
                 ```
                 /config 200 330 1 2 50 2000 2 yes
                 
-                ```Here you'd search for flats between 200 and 330 eur, 1-2 rooms, total area is 50m², built after 2000, starting on the second floor, and you're ok with seeing listings with agency fees
+                ```Here you'd search for flats between 200 and 330 eur, 1-2 rooms, total area is 50m², built after 2000, starting on the second floor
                 """;
         assertThat(response).hasSize(1);
         assertThat(response.get(0).getParameters()).containsEntry("text", expectedText);
@@ -237,20 +205,20 @@ class ConfigCommandTest extends IntegrationTest {
                 Use this format to configure your settings:
                 
                 ```
-                /config <price_from> <price_to> <rooms_from> <rooms_to> <min_area> <year_from> <min_floor> <show with fee?(yes/no)>
+                /config <price_from> <price_to> <rooms_from> <rooms_to> <min_area> <year_from> <min_floor>
                 ```
                 Here's how your message might look like:
                 ```
                 /config 200 330 1 2 50 2000 2 yes
                 
-                ```Here you'd search for flats between 200 and 330 eur, 1-2 rooms, total area is 50m², built after 2000, starting on the second floor, and you're ok with seeing listings with agency fees
+                ```Here you'd search for flats between 200 and 330 eur, 1-2 rooms, total area is 50m², built after 2000, starting on the second floor
                 """, message);
         assertThat(response).hasSize(1);
         assertThat(response.get(0).getParameters()).containsEntry("text", expectedText);
     }
 
     private void makeUserAlreadyConfigured() {
-        command.handle(update, "100 500 3 4 50 1900 1 no");
+        command.handle(update, "100 500 3 4 50 1900 1");
         var user = users.findByTelegramId(CHAT_ID).get();
         user.setEnabled(false);
         users.save(user);

@@ -60,12 +60,6 @@ public class PostResponseCreator {
             sb.append(String.format("» *Building state:* `%s`\n", post.getBuildingState().get()));
         }
 
-        if (post.getWithFees()) {
-            sb.append("» *With fee:* yes\n");
-        } else {
-            sb.append("» *With fee:* no\n");
-        }
-
         return new SendMessage(telegramId, sb.toString())
                 .parseMode(ParseMode.Markdown)
                 .linkPreviewOptions(new LinkPreviewOptions().isDisabled(true));

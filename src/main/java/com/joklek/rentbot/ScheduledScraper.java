@@ -116,9 +116,7 @@ public class ScheduledScraper {
         var rooms = post.getRooms().orElse(null);
         var year = post.getConstructionYear().orElse(null);
         var floor = post.getFloor().orElse(null);
-        if (post.getWithFees()) {
-            return users.findAllTelegramIdsInterestedWithFee(price, rooms, year, floor);
-        }
+
         return users.findAllTelegramIdsInterested(price, rooms, year, floor);
     }
 
@@ -134,9 +132,7 @@ public class ScheduledScraper {
         var year = post.getConstructionYear().orElse(null);
         var floor = post.getFloor().orElse(null);
         var district = post.getDistrict().orElse(null);
-        if (post.getWithFees()) {
-            return users.findAllTelegramIdsInterestedInDistrictWithFee(price, rooms, year, floor, district);
-        }
+
         return users.findAllTelegramIdsInterestedInDistrict(price, rooms, year, floor, district);
     }
 
@@ -145,20 +141,17 @@ public class ScheduledScraper {
         var rooms = post.getRooms().orElse(null);
         var year = post.getConstructionYear().orElse(null);
         var floor = post.getFloor().orElse(null);
-        if (post.getWithFees()) {
-            return users.findAllTelegramIdsNotInterestedInDistrictsWithFee(price, rooms, year, floor);
-        }
+
         return users.findAllTelegramIdsNotInterestedInDistricts(price, rooms, year, floor);
     }
 
     private void logPost(Post post) {
-        LOGGER.info("ID:{} Tel:{} Desc:{} Dist:{} Addr:{} Heat:{} Fl:{} FlTot:{} Area:{} Price:{} Room:{} Year:{} State:{} Material:{} WithFees:{} Link:{}",
+        LOGGER.info("ID:{} Tel:{} Desc:{} Dist:{} Addr:{} Heat:{} Fl:{} FlTot:{} Area:{} Price:{} Room:{} Year:{} State:{} Material:{} Link:{}",
                 post.getId(), post.getPhone().orElse(null), post.getDescriptionHash().isPresent(),
                 post.getDistrict().map(String::length).orElse(null), post.getStreet().map(String::length).orElse(null),
                 post.getHeating().map(String::length).orElse(null), post.getFloor().orElse(null), post.getTotalFloors().orElse(null),
                 post.getArea().map(area -> String.format("%.2f", area)).orElse(null), post.getPrice().map(price -> String.format("%.2f", price)).orElse(null),
                 post.getRooms().orElse(null), post.getConstructionYear().orElse(null),
-                post.getBuildingState().isPresent(), post.getBuildingMaterial().isPresent(),
-                post.getWithFees(), post.getLink());
+                post.getBuildingState().isPresent(), post.getBuildingMaterial().isPresent(), post.getLink());
     }
 }

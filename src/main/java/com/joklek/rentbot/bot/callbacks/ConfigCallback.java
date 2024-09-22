@@ -42,8 +42,7 @@ public class ConfigCallback implements CallbackResponder {
                 new RoomsMax(),
                 new ConstructionMin(),
                 new FloorMin(),
-                new AreaMin(),
-                new ToggleFees(users)
+                new AreaMin()
         ).collect(Collectors.toMap(CallbackAction::key, x -> x));
     }
 
@@ -381,43 +380,6 @@ public class ConfigCallback implements CallbackResponder {
                 public void onFailure(SendMessage request, IOException e) {
                 }
             });
-        }
-
-        @Override
-        public String callbackKey() {
-            return CALLBACK_KEY;
-        }
-
-        @Override
-        public String key() {
-            return KEY;
-        }
-    }
-
-    public class ToggleFees implements CallbackAction {
-        public static final String KEY = "toggleFee";
-        public static final String CALLBACK_KEY = String.format("/f%s:%s", NAME, KEY);
-
-        private final UserRepo users;
-
-        public ToggleFees(UserRepo users) {
-            this.users = users;
-        }
-
-        @Override
-        public void action(User user, Update update, TelegramBot bot, String... payload) {
-            var message = update.callbackQuery().maybeInaccessibleMessage();
-            user.setShowWithFees(!user.getShowWithFees());
-            users.save(user);
-
-            var updateMarkupRequest = new EditMessageReplyMarkup(message.chat().id(), message.messageId());
-            updateMarkupRequest.replyMarkup(configInfoProvider.showConfigPage(user));
-
-            var updateMessageRequest = new EditMessageText(message.chat().id(), message.messageId(), configInfoProvider.activeSettings(user));
-            updateMessageRequest.parseMode(ParseMode.Markdown);
-
-            bot.execute(updateMessageRequest);
-            bot.execute(updateMarkupRequest);
         }
 
         @Override

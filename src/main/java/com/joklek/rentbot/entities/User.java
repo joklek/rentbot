@@ -51,8 +51,6 @@ public class User {
     @Max(100)
     private Integer floorMin;
     @NotNull
-    private boolean showWithFees;
-    @NotNull
     private boolean filterByDistrict;
 
     @ManyToMany(cascade = {
@@ -154,14 +152,6 @@ public class User {
 
     public void setFloorMin(Integer minFloor) {
         this.floorMin = minFloor;
-    }
-
-    public boolean getShowWithFees() {
-        return showWithFees;
-    }
-
-    public void setShowWithFees(boolean showWithFees) {
-        this.showWithFees = showWithFees;
     }
 
     public boolean getFilterByDistrict() {

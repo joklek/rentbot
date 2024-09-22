@@ -61,7 +61,6 @@ class ReplayCommandTest extends IntegrationTest {
         user.setYearMin(1900);
         user.setFloorMin(1);
         user.setAreaMin(1);
-        user.setShowWithFees(true);
         user.setEnabled(true);
         return users.save(user);
     }
@@ -101,7 +100,6 @@ class ReplayCommandTest extends IntegrationTest {
                 » *Rooms:* `3`
                 » *Contruction year:* `1999`
                 » *Floor:* `2`
-                » *With fee:* no
                 """, post.getId());
         var response = command.handle(update, "");
 
@@ -128,7 +126,6 @@ class ReplayCommandTest extends IntegrationTest {
                 » *Rooms:* `3`
                 » *Contruction year:* `1999`
                 » *Floor:* `2`
-                » *With fee:* no
                 """, postInterested.getId());
         var response = command.handle(update, "");
 
@@ -154,7 +151,6 @@ class ReplayCommandTest extends IntegrationTest {
                 » *Rooms:* `3`
                 » *Contruction year:* `1999`
                 » *Floor:* `2`
-                » *With fee:* no
                 """, postInterested.getId());
         var response = command.handle(update, "");
 
@@ -179,7 +175,6 @@ class ReplayCommandTest extends IntegrationTest {
         post.setRooms(3);
         post.setConstructionYear(1999);
         post.setFloor(2);
-        post.setWithFees(false);
         post.setExternalId("EXTERNAL");
         post.setSource("EXTERNAL_SOURCE");
         post.setLink("EXTERNAL_LINK");

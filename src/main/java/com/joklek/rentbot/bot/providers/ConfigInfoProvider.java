@@ -17,7 +17,7 @@ public class ConfigInfoProvider {
     private static final String SHARE_TEXT = """
                 🔗 Share your settings with other people by sharing this command:
                 ```
-                /config %1$.0f %2$.0f %3$d %4$d %5$d %6$d %7$d %8$s
+                /config %1$.0f %2$.0f %3$d %4$d %5$d %6$d %7$d
                 ```
                 """;
 
@@ -27,7 +27,6 @@ public class ConfigInfoProvider {
 
     public String activeSettings(User user) {
         // TODO what when nothing configured?
-        var showWithFees = user.getShowWithFees() ? "yes" : "no";
         var filterByDistrict = user.getFilterByDistrict() ? "yes" : "no";
         var weekBefore = LocalDateTime.now().minusDays(7);
         var listingsDuringLastWeek = posts.getCountOfPostsForUserFromDays(user.getId(), weekBefore);
@@ -38,8 +37,7 @@ public class ConfigInfoProvider {
                         user.getRoomsMin().orElse(0), user.getRoomsMax().orElse(0),
                         user.getAreaMin().orElse(0),
                         user.getYearMin().orElse(0),
-                        user.getFloorMin().orElse(0),
-                        showWithFees
+                        user.getFloorMin().orElse(0)
                 ) : "";
 
         return String.format(
@@ -87,16 +85,11 @@ public class ConfigInfoProvider {
         var areaButton = new InlineKeyboardButton(areaText);
         areaButton.callbackData(ConfigCallback.AreaMin.CALLBACK_KEY);
 
-        var extraFeesText = String.format("Show with extra fees: %s", user.getShowWithFees() ? "Enabled" : "Disabled");
-        var extraFeesButton = new InlineKeyboardButton(extraFeesText);
-        extraFeesButton.callbackData(ConfigCallback.ToggleFees.CALLBACK_KEY);
-
         keyboard.addRow(enabledButton);
         keyboard.addRow(priceMinButton, priceMaxButton);
         keyboard.addRow(roomsMinButton, roomsMaxButton);
         keyboard.addRow(constructionButton);
         keyboard.addRow(floorButton, areaButton);
-        keyboard.addRow(extraFeesButton);
 
         return keyboard;
     }
