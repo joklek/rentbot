@@ -113,10 +113,13 @@ class ReplayCommandTest extends IntegrationTest {
     void handle__whenPostsExistAndDistrictsConfigured__thenSendsPostAndNotification() {
         var district = new District();
         district.setName("Test District");
-        districts.save(district);
+        var district2 = new District();
+        district2.setName("Test District 2");
+        districts.save(district2);
         var user = makeUserAlreadyConfigured(CHAT_ID);
         user.setFilterByDistrict(true);
         user.getDistricts().add(district);
+        user.getDistricts().add(district2);
         users.save(user);
 
         var postInterested = createPost(LocalDateTime.now().minusMinutes(2L), district.getName());

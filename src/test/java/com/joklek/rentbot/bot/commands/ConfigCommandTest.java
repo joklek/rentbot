@@ -1,7 +1,11 @@
 package com.joklek.rentbot.bot.commands;
 
 import com.joklek.rentbot.IntegrationTest;
+import com.joklek.rentbot.entities.District;
+import com.joklek.rentbot.entities.Post;
 import com.joklek.rentbot.entities.User;
+import com.joklek.rentbot.repo.DistrictRepo;
+import com.joklek.rentbot.repo.PostRepo;
 import com.joklek.rentbot.repo.UserRepo;
 import com.pengrad.telegrambot.model.Chat;
 import com.pengrad.telegrambot.model.Message;
@@ -17,6 +21,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,6 +35,11 @@ class ConfigCommandTest extends IntegrationTest {
 
     @Autowired
     private UserRepo users;
+    @Autowired
+    private DistrictRepo districts;
+    @Autowired
+    private PostRepo posts;
+
     @Mock
     private Update update;
     @Mock
@@ -188,6 +199,63 @@ class ConfigCommandTest extends IntegrationTest {
 
         var user = users.findByTelegramId(CHAT_ID).get();
         assertThat(user.getShowWithFees()).isFalse();
+    }
+
+    @Test
+    void handle__whenDistrictsSetupAndValidPostsExist__postsFromLastWeekSetCorrectly() {
+        var district = new District();
+        district.setName("Test District");
+        var district2 = new District();
+        district2.setName("Test District 2");
+        districts.save(district2);
+        var user = makeUserAlreadyConfigured(CHAT_ID);
+        user.setFilterByDistrict(true);
+        user.getDistricts().add(district);
+        user.getDistricts().add(district2);
+        users.save(user);
+        createPost(LocalDateTime.now().minusMinutes(2L), district.getName());
+
+        var response = command.handle(update, "");
+        var expectedText = """
+                📊 You would've seen 1 posts from last week with these settings.
+                
+                🔗 Share your settings with other people by sharing this command:
+                ```
+                /config 100 500 3 4 1900 1 yes
+                ```
+                
+                🔄 *Filter by district*: yes (/districts to configure)
+                """;
+        assertThat(response).hasSize(1);
+        assertThat(response.get(0).getParameters()).containsEntry("text", expectedText);
+    }
+
+    private User makeUserAlreadyConfigured(Long chatId) {
+        var user = users.findByTelegramId(chatId).get();
+        user.setPriceMin(BigDecimal.valueOf(100));
+        user.setPriceMax(BigDecimal.valueOf(500));
+        user.setRoomsMin(3);
+        user.setRoomsMax(4);
+        user.setYearMin(1900);
+        user.setFloorMin(1);
+        user.setShowWithFees(true);
+        user.setEnabled(true);
+        return users.save(user);
+    }
+
+    private Post createPost(LocalDateTime createdAt, String district) {
+        var post = new Post();
+        post.setPrice(BigDecimal.valueOf(150));
+        post.setRooms(3);
+        post.setConstructionYear(1999);
+        post.setFloor(2);
+        post.setWithFees(false);
+        post.setExternalId("EXTERNAL");
+        post.setSource("EXTERNAL_SOURCE");
+        post.setLink("EXTERNAL_LINK");
+        post.setDistrict(district);
+        post.setCreatedAt(createdAt);
+        return posts.save(post);
     }
 
     @Test
