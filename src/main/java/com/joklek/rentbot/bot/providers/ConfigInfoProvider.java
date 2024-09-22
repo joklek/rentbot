@@ -30,7 +30,7 @@ public class ConfigInfoProvider {
         var filterByDistrict = user.getFilterByDistrict() ? "yes" : "no";
         var weekBefore = LocalDateTime.now().minusDays(7);
         var listingsDuringLastWeek = posts.getCountOfPostsForUserFromDays(user.getId(), weekBefore);
-        var statsText = user.isConfigured() ? String.format("\uD83D\uDCCA You would've seen %d posts from last week with these settings.\n", listingsDuringLastWeek) : "";
+        var statsText = user.isConfigured() ? String.format("\uD83D\uDCCA You would've seen %d posts from last week with these settings. Use /replay to see listings from the last 2 days\n", listingsDuringLastWeek) : "";
         var shareText = user.isConfigured() ?
                 String.format(SHARE_TEXT,
                         user.getPriceMin().orElse(BigDecimal.ZERO), user.getPriceMax().orElse(BigDecimal.ZERO),

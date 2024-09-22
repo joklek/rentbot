@@ -85,7 +85,7 @@ class ConfigCommandTest extends IntegrationTest {
         var expectedText = """
                 Config updated!
                 
-                📊 You would've seen 0 posts from last week with these settings.
+                📊 You would've seen 0 posts from last week with these settings. Use /replay to see listings from the last 2 days
                 
                 🔗 Share your settings with other people by sharing this command:
                 ```
@@ -126,7 +126,7 @@ class ConfigCommandTest extends IntegrationTest {
         var expectedText = """
                 Config updated!
                 
-                📊 You would've seen 0 posts from last week with these settings.
+                📊 You would've seen 0 posts from last week with these settings. Use /replay to see listings from the last 2 days
                 
                 🔗 Share your settings with other people by sharing this command:
                 ```
