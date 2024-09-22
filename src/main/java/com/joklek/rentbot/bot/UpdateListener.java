@@ -53,7 +53,7 @@ public class UpdateListener {
     }
 
     private void handleMessage(TelegramBot bot, Update update) {
-        var rawText = update.message().text();
+        var rawText = update.message().text().replaceFirst("@\\w+$", "");
         var handler = commandRecognizer.getHandler(rawText);
         if (handler == null) {
             return;
