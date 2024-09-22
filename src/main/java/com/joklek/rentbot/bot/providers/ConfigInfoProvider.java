@@ -17,7 +17,7 @@ public class ConfigInfoProvider {
     private static final String SHARE_TEXT = """
                 🔗 Share your settings with other people by sharing this command:
                 ```
-                /config %1$.0f %2$.0f %3$d %4$d %5$d %6$d %7$s
+                /config %1$.0f %2$.0f %3$d %4$d %5$d %6$d %7$d %8$s
                 ```
                 """;
 
@@ -33,8 +33,8 @@ public class ConfigInfoProvider {
         var listingsDuringLastWeek = posts.getCountOfPostsForUserFromDays(user.getId(), weekBefore);
         var statsText = user.isConfigured() ? String.format("\uD83D\uDCCA You would've seen %d posts from last week with these settings.\n", listingsDuringLastWeek) : "";
         var shareText = user.isConfigured() ?
-                String.format(SHARE_TEXT, user.getPriceMin().orElse(BigDecimal.ZERO),
-                        user.getPriceMax().orElse(BigDecimal.ZERO),
+                String.format(SHARE_TEXT,
+                        user.getPriceMin().orElse(BigDecimal.ZERO), user.getPriceMax().orElse(BigDecimal.ZERO),
                         user.getRoomsMin().orElse(0), user.getRoomsMax().orElse(0),
                         user.getAreaMin().orElse(0),
                         user.getYearMin().orElse(0),
