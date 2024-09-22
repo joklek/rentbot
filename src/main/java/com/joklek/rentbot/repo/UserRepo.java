@@ -20,8 +20,9 @@ public interface UserRepo extends JpaRepository<User, Long> {
             "AND :price >= priceMin AND :price <= priceMax " +
             "AND :rooms >= roomsMin AND :rooms <= roomsMax " +
             "AND :year >= yearMin " +
-            "AND floorMin <= :floor")
-    List<Long> findAllTelegramIdsInterested(BigDecimal price, Integer rooms, Integer year, Integer floor);
+            "AND floorMin <= :floor " +
+            "AND areaMin <= :area")
+    List<Long> findAllTelegramIdsInterested(BigDecimal price, Integer rooms, Integer year, Integer floor, BigDecimal area);
 
     @Query(value = "SELECT DISTINCT u.telegramId FROM User u " +
             "LEFT JOIN u.districts d " +
@@ -31,8 +32,9 @@ public interface UserRepo extends JpaRepository<User, Long> {
             "AND :rooms >= u.roomsMin AND :rooms <= u.roomsMax " +
             "AND :year >= u.yearMin " +
             "AND u.floorMin <= :floor " +
+            "AND areaMin <= :area " +
             "AND lower(d.name) = lower(:district)")
-    List<Long> findAllTelegramIdsInterestedInDistrict(BigDecimal price, Integer rooms, Integer year, Integer floor, String district);
+    List<Long> findAllTelegramIdsInterestedInDistrict(BigDecimal price, Integer rooms, Integer year, Integer floor, BigDecimal area, String district);
 
     @Query(value = "SELECT telegramId FROM User " +
             "WHERE enabled = true " +
@@ -40,6 +42,7 @@ public interface UserRepo extends JpaRepository<User, Long> {
             "AND :price >= priceMin AND :price <= priceMax " +
             "AND :rooms >= roomsMin AND :rooms <= roomsMax " +
             "AND :year >= yearMin " +
-            "AND floorMin <= :floor")
-    List<Long> findAllTelegramIdsNotInterestedInDistricts(BigDecimal price, Integer rooms, Integer year, Integer floor);
+            "AND floorMin <= :floor " +
+            "AND areaMin <= :area")
+    List<Long> findAllTelegramIdsNotInterestedInDistricts(BigDecimal price, Integer rooms, Integer year, Integer floor, BigDecimal area);
 }

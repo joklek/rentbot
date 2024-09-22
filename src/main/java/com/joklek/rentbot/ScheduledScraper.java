@@ -116,8 +116,9 @@ public class ScheduledScraper {
         var rooms = post.getRooms().orElse(null);
         var year = post.getConstructionYear().orElse(null);
         var floor = post.getFloor().orElse(null);
+        var area = post.getArea().orElse(null);
 
-        return users.findAllTelegramIdsInterested(price, rooms, year, floor);
+        return users.findAllTelegramIdsInterested(price, rooms, year, floor, area);
     }
 
     private List<Long> getInterestedWithDistrict(Post post) {
@@ -132,8 +133,9 @@ public class ScheduledScraper {
         var year = post.getConstructionYear().orElse(null);
         var floor = post.getFloor().orElse(null);
         var district = post.getDistrict().orElse(null);
+        var area = post.getArea().orElse(null);
 
-        return users.findAllTelegramIdsInterestedInDistrict(price, rooms, year, floor, district);
+        return users.findAllTelegramIdsInterestedInDistrict(price, rooms, year, floor, area, district);
     }
 
     private List<Long> findAllTelegramIdsNotInterestedInDistricts(Post post) {
@@ -141,8 +143,9 @@ public class ScheduledScraper {
         var rooms = post.getRooms().orElse(null);
         var year = post.getConstructionYear().orElse(null);
         var floor = post.getFloor().orElse(null);
+        var area = post.getArea().orElse(null);
 
-        return users.findAllTelegramIdsNotInterestedInDistricts(price, rooms, year, floor);
+        return users.findAllTelegramIdsNotInterestedInDistricts(price, rooms, year, floor, area);
     }
 
     private void logPost(Post post) {
