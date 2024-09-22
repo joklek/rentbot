@@ -94,6 +94,8 @@ public class SkelbiuScraper implements Scraper {
                 .flatMap(ScraperHelper::parseInt);
         var year = Optional.ofNullable(moreInfo.get("Metai:"))
                 .flatMap(ScraperHelper::parseInt);
+        var buildingState = Optional.ofNullable(moreInfo.get("Įrengimas:"));
+        var buildingMaterial = Optional.ofNullable(moreInfo.get("Tipas:"));
 
         post.setExternalId(skelbiuId);
         post.setLink(link);
@@ -109,6 +111,8 @@ public class SkelbiuScraper implements Scraper {
         price.ifPresent(post::setPrice);
         rooms.ifPresent(post::setRooms);
         year.ifPresent(post::setYear);
+        buildingState.ifPresent(post::setBuildingState);
+        buildingMaterial.ifPresent(post::setBuildingMaterial);
 
         driver.close();
         driver.switchTo().window(originalWindow);

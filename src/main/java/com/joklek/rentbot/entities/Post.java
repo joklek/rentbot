@@ -34,6 +34,8 @@ public class Post {
     private String houseNumber;
     private String heating;
     private BigDecimal area;
+    private String buildingState;
+    private String buildingMaterial;
 
     public Long getId() {
         return id;
@@ -180,6 +182,24 @@ public class Post {
 
     public Post setArea(BigDecimal area) {
         this.area = area;
+        return this;
+    }
+
+    public Optional<String> getBuildingMaterial() {
+        return Optional.ofNullable(buildingMaterial);
+    }
+
+    public Post setBuildingMaterial(String buildingMaterial) {
+        this.buildingMaterial = buildingMaterial;
+        return this;
+    }
+
+    public Optional<String> getBuildingState() {
+        return Optional.ofNullable(buildingState);
+    }
+
+    public Post setBuildingState(String buildingState) {
+        this.buildingState = buildingState;
         return this;
     }
 

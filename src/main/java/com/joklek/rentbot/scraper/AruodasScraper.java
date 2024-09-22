@@ -102,6 +102,8 @@ public class AruodasScraper implements Scraper {
         var year = Optional.ofNullable(moreInfo.get("Metai:"))
                 .map(x -> x.substring(0, 4))
                 .flatMap(ScraperHelper::parseInt);
+        var buildingState = Optional.ofNullable(moreInfo.get("Įrengimas:"));
+        var buildingMaterial = Optional.ofNullable(moreInfo.get("Pastato tipas:"));
 
         post.setExternalId(aruodasId);
         post.setLink(link);
@@ -117,6 +119,8 @@ public class AruodasScraper implements Scraper {
         price.ifPresent(post::setPrice);
         rooms.ifPresent(post::setRooms);
         year.ifPresent(post::setYear);
+        buildingState.ifPresent(post::setBuildingState);
+        buildingMaterial.ifPresent(post::setBuildingMaterial);
 
         driver.close();
         driver.switchTo().window(originalWindow);

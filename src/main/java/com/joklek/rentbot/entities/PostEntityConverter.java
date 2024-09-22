@@ -54,6 +54,8 @@ public class PostEntityConverter {
                 .ifPresent(post::setConstructionYear);
         post.setWithFees(postDto.getDescription()
                 .map(this::isWithFees).orElse(false));
+        post.setBuildingMaterial(postDto.getBuildingMaterial().orElse(null));
+        post.setBuildingState(postDto.getBuildingState().orElse(null));
 
         post.setCreatedAt(LocalDateTime.now());
 

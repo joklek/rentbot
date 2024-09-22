@@ -52,6 +52,14 @@ public class PostResponseCreator {
             sb.append(String.format("» *Floor:* `%d`\n", post.getFloor().get()));
         }
 
+        if (post.getBuildingMaterial().isPresent()) {
+            sb.append(String.format("» *Building material:* `%s`\n", post.getBuildingMaterial().get()));
+        }
+
+        if (post.getBuildingState().isPresent()) {
+            sb.append(String.format("» *Building state:* `%s`\n", post.getBuildingState().get()));
+        }
+
         if (post.getWithFees()) {
             sb.append("» *With fee:* yes\n");
         } else {

@@ -97,6 +97,8 @@ public class CapitalScraper extends JsoupScraper {
         var year = Optional.ofNullable(moreInfo.get("Statybos metai"))
                 .map(yearRaw -> yearRaw.trim().split(" ")[0])
                 .flatMap(ScraperHelper::parseInt);
+        var buildingState = Optional.ofNullable(moreInfo.get("Įrengimo lygis"));
+        var buildingMaterial = Optional.ofNullable(moreInfo.get("Statinio tipas"));
 
         post.setExternalId(capitalId);
         post.setLink(link);
@@ -112,6 +114,8 @@ public class CapitalScraper extends JsoupScraper {
         price.ifPresent(post::setPrice);
         rooms.ifPresent(post::setRooms);
         year.ifPresent(post::setYear);
+        buildingState.ifPresent(post::setBuildingState);
+        buildingMaterial.ifPresent(post::setBuildingMaterial);
 
         return Optional.of(post);
     }

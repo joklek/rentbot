@@ -92,6 +92,25 @@ public class KampasScraper implements Scraper {
                 .flatMap(ScraperHelper::parseBigDecimal);
         var rooms = Optional.ofNullable(node.get("totalrooms")).map(JsonNode::asInt);
         var year = Optional.ofNullable(node.get("yearbuilt")).map(JsonNode::asInt);
+        var buildingState = Optional.ofNullable(node.get("condition")).map(JsonNode::asText)
+                .map(state -> switch (state) {
+                    case "new" -> "Naujas";
+                    case "equipped" -> "Įrengtas";
+                    case "renovated" -> "Suremontuotas";
+                    case "almost_ready" -> "Dalinė apdaila";
+                    case "needs_renovating" -> "Reikia remonto";
+                    case "not_finished" -> "Neįrengtas";
+                    case "moderate" -> "Tvarkingas";
+                    case "null" -> null;
+                    default -> state;
+                });
+        var buildingMaterial = Optional.ofNullable(node.get("buildingstructure")).map(JsonNode::asText)
+                .map(type -> switch (type) {
+                    case "panel" -> "Blokinis";
+                    case "stone", "brick" -> "Plytinis";
+                    case "null" -> null;
+                    default -> type;
+                });
 
         post.setExternalId(kampasId);
         post.setLink(link);
@@ -106,6 +125,8 @@ public class KampasScraper implements Scraper {
         price.ifPresent(post::setPrice);
         rooms.ifPresent(post::setRooms);
         year.ifPresent(post::setYear);
+        buildingState.ifPresent(post::setBuildingState);
+        buildingMaterial.ifPresent(post::setBuildingMaterial);
 
         return Optional.of(post);
     }

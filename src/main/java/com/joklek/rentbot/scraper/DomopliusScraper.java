@@ -104,6 +104,8 @@ public class DomopliusScraper extends JsoupScraper {
         var year = Optional.ofNullable(moreInfo.get("Statybos metai"))
                 .map(yearRaw -> yearRaw.trim().split(" ")[0])
                 .flatMap(ScraperHelper::parseInt);
+        var buildingState = Optional.ofNullable(moreInfo.get("Būklė"));
+        var buildingMaterial = Optional.ofNullable(moreInfo.get("Namo tipas"));
 
         post.setExternalId(domoId);
         post.setLink(link);
@@ -120,6 +122,8 @@ public class DomopliusScraper extends JsoupScraper {
         price.ifPresent(post::setPrice);
         rooms.ifPresent(post::setRooms);
         year.ifPresent(post::setYear);
+        buildingState.ifPresent(post::setBuildingState);
+        buildingMaterial.ifPresent(post::setBuildingMaterial);
 
         return Optional.of(post);
     }

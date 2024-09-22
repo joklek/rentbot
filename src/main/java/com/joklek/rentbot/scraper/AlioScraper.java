@@ -16,7 +16,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 @Component
 public class AlioScraper extends JsoupScraper {
     private static final Logger LOGGER = getLogger(AlioScraper.class);
-    private static final URI BASE_URL = URI.create("https://www.alio.lt/paieska/?category_id=1393&city_id=228626&search_block=1&search[eq][adresas_1]=228626&order=ad_id");
+    private static final URI BASE_URL = URI.create("https://www.alio.lt/paieska/?category_id=1373&city_id=228626&search_block=1&search%5Beq%5D%5Badresas_1%5D=228626&order=ad_id");
 
     private final PostRepo posts;
 
@@ -97,6 +97,8 @@ public class AlioScraper extends JsoupScraper {
         var year = Optional.ofNullable(moreInfo.get("Statybos metai"))
                 .map(yearRaw -> yearRaw.trim().split(" ")[0])
                 .flatMap(ScraperHelper::parseInt);
+        var buildingState = Optional.ofNullable(moreInfo.get("Būsto būklė"));
+        var buildingMaterial = Optional.ofNullable(moreInfo.get("Namo tipas"));
 
         post.setExternalId(alioId);
         post.setLink(link);
@@ -112,6 +114,8 @@ public class AlioScraper extends JsoupScraper {
         price.ifPresent(post::setPrice);
         rooms.ifPresent(post::setRooms);
         year.ifPresent(post::setYear);
+        buildingState.ifPresent(post::setBuildingState);
+        buildingMaterial.ifPresent(post::setBuildingMaterial);
 
         return Optional.of(post);
     }

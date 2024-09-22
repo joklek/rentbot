@@ -19,6 +19,8 @@ public abstract class PostDto {
     private BigDecimal price;
     private Integer rooms;
     private Integer year;
+    private String buildingState;
+    private String buildingMaterial;
 
     public abstract String getSource();
 
@@ -145,6 +147,24 @@ public abstract class PostDto {
 
     public PostDto setYear(Integer year) {
         this.year = year;
+        return this;
+    }
+
+    public Optional<String> getBuildingMaterial() {
+        return Optional.ofNullable(buildingMaterial);
+    }
+
+    public PostDto setBuildingMaterial(String buildingMaterial) {
+        this.buildingMaterial = buildingMaterial;
+        return this;
+    }
+
+    public Optional<String> getBuildingState() {
+        return Optional.ofNullable(buildingState);
+    }
+
+    public PostDto setBuildingState(String buildingState) {
+        this.buildingState = buildingState;
         return this;
     }
 }
