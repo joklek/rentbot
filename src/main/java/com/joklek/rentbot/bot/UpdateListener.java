@@ -45,7 +45,7 @@ public class UpdateListener {
                 handleMessage(bot, update);
             } else if (update.callbackQuery() != null && update.callbackQuery().data() != null) {
                 handleCallback(bot, update);
-            } else if (update.message().replyToMessage() != null) {
+            } else if (update.message() != null && update.message().replyToMessage() != null) {
                 handleReply(bot, update);
             }
         });
