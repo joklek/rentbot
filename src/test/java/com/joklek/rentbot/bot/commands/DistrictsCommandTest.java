@@ -84,7 +84,7 @@ class DistrictsCommandTest extends IntegrationTest {
         assertThat(response.get(0).getParameters()).containsKey("reply_markup");
         assertThat(response.get(0).getParameters().get("reply_markup")).isInstanceOf(InlineKeyboardMarkup.class);
         var replyMarkup = (InlineKeyboardMarkup) response.get(0).getParameters().get("reply_markup");
-        assertThat(replyMarkup.inlineKeyboard()).hasNumberOfRows(3);
+        assertThat(replyMarkup.inlineKeyboard()).hasNumberOfRows(4);
 
         // First row of districts
         assertThat(replyMarkup.inlineKeyboard()[0]).hasSize(3)
@@ -96,15 +96,20 @@ class DistrictsCommandTest extends IntegrationTest {
                 .allSatisfy(button -> assertThat(button.callbackData()).matches("/fdistricts:toggle:\\d+"))
                 .allSatisfy(button -> assertThat(button.text()).isNotBlank());
 
+        // Third row of districts
+        assertThat(replyMarkup.inlineKeyboard()[2]).hasSize(3)
+                .allSatisfy(button -> assertThat(button.callbackData()).matches("/fdistricts:toggle:\\d+"))
+                .allSatisfy(button -> assertThat(button.text()).isNotBlank());
+
         // Control row is present
-        assertThat(replyMarkup.inlineKeyboard()[2]).hasSize(4); // Control row
-        assertThat(replyMarkup.inlineKeyboard()[2][0].text()).isEqualTo("⬅");
-        assertThat(replyMarkup.inlineKeyboard()[2][0].callbackData()).isEqualTo("/fdistricts:page:0");
-        assertThat(replyMarkup.inlineKeyboard()[2][1].text()).isEqualTo("➡");
-        assertThat(replyMarkup.inlineKeyboard()[2][1].callbackData()).isEqualTo("/fdistricts:page:1");
-        assertThat(replyMarkup.inlineKeyboard()[2][2].text()).isEqualTo("\uD83D\uDD04");
-        assertThat(replyMarkup.inlineKeyboard()[2][2].callbackData()).isEqualTo("/fdistricts:reset");
-        assertThat(replyMarkup.inlineKeyboard()[2][3].text()).isEqualTo("❌");
-        assertThat(replyMarkup.inlineKeyboard()[2][3].callbackData()).isEqualTo("/fdistricts:off");
+        assertThat(replyMarkup.inlineKeyboard()[3]).hasSize(4); // Control row
+        assertThat(replyMarkup.inlineKeyboard()[3][0].text()).isEqualTo("⬅");
+        assertThat(replyMarkup.inlineKeyboard()[3][0].callbackData()).isEqualTo("/fdistricts:page:0");
+        assertThat(replyMarkup.inlineKeyboard()[3][1].text()).isEqualTo("➡");
+        assertThat(replyMarkup.inlineKeyboard()[3][1].callbackData()).isEqualTo("/fdistricts:page:1");
+        assertThat(replyMarkup.inlineKeyboard()[3][2].text()).isEqualTo("\uD83D\uDD04");
+        assertThat(replyMarkup.inlineKeyboard()[3][2].callbackData()).isEqualTo("/fdistricts:reset");
+        assertThat(replyMarkup.inlineKeyboard()[3][3].text()).isEqualTo("❌");
+        assertThat(replyMarkup.inlineKeyboard()[3][3].callbackData()).isEqualTo("/fdistricts:off");
     }
 }

@@ -60,6 +60,7 @@ class ReplayCommandTest extends IntegrationTest {
         user.setRoomsMax(4);
         user.setYearMin(1900);
         user.setFloorMin(1);
+        user.setAreaMin(1);
         user.setShowWithFees(true);
         user.setEnabled(true);
         return users.save(user);
