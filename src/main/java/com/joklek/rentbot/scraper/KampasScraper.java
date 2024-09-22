@@ -107,7 +107,8 @@ public class KampasScraper implements Scraper {
         var buildingMaterial = Optional.ofNullable(node.get("buildingstructure")).map(JsonNode::asText)
                 .map(type -> switch (type) {
                     case "panel" -> "Blokinis";
-                    case "stone", "brick" -> "Plytinis";
+                    case "stone", "brick", "bricks" -> "Plytinis";
+                    case "monolithic" -> "Monolitinis";
                     case "null" -> null;
                     default -> type;
                 });
