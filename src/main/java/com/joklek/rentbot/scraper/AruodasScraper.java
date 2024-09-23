@@ -77,6 +77,7 @@ public class AruodasScraper implements Scraper {
         var description = selectByCss(driver, "#collapsedTextBlock > #collapsedText");
         var rawAddress = selectByCss(driver, ".main-content > .obj-cont > h1")
                 .or(() -> selectByCss(driver, ".advert-info-header .title-col > h1"))
+                .or(() -> selectByCss(driver, "div.obj-cont h1"))
                 .map(s -> Stream.of(s.split(",")).toList());
         var district = rawAddress.flatMap(x -> x.size() >= 2 ? Optional.of(x.get(1)) : Optional.empty());
         var street = rawAddress.flatMap(x -> x.size() >= 3 ? Optional.of(x.get(2)) : Optional.empty());
