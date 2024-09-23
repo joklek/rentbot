@@ -44,22 +44,28 @@ public class AruodasScraper implements Scraper {
 
     private List<PostDto> getPosts(WebDriver driver) {
         driver.get(BASE_URL.toString());
-        var rawPosts = driver.findElements(By.cssSelector("ul.search-result-list-big_thumbs > li.result-item-big-thumb:not([style='display: none'])"));
-        if (rawPosts.isEmpty()) {
+        var ids = driver.findElements(By.cssSelector("ul.search-result-list-big_thumbs > li.result-item-big-thumb:not([style='display: none'])"))
+                .stream().flatMap(rawPost -> {
+                    var relatedIds = rawPost.findElements(By.cssSelector("table tr td.goto > a")).stream().map(element -> element.getAttribute("href").split("/")[3]).toList();
+                    var mainId = rawPost.getAttribute("data-id").replace("loadobject", "");
+                    return Stream.concat(relatedIds.stream(), Stream.of(mainId));
+                })
+                .toList();
+        if (ids.isEmpty()) {
             LOGGER.error("Cant fetch posts, might be blocked");
             return List.of();
         }
 
-        return rawPosts.stream()
-                .map(rawPost -> processItem(rawPost, driver))
+        return ids.stream()
+                .map(aruodasId -> processItem(aruodasId, driver))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .toList();
     }
 
-    private Optional<PostDto> processItem(WebElement rawPost, WebDriver driver) {
+    private Optional<PostDto> processItem(String aruodasId, WebDriver driver) {
         var originalWindow = driver.getWindowHandle();
-        var aruodasId = rawPost.getAttribute("data-id").replace("loadobject", "");
+
         if (posts.existsByExternalIdAndSource(aruodasId, AruodasPost.SOURCE)) {
             return Optional.empty();
         }
@@ -69,7 +75,9 @@ public class AruodasScraper implements Scraper {
 
         var post = new AruodasPost();
         var description = selectByCss(driver, "#collapsedTextBlock > #collapsedText");
-        var rawAddress = selectByCss(driver, ".main-content > .obj-cont > h1").map(s -> Stream.of(s.split(",")).filter(x -> !x.contains("nuoma")).toList());
+        var rawAddress = selectByCss(driver, ".main-content > .obj-cont > h1")
+                .or(() -> selectByCss(driver, ".advert-info-header .title-col > h1"))
+                .map(s -> Stream.of(s.split(",")).toList());
         var district = rawAddress.flatMap(x -> x.size() >= 2 ? Optional.of(x.get(1)) : Optional.empty());
         var street = rawAddress.flatMap(x -> x.size() >= 3 ? Optional.of(x.get(2)) : Optional.empty());
 
