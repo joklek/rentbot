@@ -79,8 +79,19 @@ public class ScheduledScraper {
 
     private List<List<Post>> deduplicatePosts(List<Post> posts) {
         var deduplicatedPosts = new ArrayList<List<Post>>();
-        for (var i = 0; i < posts.size() - 1; i++) {
+        for (var i = 0; i < posts.size(); i++) {
             var post1 = posts.get(i);
+
+            var duplicateListsContainsPost = false;
+            for (var j = 0; j < i; j++) {
+                duplicateListsContainsPost = deduplicatedPosts.stream().anyMatch(deduplicated -> deduplicated.contains(post1));
+                if (duplicateListsContainsPost) {
+                    break;
+                }
+            }
+            if (duplicateListsContainsPost) {
+                continue;
+            }
             var postList = new ArrayList<Post>();
             postList.add(post1);
             for(var j = i + 1; j < posts.size(); j++) {
@@ -96,6 +107,8 @@ public class ScheduledScraper {
                         && post1.getTotalFloors().equals(post2.getTotalFloors())
                         && post1.getStreet().equals(post2.getStreet())
                 ) {
+                    postList.add(post2);
+                } else if (post1.getPrice().equals(post2.getPrice()) && post1.getDescriptionHash().equals(post2.getDescriptionHash())) {
                     postList.add(post2);
                 }
             }
@@ -123,12 +136,12 @@ public class ScheduledScraper {
 
     private void notifyUsers(List<Post> posts) {
         posts.forEach(post -> logPost(post));
-        var post = posts.getFirst();
-        if (post.getPrice().isEmpty()) {
+        if (posts.stream().allMatch(post -> post.getPrice().isEmpty())) {
             return;
         }
 
-        getInterestedTelegramIds(post)
+        posts.stream().flatMap(duplicatePost -> getInterestedTelegramIds(duplicatePost).stream())
+                .distinct()
                 .forEach(telegramId -> {
                     try {
                         bot.execute(postResponseCreator.createTelegramMessage(telegramId, posts));
