@@ -18,10 +18,10 @@ public interface UserRepo extends JpaRepository<User, Long> {
     @Query(value = "SELECT telegramId FROM User " +
             "WHERE enabled = true " +
             "AND :price >= priceMin AND :price <= priceMax " +
-            "AND :rooms >= roomsMin AND :rooms <= roomsMax " +
-            "AND :year >= yearMin " +
-            "AND floorMin <= :floor " +
-            "AND areaMin <= :area")
+            "AND ((:rooms >= roomsMin AND :rooms <= roomsMax) OR :rooms IS NULL) " +
+            "AND (:year >= yearMin OR :year IS NULL) " +
+            "AND (floorMin <= :floor OR :floor IS NULL) " +
+            "AND (areaMin <= :area OR :area IS NULL)")
     List<Long> findAllTelegramIdsInterested(BigDecimal price, Integer rooms, Integer year, Integer floor, Integer area);
 
     @Query(value = "SELECT DISTINCT u.telegramId FROM User u " +
@@ -29,10 +29,10 @@ public interface UserRepo extends JpaRepository<User, Long> {
             "WHERE u.enabled = true " +
             "AND u.filterByDistrict = true " +
             "AND :price >= u.priceMin AND :price <= u.priceMax " +
-            "AND :rooms >= u.roomsMin AND :rooms <= u.roomsMax " +
-            "AND :year >= u.yearMin " +
-            "AND u.floorMin <= :floor " +
-            "AND areaMin <= :area " +
+            "AND ((:rooms >= roomsMin AND :rooms <= roomsMax) OR :rooms IS NULL) " +
+            "AND (:year >= yearMin OR :year IS NULL) " +
+            "AND (floorMin <= :floor OR :floor IS NULL) " +
+            "AND (areaMin <= :area OR :area IS NULL) " +
             "AND lower(d.name) = lower(:district)")
     List<Long> findAllTelegramIdsInterestedInDistrict(BigDecimal price, Integer rooms, Integer year, Integer floor, Integer area, String district);
 
@@ -40,9 +40,9 @@ public interface UserRepo extends JpaRepository<User, Long> {
             "WHERE enabled = true " +
             "AND filterByDistrict = false " +
             "AND :price >= priceMin AND :price <= priceMax " +
-            "AND :rooms >= roomsMin AND :rooms <= roomsMax " +
-            "AND :year >= yearMin " +
-            "AND floorMin <= :floor " +
-            "AND areaMin <= :area")
+            "AND ((:rooms >= roomsMin AND :rooms <= roomsMax) OR :rooms IS NULL) " +
+            "AND (:year >= yearMin OR :year IS NULL) " +
+            "AND (floorMin <= :floor OR :floor IS NULL) " +
+            "AND (areaMin <= :area OR :area IS NULL)")
     List<Long> findAllTelegramIdsNotInterestedInDistricts(BigDecimal price, Integer rooms, Integer year, Integer floor, Integer area);
 }
