@@ -90,9 +90,11 @@ public class KampasScraper implements Scraper {
             if (feature.endsWith("_heating")) {
                 heating = Optional.of(feature
                         .replace("_heating", "")
-                        .replace("gas", "dujinis")
-                        .replace("central", "centrinis")
-                        .replace("thermostat", "termostatas"));
+                        .replace("gas", "Dujinis")
+                        .replace("central", "Centrinis")
+                        .replace("city", "Centrinis")
+                        .replace("electric", "Elektrinis")
+                        .replace("thermostat", "Termostatas"));
                 break;
             }
         }
@@ -112,8 +114,11 @@ public class KampasScraper implements Scraper {
                     case "equipped" -> "Įrengtas";
                     case "renovated" -> "Suremontuotas";
                     case "almost_ready" -> "Dalinė apdaila";
+                    case "partial_decoration" -> "Dalinė apdaila";
+                    case "needs_san_repairs" -> "Reikia remonto";
                     case "needs_renovating" -> "Reikia remonto";
                     case "not_finished" -> "Neįrengtas";
+                    case "san_repairs" -> "Įrengtas";
                     case "moderate" -> "Tvarkingas";
                     case "null" -> null;
                     default -> state;
@@ -121,8 +126,10 @@ public class KampasScraper implements Scraper {
         var buildingMaterial = Optional.ofNullable(node.get("buildingstructure")).map(JsonNode::asText)
                 .map(type -> switch (type) {
                     case "panel" -> "Blokinis";
+                    case "block" -> "Blokinis";
                     case "stone", "brick", "bricks" -> "Plytinis";
                     case "monolithic" -> "Monolitinis";
+                    case "wood" -> "Medinis";
                     case "null" -> null;
                     default -> type;
                 });
