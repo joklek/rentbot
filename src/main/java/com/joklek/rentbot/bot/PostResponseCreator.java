@@ -9,16 +9,17 @@ import org.springframework.stereotype.Component;
 import java.math.RoundingMode;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Optional;
 
 @Component
 public class PostResponseCreator {
 
-    public SendMessage createTelegramMessage(Long telegramId, Post post) {
+    public SendMessage createTelegramMessage(Long telegramId, List<Post> posts) {
         var sb = new StringBuilder();
+        posts.forEach(post -> sb.append(String.format("%d. %s\n", post.getId(), post.getLink())));
 
-        sb.append(String.format("%d. %s\n", post.getId(), post.getLink()));
-
+        var post = posts.getFirst();
         var address = getAddress(post);
         if (address.isPresent()) {
             sb.append(String.format("» *Address:* [%s](https://maps.google.com/?q=%s)\n", address.get(), URLEncoder.encode(address.get(), StandardCharsets.UTF_8)));

@@ -42,13 +42,14 @@ public class ReplayCommand implements Command {
         }
 
         var posts = getPosts(user);
+        var deduplicatedPosts = deduplicatePosts(posts);
 
-        if (posts.isEmpty()) {
+        if (deduplicatedPosts.isEmpty()) {
             return simpleFinalResponse(update, String.format("No posts found in the last %d days", POSTS_FROM_PREVIOUS_DAYS));
         }
 
-        var messages = new ArrayList<>(posts.stream()
-                .map(post -> postResponseCreator.createTelegramMessage(telegramId, post))
+        var messages = new ArrayList<>(deduplicatedPosts.stream()
+                .map(similarPosts -> postResponseCreator.createTelegramMessage(telegramId, similarPosts))
                 .toList());
         messages.add(simpleResponse(update, String.format("Replayed %d posts from last %d days", posts.size(), POSTS_FROM_PREVIOUS_DAYS)));
 
@@ -60,5 +61,34 @@ public class ReplayCommand implements Command {
                 user.getId(),
                 LocalDateTime.now().minusDays(POSTS_FROM_PREVIOUS_DAYS)
         );
+    }
+
+    private List<List<Post>> deduplicatePosts(List<Post> posts) {
+        var deduplicatedPosts = new ArrayList<List<Post>>();
+        for (var i = 0; i < posts.size() - 1; i++) {
+            var post1 = posts.get(i);
+            var postList = new ArrayList<Post>();
+            postList.add(post1);
+            for(var j = i + 1; j < posts.size(); j++) {
+                var post2 = posts.get(j);
+
+                if (post1.getSource().equals(post2.getSource())) {
+                    continue;
+                }
+                if (post1.getPrice().equals(post2.getPrice())
+                        && post1.getRooms().equals(post2.getRooms())
+                        && post1.getConstructionYear().equals(post2.getConstructionYear())
+                        && post1.getFloor().equals(post2.getFloor())
+                        && post1.getTotalFloors().equals(post2.getTotalFloors())
+                        && post1.getStreet().equals(post2.getStreet())
+                ) {
+                    postList.add(post2);
+                }
+            }
+
+            deduplicatedPosts.add(postList);
+        }
+
+        return deduplicatedPosts;
     }
 }

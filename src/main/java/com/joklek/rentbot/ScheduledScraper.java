@@ -66,11 +66,44 @@ public class ScheduledScraper {
                 .filter(not(post -> posts.existsByExternalIdAndSource(post.getExternalId(), post.getSource())))
                 .toList();
 
-        unpublishedPosts.stream()
+        var posts = unpublishedPosts.stream()
                 .map(post -> save(post))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .forEach(post -> notifyUsers(post));
+                .toList();
+
+        List<List<Post>> deduplicatedPosts = deduplicatePosts(posts);
+
+        deduplicatedPosts.forEach(similarPosts -> notifyUsers(similarPosts));
+    }
+
+    private List<List<Post>> deduplicatePosts(List<Post> posts) {
+        var deduplicatedPosts = new ArrayList<List<Post>>();
+        for (var i = 0; i < posts.size() - 1; i++) {
+            var post1 = posts.get(i);
+            var postList = new ArrayList<Post>();
+            postList.add(post1);
+            for(var j = i + 1; j < posts.size(); j++) {
+                var post2 = posts.get(j);
+
+                if (post1.getSource().equals(post2.getSource())) {
+                    continue;
+                }
+                if (post1.getPrice().equals(post2.getPrice())
+                        && post1.getRooms().equals(post2.getRooms())
+                        && post1.getConstructionYear().equals(post2.getConstructionYear())
+                        && post1.getFloor().equals(post2.getFloor())
+                        && post1.getTotalFloors().equals(post2.getTotalFloors())
+                        && post1.getStreet().equals(post2.getStreet())
+                ) {
+                    postList.add(post2);
+                }
+            }
+
+            deduplicatedPosts.add(postList);
+        }
+
+        return deduplicatedPosts;
     }
 
     private boolean isNightTime() {
@@ -88,8 +121,9 @@ public class ScheduledScraper {
         }
     }
 
-    private void notifyUsers(Post post) {
-        logPost(post);
+    private void notifyUsers(List<Post> posts) {
+        posts.forEach(post -> logPost(post));
+        var post = posts.getFirst();
         if (post.getPrice().isEmpty()) {
             return;
         }
@@ -97,7 +131,7 @@ public class ScheduledScraper {
         getInterestedTelegramIds(post)
                 .forEach(telegramId -> {
                     try {
-                        bot.execute(postResponseCreator.createTelegramMessage(telegramId, post));
+                        bot.execute(postResponseCreator.createTelegramMessage(telegramId, posts));
                     } catch (Exception e) {
                         LOGGER.error("Can't send telegram message to {}", telegramId, e);
                     }
