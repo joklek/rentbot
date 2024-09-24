@@ -11,6 +11,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.StreamSupport;
@@ -40,13 +41,26 @@ public class KampasScraper implements Scraper {
             // TODO log empty
             return List.of();
         }
-        var rawPosts = StreamSupport.stream(maybeTree.get().get("hits").spliterator(), false).toList();
+        var regularPosts = jsonNodeToList(maybeTree.get().get("hits"));
+        var projectPosts = jsonNodeToList(maybeTree.get().get("projecthits"));
+        var rawPosts = new ArrayList<JsonNode>();
+        rawPosts.addAll(regularPosts);
+        rawPosts.addAll(projectPosts);
 
         return rawPosts.stream()
                 .map(rawPost -> processItem(rawPost))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .toList();
+    }
+
+    private List<JsonNode> jsonNodeToList(JsonNode node) {
+        if (!node.isArray()) {
+            LOGGER.warn("Expected array, but got {}", node.getNodeType());
+            return List.of();
+        }
+
+        return StreamSupport.stream(node.spliterator(), false).toList();
     }
 
     private Optional<PostDto> processItem(JsonNode node) {
