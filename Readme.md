@@ -4,6 +4,8 @@ This bot scans the most popular flat rent portals for latest posts in Vilnius, w
 
 Original idea taken from https://github.com/erkexzcx/bbtmvbot
 
+See the `buy-flat` branch for the buybot. A branch of this project which enables real estate search. 
+
 # Usage
 
 Below are the steps on how to host it yourself.
