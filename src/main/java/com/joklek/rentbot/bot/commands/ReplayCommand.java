@@ -51,7 +51,7 @@ public class ReplayCommand implements Command {
         var messages = new ArrayList<>(deduplicatedPosts.stream()
                 .map(similarPosts -> postResponseCreator.createTelegramMessage(telegramId, similarPosts))
                 .toList());
-        messages.add(simpleResponse(update, String.format("Replayed %d posts from last %d days", posts.size(), POSTS_FROM_PREVIOUS_DAYS)));
+        messages.add(simpleResponse(update, String.format("Replayed %d posts from last %d days", deduplicatedPosts.size(), POSTS_FROM_PREVIOUS_DAYS)));
 
         return messages;
     }
