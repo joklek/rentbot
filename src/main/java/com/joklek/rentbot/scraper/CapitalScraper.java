@@ -63,7 +63,12 @@ public class CapitalScraper extends JsoupScraper {
 
         var moreInfo = exactPost.select(".realty-info-line").stream()
                 .filter(el -> el.select("td").size() == 2)
-                .collect(Collectors.toMap(x -> x.select("td").get(0).text(), x -> x.select("td").get(1).text().trim()));
+                .collect(Collectors.toMap(
+                        x -> x.select("td").get(0).text(),
+                        x -> {
+                            var node = x.select("td").get(1);
+                            return (node.select("div").isEmpty() ? node : node.select("div").get(0)).text().trim();
+                        }));
 
         var addresRaw = Optional.ofNullable(moreInfo.get("Adresas"));
         Optional<String> district = Optional.empty();
