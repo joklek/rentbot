@@ -1,6 +1,7 @@
 package com.joklek.rentbot;
 
 import com.joklek.rentbot.bot.PostResponseCreator;
+import com.joklek.rentbot.bot.providers.PostDeduplicator;
 import com.joklek.rentbot.entities.Post;
 import com.joklek.rentbot.entities.PostEntityConverter;
 import com.joklek.rentbot.repo.DistrictRepo;
@@ -35,16 +36,18 @@ public class ScheduledScraper {
     private final DistrictRepo districts;
     private final PostEntityConverter postConverter;
     private final PostResponseCreator postResponseCreator;
+    private final PostDeduplicator postDeduplicator;
     private final TelegramBot bot;
     private final Random random;
 
-    public ScheduledScraper(List<Scraper> scrapers, UserRepo users, PostRepo posts, DistrictRepo districts, PostEntityConverter postConverter, PostResponseCreator postResponseCreator, TelegramBot bot) {
+    public ScheduledScraper(List<Scraper> scrapers, UserRepo users, PostRepo posts, DistrictRepo districts, PostEntityConverter postConverter, PostResponseCreator postResponseCreator, PostDeduplicator postDeduplicator, TelegramBot bot) {
         this.scrapers = scrapers;
         this.users = users;
         this.posts = posts;
         this.districts = districts;
         this.postConverter = postConverter;
         this.postResponseCreator = postResponseCreator;
+        this.postDeduplicator = postDeduplicator;
         this.bot = bot;
         this.random = new Random();
     }
@@ -72,51 +75,9 @@ public class ScheduledScraper {
                 .map(Optional::get)
                 .toList();
 
-        List<List<Post>> deduplicatedPosts = deduplicatePosts(posts);
+        List<List<Post>> deduplicatedPosts = postDeduplicator.deduplicatePosts(posts);
 
         deduplicatedPosts.forEach(similarPosts -> notifyUsers(similarPosts));
-    }
-
-    private List<List<Post>> deduplicatePosts(List<Post> posts) {
-        var deduplicatedPosts = new ArrayList<List<Post>>();
-        for (var i = 0; i < posts.size(); i++) {
-            var post1 = posts.get(i);
-
-            var duplicateListsContainsPost = false;
-            for (var j = 0; j < i; j++) {
-                duplicateListsContainsPost = deduplicatedPosts.stream().anyMatch(deduplicated -> deduplicated.contains(post1));
-                if (duplicateListsContainsPost) {
-                    break;
-                }
-            }
-            if (duplicateListsContainsPost) {
-                continue;
-            }
-            var postList = new ArrayList<Post>();
-            postList.add(post1);
-            for(var j = i + 1; j < posts.size(); j++) {
-                var post2 = posts.get(j);
-
-                if (post1.getSource().equals(post2.getSource())) {
-                    continue;
-                }
-                if (post1.getPrice().equals(post2.getPrice())
-                        && post1.getRooms().equals(post2.getRooms())
-                        && post1.getConstructionYear().equals(post2.getConstructionYear())
-                        && post1.getFloor().equals(post2.getFloor())
-                        && post1.getTotalFloors().equals(post2.getTotalFloors())
-                        && post1.getStreet().equals(post2.getStreet())
-                ) {
-                    postList.add(post2);
-                } else if (post1.getPrice().equals(post2.getPrice()) && post1.getDescriptionHash().equals(post2.getDescriptionHash())) {
-                    postList.add(post2);
-                }
-            }
-
-            deduplicatedPosts.add(postList);
-        }
-
-        return deduplicatedPosts;
     }
 
     private boolean isNightTime() {

@@ -1,6 +1,7 @@
 package com.joklek.rentbot.bot.commands;
 
 import com.joklek.rentbot.bot.PostResponseCreator;
+import com.joklek.rentbot.bot.providers.PostDeduplicator;
 import com.joklek.rentbot.entities.Post;
 import com.joklek.rentbot.entities.User;
 import com.joklek.rentbot.repo.PostRepo;
@@ -21,11 +22,13 @@ public class ReplayCommand implements Command {
     private final PostRepo posts;
     private final UserRepo users;
     private final PostResponseCreator postResponseCreator;
+    private final PostDeduplicator postDeduplicator;
 
-    public ReplayCommand(PostRepo posts, UserRepo users, PostResponseCreator postResponseCreator) {
+    public ReplayCommand(PostRepo posts, UserRepo users, PostResponseCreator postResponseCreator, PostDeduplicator postDeduplicator) {
         this.posts = posts;
         this.users = users;
         this.postResponseCreator = postResponseCreator;
+        this.postDeduplicator = postDeduplicator;
     }
 
     @Override
@@ -42,7 +45,7 @@ public class ReplayCommand implements Command {
         }
 
         var posts = getPosts(user);
-        var deduplicatedPosts = deduplicatePosts(posts);
+        var deduplicatedPosts = postDeduplicator.deduplicatePosts(posts);
 
         if (deduplicatedPosts.isEmpty()) {
             return simpleFinalResponse(update, String.format("No posts found in the last %d days", POSTS_FROM_PREVIOUS_DAYS));
@@ -61,47 +64,5 @@ public class ReplayCommand implements Command {
                 user.getId(),
                 LocalDateTime.now().minusDays(POSTS_FROM_PREVIOUS_DAYS)
         );
-    }
-
-    private List<List<Post>> deduplicatePosts(List<Post> posts) {
-        var deduplicatedPosts = new ArrayList<List<Post>>();
-        for (var i = 0; i < posts.size(); i++) {
-            var post1 = posts.get(i);
-
-            var duplicateListsContainsPost = false;
-            for (var j = 0; j < i; j++) {
-                duplicateListsContainsPost = deduplicatedPosts.stream().anyMatch(deduplicated -> deduplicated.contains(post1));
-                if (duplicateListsContainsPost) {
-                    break;
-                }
-            }
-            if (duplicateListsContainsPost) {
-                continue;
-            }
-            var postList = new ArrayList<Post>();
-            postList.add(post1);
-            for(var j = i + 1; j < posts.size(); j++) {
-                var post2 = posts.get(j);
-
-                if (post1.getSource().equals(post2.getSource())) {
-                    continue;
-                }
-                if (post1.getPrice().equals(post2.getPrice())
-                        && post1.getRooms().equals(post2.getRooms())
-                        && post1.getConstructionYear().equals(post2.getConstructionYear())
-                        && post1.getFloor().equals(post2.getFloor())
-                        && post1.getTotalFloors().equals(post2.getTotalFloors())
-                        && post1.getStreet().equals(post2.getStreet())
-                ) {
-                    postList.add(post2);
-                } else if (post1.getPrice().equals(post2.getPrice()) && post1.getDescriptionHash().equals(post2.getDescriptionHash())) {
-                    postList.add(post2);
-                }
-            }
-
-            deduplicatedPosts.add(postList);
-        }
-
-        return deduplicatedPosts;
     }
 }
