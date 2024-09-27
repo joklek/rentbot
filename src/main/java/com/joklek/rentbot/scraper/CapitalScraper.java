@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import java.net.URI;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Component
@@ -73,11 +74,18 @@ public class CapitalScraper extends JsoupScraper {
         var addresRaw = Optional.ofNullable(moreInfo.get("Adresas"));
         Optional<String> district = Optional.empty();
         Optional<String> street = Optional.empty();
+        Optional<String> houseNumber = Optional.empty();
         if (addresRaw.isPresent()) {
             var addressSplit = addresRaw.get().split(",");
             if (addressSplit.length == 4) {
-                street = Optional.of(addressSplit[0]);
+                var realStreet = addressSplit[0];
+                street = Optional.of(realStreet);
                 district = Optional.of(addressSplit[1]);
+                var postTitle = exactPost.select("h1.realty-title").text();
+                var matcher = Pattern.compile(String.format(".+%s (\\w+),.+", realStreet)).matcher(postTitle);
+                if (matcher.matches()) {
+                    houseNumber = Optional.of(matcher.group(1));
+                }
             }
         }
 
@@ -112,6 +120,7 @@ public class CapitalScraper extends JsoupScraper {
         heating.ifPresent(post::setHeating);
         floor.ifPresent(post::setFloor);
         totalFloors.ifPresent(post::setTotalFloors);
+        houseNumber.ifPresent(post::setHouseNumber);
         area.ifPresent(post::setArea);
         price.ifPresent(post::setPrice);
         rooms.ifPresent(post::setRooms);
