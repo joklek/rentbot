@@ -93,6 +93,7 @@ public class SkelbiuScraper implements Scraper {
         var rooms = Optional.ofNullable(moreInfo.get("Kamb. sk.:"))
                 .flatMap(ScraperHelper::parseInt);
         var year = Optional.ofNullable(moreInfo.get("Metai:"))
+                .map(rawYear -> rawYear.replaceAll(", \\d+ renovuotas", ""))
                 .flatMap(ScraperHelper::parseInt);
         var buildingState = Optional.ofNullable(moreInfo.get("Įrengimas:"));
         var buildingMaterial = Optional.ofNullable(moreInfo.get("Tipas:"));
