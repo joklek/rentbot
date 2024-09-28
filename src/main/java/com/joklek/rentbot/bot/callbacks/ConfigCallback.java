@@ -103,15 +103,18 @@ public class ConfigCallback implements CallbackResponder {
                 settingsChanged = true;
             }
 
-            var updateMarkupRequest = new EditMessageReplyMarkup(message.chat().id(), message.messageId());
-            updateMarkupRequest.replyMarkup(configInfoProvider.showConfigPage(user));
-
             if (!settingsChanged) {
                 var callbackResponse = new AnswerCallbackQuery(update.callbackQuery().id());
                 callbackResponse.text("Configure other settings first");
                 callbackResponse.showAlert(true);
                 bot.execute(callbackResponse);
             } else {
+                var updateMessageRequest = new EditMessageText(message.chat().id(), message.messageId(), configInfoProvider.activeSettings(user));
+                updateMessageRequest.parseMode(ParseMode.Markdown);
+                var updateMarkupRequest = new EditMessageReplyMarkup(message.chat().id(), message.messageId());
+                updateMarkupRequest.replyMarkup(configInfoProvider.showConfigPage(user));
+
+                bot.execute(updateMessageRequest);
                 bot.execute(updateMarkupRequest);
             }
         }
@@ -138,8 +141,8 @@ public class ConfigCallback implements CallbackResponder {
             var updateMarkupRequest = new EditMessageReplyMarkup(message.chat().id(), message.messageId());
             updateMarkupRequest.replyMarkup(configInfoProvider.showConfigPage(user));
 
-            var sendMessage = new SendMessage(message.chat().id(), "What is the new min price in EUR?");
-            var reply = new ForceReply(false, "Enter new min price in EUR");
+            var sendMessage = new SendMessage(message.chat().id(), "What is the new min price in EUR? (enter \"any\" if you want to disable this filter)");
+            var reply = new ForceReply(false, "Enter a number");
             sendMessage.replyMarkup(reply);
             bot.execute(sendMessage, new Callback<SendMessage, SendResponse>() {
                 @Override
@@ -176,8 +179,8 @@ public class ConfigCallback implements CallbackResponder {
             var updateMarkupRequest = new EditMessageReplyMarkup(message.chat().id(), message.messageId());
             updateMarkupRequest.replyMarkup(configInfoProvider.showConfigPage(user));
 
-            var sendMessage = new SendMessage(message.chat().id(), "What is the new max price in EUR?");
-            var reply = new ForceReply(false, "Enter new max price in EUR");
+            var sendMessage = new SendMessage(message.chat().id(), "What is the new max price in EUR? (enter \"any\" if you want to disable this filter)");
+            var reply = new ForceReply(false, "Enter a number");
             sendMessage.replyMarkup(reply);
             bot.execute(sendMessage, new Callback<SendMessage, SendResponse>() {
                 @Override
@@ -214,8 +217,8 @@ public class ConfigCallback implements CallbackResponder {
             var updateMarkupRequest = new EditMessageReplyMarkup(message.chat().id(), message.messageId());
             updateMarkupRequest.replyMarkup(configInfoProvider.showConfigPage(user));
 
-            var sendMessage = new SendMessage(message.chat().id(), "What is the new min rooms?");
-            var reply = new ForceReply(false, "Enter new min rooms");
+            var sendMessage = new SendMessage(message.chat().id(), "What is the new min rooms? (enter \"any\" if you want to disable this filter)");
+            var reply = new ForceReply(false, "Enter a number");
             sendMessage.replyMarkup(reply);
             bot.execute(sendMessage, new Callback<SendMessage, SendResponse>() {
                 @Override
@@ -252,8 +255,8 @@ public class ConfigCallback implements CallbackResponder {
             var updateMarkupRequest = new EditMessageReplyMarkup(message.chat().id(), message.messageId());
             updateMarkupRequest.replyMarkup(configInfoProvider.showConfigPage(user));
 
-            var sendMessage = new SendMessage(message.chat().id(), "What is the new max rooms?");
-            var reply = new ForceReply(false, "Enter new max rooms");
+            var sendMessage = new SendMessage(message.chat().id(), "What is the new max rooms? (enter \"any\" if you want to disable this filter)");
+            var reply = new ForceReply(false, "Enter a number");
             sendMessage.replyMarkup(reply);
             bot.execute(sendMessage, new Callback<SendMessage, SendResponse>() {
                 @Override
@@ -290,8 +293,8 @@ public class ConfigCallback implements CallbackResponder {
             var updateMarkupRequest = new EditMessageReplyMarkup(message.chat().id(), message.messageId());
             updateMarkupRequest.replyMarkup(configInfoProvider.showConfigPage(user));
 
-            var sendMessage = new SendMessage(message.chat().id(), "What is the new min contruction year?");
-            var reply = new ForceReply(false, "Enter new min construction year");
+            var sendMessage = new SendMessage(message.chat().id(), "What is the new min contruction year? (enter \"any\" if you want to disable this filter)");
+            var reply = new ForceReply(false, "Enter a number");
             sendMessage.replyMarkup(reply);
             bot.execute(sendMessage, new Callback<SendMessage, SendResponse>() {
                 @Override
@@ -328,8 +331,8 @@ public class ConfigCallback implements CallbackResponder {
             var updateMarkupRequest = new EditMessageReplyMarkup(message.chat().id(), message.messageId());
             updateMarkupRequest.replyMarkup(configInfoProvider.showConfigPage(user));
 
-            var sendMessage = new SendMessage(message.chat().id(), "What is the new min floor?");
-            var reply = new ForceReply(false, "Enter new min floor");
+            var sendMessage = new SendMessage(message.chat().id(), "What is the new min floor? (enter \"any\" if you want to disable this filter)");
+            var reply = new ForceReply(false, "Enter a number");
             sendMessage.replyMarkup(reply);
             bot.execute(sendMessage, new Callback<SendMessage, SendResponse>() {
                 @Override
@@ -366,8 +369,8 @@ public class ConfigCallback implements CallbackResponder {
             var updateMarkupRequest = new EditMessageReplyMarkup(message.chat().id(), message.messageId());
             updateMarkupRequest.replyMarkup(configInfoProvider.showConfigPage(user));
 
-            var sendMessage = new SendMessage(message.chat().id(), "What is the new min area m²?");
-            var reply = new ForceReply(false, "Enter new min area m²");
+            var sendMessage = new SendMessage(message.chat().id(), "What is the new min area m²? (enter \"any\" if you want to disable this filter)");
+            var reply = new ForceReply(false, "Enter a number");
             sendMessage.replyMarkup(reply);
             bot.execute(sendMessage, new Callback<SendMessage, SendResponse>() {
                 @Override

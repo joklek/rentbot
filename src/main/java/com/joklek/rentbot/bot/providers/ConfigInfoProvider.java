@@ -17,7 +17,7 @@ public class ConfigInfoProvider {
     private static final String SHARE_TEXT = """
                 🔗 Share your settings with other people by sharing this command:
                 ```
-                /config %1$.0f %2$.0f %3$d %4$d %5$d %6$d %7$d
+                /config %1$s %2$s %3$s %4$s %5$s %6$s %7$s
                 ```
                 """;
 
@@ -33,11 +33,13 @@ public class ConfigInfoProvider {
         var statsText = user.isConfigured() ? String.format("\uD83D\uDCCA You would've seen %d posts from last week with these settings. Use /replay to see listings from the last 2 days\n", listingsDuringLastWeek) : "";
         var shareText = user.isConfigured() ?
                 String.format(SHARE_TEXT,
-                        user.getPriceMin().orElse(BigDecimal.ZERO), user.getPriceMax().orElse(BigDecimal.ZERO),
-                        user.getRoomsMin().orElse(0), user.getRoomsMax().orElse(0),
-                        user.getAreaMin().orElse(0),
-                        user.getYearMin().orElse(0),
-                        user.getFloorMin().orElse(0)
+                        user.getPriceMin().map(x -> String.format("%.0f", x)).orElse("any"),
+                        user.getPriceMax().map(x -> String.format("%.0f", x)).orElse("any"),
+                        user.getRoomsMin().map(Object::toString).orElse("any"),
+                        user.getRoomsMax().map(Object::toString).orElse("any"),
+                        user.getAreaMin().map(Object::toString).orElse("any"),
+                        user.getYearMin().map(Object::toString).orElse("any"),
+                        user.getFloorMin().map(Object::toString).orElse("any")
                 ) : "";
         var notificationReminder = user.isConfigured() ? (user.getEnabled() ? "\n🔔 Notifications are enabled" : "\n🔕 Notifications are **disabled**") : "";
 
@@ -60,31 +62,31 @@ public class ConfigInfoProvider {
         var enabledButton = new InlineKeyboardButton(enabledText);
         enabledButton.callbackData(ConfigCallback.Toggle.CALLBACK_KEY);
 
-        var priceMinText = String.format("Price from: %.0f€", user.getPriceMin().orElse(BigDecimal.ZERO));
+        var priceMinText = String.format("From: %s€", user.getPriceMin().map(x -> String.format("%.0f", x)).orElse("any"));
         var priceMinButton = new InlineKeyboardButton(priceMinText);
         priceMinButton.callbackData(ConfigCallback.PriceMin.CALLBACK_KEY);
 
-        var priceMaxText = String.format("Price to: %.0f€", user.getPriceMax().orElse(BigDecimal.ZERO));
+        var priceMaxText = String.format("To: %s€", user.getPriceMax().map(x -> String.format("%.0f", x)).orElse("any"));
         var priceMaxButton = new InlineKeyboardButton(priceMaxText);
         priceMaxButton.callbackData(ConfigCallback.PriceMax.CALLBACK_KEY);
 
-        var roomsMinText = String.format("Min rooms: %d", user.getRoomsMin().orElse(0));
+        var roomsMinText = String.format("Min rooms: %s", user.getRoomsMin().map(Object::toString).orElse("any"));
         var roomsMinButton = new InlineKeyboardButton(roomsMinText);
         roomsMinButton.callbackData(ConfigCallback.RoomsMin.CALLBACK_KEY);
 
-        var roomsMaxText = String.format("Max rooms: %d", user.getRoomsMax().orElse(0));
+        var roomsMaxText = String.format("Max rooms: %s", user.getRoomsMax().map(Object::toString).orElse("any"));
         var roomsMaxButton = new InlineKeyboardButton(roomsMaxText);
         roomsMaxButton.callbackData(ConfigCallback.RoomsMax.CALLBACK_KEY);
 
-        var constructionText = String.format("From construction year: %d", user.getYearMin().orElse(0));
+        var constructionText = String.format("From construction year: %s", user.getYearMin().map(Object::toString).orElse("any"));
         var constructionButton = new InlineKeyboardButton(constructionText);
         constructionButton.callbackData(ConfigCallback.ConstructionMin.CALLBACK_KEY);
 
-        var floorText = String.format("Min floor: %d", user.getFloorMin().orElse(0));
+        var floorText = String.format("Min floor: %s", user.getFloorMin().map(Object::toString).orElse("any"));
         var floorButton = new InlineKeyboardButton(floorText);
         floorButton.callbackData(ConfigCallback.FloorMin.CALLBACK_KEY);
 
-        var areaText = String.format("Min area m²: %d", user.getAreaMin().orElse(0));
+        var areaText = String.format("Min area: %s m²", user.getAreaMin().map(Object::toString).orElse("any"));
         var areaButton = new InlineKeyboardButton(areaText);
         areaButton.callbackData(ConfigCallback.AreaMin.CALLBACK_KEY);
 
