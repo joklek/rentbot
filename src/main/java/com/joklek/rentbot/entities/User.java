@@ -24,11 +24,11 @@ public class User {
     private boolean enabled;
 
     @Min(0)
-    @Max(100000)
+    @Max(100_000)
     private BigDecimal priceMin;
 
     @Min(0)
-    @Max(100000)
+    @Max(100_000)
     private BigDecimal priceMax;
 
     @Min(0)
@@ -70,9 +70,9 @@ public class User {
     }
 
     public boolean isConfigured() {
-        return getPriceMin().isPresent() && getPriceMax().isPresent()
-                && getRoomsMin().isPresent() && getRoomsMax().isPresent()
-                && getYearMin().isPresent() && getFloorMin().isPresent();
+        return getPriceMin().isPresent() || getPriceMax().isPresent()
+                || getRoomsMin().isPresent() || getRoomsMax().isPresent()
+                || getYearMin().isPresent() || getFloorMin().isPresent();
     }
 
     public Long getId() {

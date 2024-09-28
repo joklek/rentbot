@@ -23,7 +23,7 @@ public class ConfigCommand implements Command {
 
     private static final Logger LOGGER = getLogger(ConfigCommand.class);
 
-    private static final Pattern CONFIG_PATTERN = Pattern.compile("^(\\d+) (\\d+) (\\d+) (\\d+) (\\d+) (\\d+) (yes|no)$");
+    private static final Pattern CONFIG_PATTERN = Pattern.compile("^(\\d+|any) (\\d+|any) (\\d+|any) (\\d+|any) (\\d+|any) (\\d+|any) (yes|no)$");
     private static final String CONFIG_TEXT = "Use this format to configure your settings:\n\n```\n/config <price_from> <price_to> <rooms_from> <rooms_to> <year_from> <min_floor> <show with fee?(yes/no)>\n```\nHere's how your message might look like:\n```\n/config 200 330 1 2 2000 2 yes\n\n```Here you'd search for flats between 200 and 330 eur, 1-2 rooms, built after 2000, starting on the second floor, and you're ok with seeing listings with agency fees\n";
 
     private final UserRepo users;
@@ -75,12 +75,12 @@ public class ConfigCommand implements Command {
     private void updateSettings(User user, Matcher matcher) {
         var isFirstTimeSettingUp = !user.isConfigured();
 
-        var priceMin = new BigDecimal(matcher.group(1));
-        var priceMax = new BigDecimal(matcher.group(2));
-        var roomsMin = Integer.parseInt(matcher.group(3));
-        var roomsMax = Integer.parseInt(matcher.group(4));
-        var yearMin = Integer.parseInt(matcher.group(5));
-        var floorMin = Integer.parseInt(matcher.group(6));
+        var priceMin = matcher.group(1).equalsIgnoreCase("any") ? null : new BigDecimal(matcher.group(1));
+        var priceMax = matcher.group(2).equalsIgnoreCase("any") ? null : new BigDecimal(matcher.group(2));
+        var roomsMin = matcher.group(3).equalsIgnoreCase("any") ? null : Integer.parseInt(matcher.group(3));
+        var roomsMax = matcher.group(4).equalsIgnoreCase("any") ? null : Integer.parseInt(matcher.group(4));
+        var yearMin = matcher.group(5).equalsIgnoreCase("any") ? null : Integer.parseInt(matcher.group(5));
+        var floorMin = matcher.group(6).equalsIgnoreCase("any") ? null : Integer.parseInt(matcher.group(6));
         var showWithFees = "yes".equals(matcher.group(7));
 
         user.setPriceMin(priceMin);
@@ -94,10 +94,10 @@ public class ConfigCommand implements Command {
             user.setEnabled(true);
         }
 
-        if (priceMin.compareTo(priceMax) > 0) {
+        if (priceMin != null && priceMax != null && priceMin.compareTo(priceMax) > 0) {
             throw new ValidationException("Min price can't be bigger than max price");
         }
-        if (roomsMin > roomsMax) {
+        if (roomsMin != null && roomsMax != null && roomsMin > roomsMax) {
             throw new ValidationException("Min rooms can't be bigger than max rooms");
         }
         var results = validator.validate(user);

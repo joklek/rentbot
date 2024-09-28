@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
 public class ConstructionMinReplyResponder implements ReplyResponder {
     public static final String KEY = "minConstruction";
 
-    private static final Pattern PRICE_PATTERN = Pattern.compile("^\\s*(\\d+)\\s*$");
+    private static final Pattern NUMBER_PATTERN = Pattern.compile("^\\s*((\\d+)|any|Any)\\s*$");
 
     private final UserRepo users;
     private final SentMessageRepo sentMessages;
@@ -38,7 +38,7 @@ public class ConstructionMinReplyResponder implements ReplyResponder {
     public void handle(Message message, TelegramBot bot) {
         var text = message.text();
         var oldConfigMessage = sentMessages.findFirstByChatIdAndTypeOrderByMessageIdDesc(message.chat().id(), ConfigCallback.NAME).orElse(null);
-        var matcher = PRICE_PATTERN.matcher(text);
+        var matcher = NUMBER_PATTERN.matcher(text);
         var user = users.getByTelegramId(message.chat().id());
 
         if (!matcher.matches()) {
@@ -49,7 +49,7 @@ public class ConstructionMinReplyResponder implements ReplyResponder {
             return;
         }
         var match = matcher.group(1);
-        var constructionYearMin = Integer.parseInt(match);
+        var constructionYearMin = match.equalsIgnoreCase("any") ? null : Integer.parseInt(match);
 
         user.setYearMin(constructionYearMin);
         var results = validator.validate(user);

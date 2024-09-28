@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
 public class RoomsMaxReplyResponder implements ReplyResponder {
     public static final String KEY = "maxRooms";
 
-    private static final Pattern PRICE_PATTERN = Pattern.compile("^\\s*(\\d+)\\s*$");
+    private static final Pattern NUMBER_PATTERN = Pattern.compile("^\\s*((\\d+)|any|Any)\\s*$");
 
     private final UserRepo users;
     private final SentMessageRepo sentMessages;
@@ -38,7 +38,7 @@ public class RoomsMaxReplyResponder implements ReplyResponder {
     public void handle(Message message, TelegramBot bot) {
         var text = message.text();
         var oldConfigMessage = sentMessages.findFirstByChatIdAndTypeOrderByMessageIdDesc(message.chat().id(), ConfigCallback.NAME).orElse(null);
-        var matcher = PRICE_PATTERN.matcher(text);
+        var matcher = NUMBER_PATTERN.matcher(text);
         var user = users.getByTelegramId(message.chat().id());
 
         if (!matcher.matches()) {
@@ -49,9 +49,9 @@ public class RoomsMaxReplyResponder implements ReplyResponder {
             return;
         }
         var match = matcher.group(1);
-        var roomsMax = Integer.parseInt(match);
+        var roomsMax = match.equalsIgnoreCase("any") ? null : Integer.parseInt(match);
 
-        if (user.getRoomsMin().isPresent()) {
+        if (roomsMax != null && user.getRoomsMin().isPresent()) {
             var roomsMin = user.getRoomsMin().get();
             if (roomsMax < roomsMin) {
                 var sendMessage = new SendMessage(message.chat().id(), "❌ Max rooms can't be smaller than min rooms");

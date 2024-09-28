@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
 public class PriceMaxReplyResponder implements ReplyResponder {
     public static final String KEY = "maxPrice";
 
-    private static final Pattern PRICE_PATTERN = Pattern.compile("^\\s*(\\d+)\\s*$");
+    private static final Pattern NUMBER_PATTERN = Pattern.compile("^\\s*((\\d+)|any|Any)\\s*$");
 
     private final UserRepo users;
     private final SentMessageRepo sentMessages;
@@ -39,7 +39,7 @@ public class PriceMaxReplyResponder implements ReplyResponder {
     public void handle(Message message, TelegramBot bot) {
         var text = message.text();
         var oldConfigMessage = sentMessages.findFirstByChatIdAndTypeOrderByMessageIdDesc(message.chat().id(), ConfigCallback.NAME).orElse(null);
-        var matcher = PRICE_PATTERN.matcher(text);
+        var matcher = NUMBER_PATTERN.matcher(text);
         var user = users.getByTelegramId(message.chat().id());
 
         if (!matcher.matches()) {
@@ -50,9 +50,9 @@ public class PriceMaxReplyResponder implements ReplyResponder {
             return;
         }
         var match = matcher.group(1);
-        var priceMax = new BigDecimal(match);
+        var priceMax = match.equalsIgnoreCase("any") ? null : new BigDecimal(match);
 
-        if (user.getPriceMin().isPresent()) {
+        if (user.getPriceMin().isPresent() && priceMax != null) {
             var priceMin = user.getPriceMin().get();
             if (priceMax.compareTo(priceMin) < 0) {
                 var sendMessage = new SendMessage(message.chat().id(), "❌ Max price can't be smaller than min price");

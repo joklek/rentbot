@@ -16,10 +16,20 @@ public interface PostRepo extends JpaRepository<Post, Long> {
     @Query(value = "SELECT distinct p FROM Post p " +
             "JOIN User u ON u.id = :userId " +
             "LEFT JOIN u.districts d " +
-            "WHERE ((p.price >= u.priceMin AND p.price <= u.priceMax) OR p.price IS NULL) " +
-            "AND ((p.rooms >= u.roomsMin AND p.rooms <= u.roomsMax) OR p.rooms IS NULL) " +
-            "AND ((p.constructionYear >= u.yearMin) OR p.constructionYear IS NULL) " +
-            "AND ((p.floor >= u.floorMin) OR p.floor IS NULL) " +
+            "WHERE (" +
+                "((p.price >= u.priceMin OR u.priceMin IS NULL) AND (p.price <= u.priceMax OR u.priceMax IS NULL)) " +
+                "OR p.price IS NULL) " +
+            "AND (" +
+                "((p.rooms >= u.roomsMin OR u.roomsMin IS NULL) AND (p.rooms <= u.roomsMax OR u.roomsMax IS NULL)) " +
+                "OR p.rooms IS NULL) " +
+            "AND " +
+                "(p.constructionYear >= u.yearMin " +
+                "OR u.yearMin IS NULL " +
+                "OR p.constructionYear IS NULL) " +
+            "AND " +
+                "(p.floor >= u.floorMin " +
+                "OR u.floorMin IS NULL " +
+                "OR p.floor IS NULL) " +
             "AND (u.showWithFees = true OR p.isWithFees = false) " +
             "AND (u.filterByDistrict = false OR (" +
             "   d.name = p.district OR " +
@@ -32,10 +42,20 @@ public interface PostRepo extends JpaRepository<Post, Long> {
     @Query(value = "SELECT COUNT(distinct p.id) FROM Post p " +
             "JOIN User u ON u.id = :userId " +
             "LEFT JOIN u.districts d " +
-            "WHERE ((p.price >= u.priceMin AND p.price <= u.priceMax) OR p.price IS NULL) " +
-            "AND ((p.rooms >= u.roomsMin AND p.rooms <= u.roomsMax) OR p.rooms IS NULL) " +
-            "AND ((p.constructionYear >= u.yearMin) OR p.constructionYear IS NULL) " +
-            "AND ((p.floor >= u.floorMin) OR p.floor IS NULL) " +
+            "WHERE (" +
+                "((p.price >= u.priceMin OR u.priceMin IS NULL) AND (p.price <= u.priceMax OR u.priceMax IS NULL)) " +
+                "OR p.price IS NULL) " +
+            "AND (" +
+                "((p.rooms >= u.roomsMin OR u.roomsMin IS NULL) AND (p.rooms <= u.roomsMax OR u.roomsMax IS NULL)) " +
+                "OR p.rooms IS NULL) " +
+            "AND " +
+                "(p.constructionYear >= u.yearMin " +
+                "OR u.yearMin IS NULL " +
+                "OR p.constructionYear IS NULL) " +
+            "AND " +
+                "(p.floor >= u.floorMin " +
+                "OR u.floorMin IS NULL " +
+                "OR p.floor IS NULL) " +
             "AND (u.showWithFees = true OR p.isWithFees = false) " +
             "AND (u.filterByDistrict = false OR (" +
             "   d.name = p.district OR " +
