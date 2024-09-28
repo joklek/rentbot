@@ -52,11 +52,12 @@ public class DistrictsPageProvider {
         prevButton.callbackData(DistrictsCallback.Page.callbackKey(prevPage));
         var nextButton = new InlineKeyboardButton("➡");
         nextButton.callbackData(DistrictsCallback.Page.callbackKey(nextPage));
-        var resetButton = new InlineKeyboardButton("\uD83D\uDD04");
+        var resetButton = new InlineKeyboardButton("Reset");
         resetButton.callbackData(DistrictsCallback.Reset.CALLBACK_KEY);
-        var turnOffButton = new InlineKeyboardButton("❌");
+        var turnOffButton = new InlineKeyboardButton("Remove filtering by district");
         turnOffButton.callbackData(DistrictsCallback.TurnOff.CALLBACK_KEY);
-        keyboard.addRow(prevButton, nextButton, resetButton, turnOffButton); // control row
+        keyboard.addRow(prevButton, nextButton, resetButton);
+        keyboard.addRow(turnOffButton);
         return keyboard;
     }
 }
