@@ -98,16 +98,16 @@ public class KampasScraper implements Scraper {
                 break;
             }
         }
-        var floor = Optional.ofNullable(node.get("objectfloor")).map(JsonNode::asInt);
-        var totalFloors = Optional.ofNullable(node.get("totalfloors")).map(JsonNode::asInt);
+        var floor = Optional.ofNullable(node.get("objectfloor")).map(JsonNode::intValue).filter(x -> x > 0);
+        var totalFloors = Optional.ofNullable(node.get("totalfloors")).map(JsonNode::intValue).filter(x -> x > 0);
         var area = Optional.ofNullable(node.get("objectarea"))
                 .map(JsonNode::asText)
                 .flatMap(ScraperHelper::parseBigDecimal);
         var price = Optional.ofNullable(node.get("objectprice"))
                 .map(JsonNode::asText)
                 .flatMap(ScraperHelper::parseBigDecimal);
-        var rooms = Optional.ofNullable(node.get("totalrooms")).map(JsonNode::asInt);
-        var year = Optional.ofNullable(node.get("yearbuilt")).map(JsonNode::asInt);
+        var rooms = Optional.ofNullable(node.get("totalrooms")).map(JsonNode::intValue).filter(x -> x > 0);
+        var year = Optional.ofNullable(node.get("yearbuilt")).map(JsonNode::intValue).filter(y -> y > 1000);
         var buildingState = Optional.ofNullable(node.get("condition")).map(JsonNode::asText)
                 .map(state -> switch (state) {
                     case "new" -> "Naujas";
@@ -120,15 +120,14 @@ public class KampasScraper implements Scraper {
                     case "not_finished" -> "Neįrengtas";
                     case "san_repairs" -> "Įrengtas";
                     case "moderate" -> "Tvarkingas";
-                    case "null" -> null;
+                    case "null", "renovated-house" -> null;
                     default -> state;
                 });
         var buildingMaterial = Optional.ofNullable(node.get("buildingstructure")).map(JsonNode::asText)
                 .map(type -> switch (type) {
-                    case "panel" -> "Blokinis";
-                    case "block" -> "Blokinis";
+                    case "panel", "block" -> "Blokinis";
                     case "stone", "brick", "bricks" -> "Plytinis";
-                    case "monolithic" -> "Monolitinis";
+                    case "monolithic", "monolith" -> "Monolitinis";
                     case "wood" -> "Medinis";
                     case "null" -> null;
                     default -> type;
