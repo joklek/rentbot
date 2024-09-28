@@ -40,21 +40,24 @@ public class ConfigInfoProvider {
                         user.getFloorMin().orElse(0),
                         showWithFees
                 ) : "";
+        var notificationReminder = user.isConfigured() ? (user.getEnabled() ? "\n🔔 Notifications are enabled" : "\n🔕 Notifications are **disabled**") : "";
 
         return String.format(
                 """
                 %1$s
                 %2$s
                 🔄 *Filter by district*: %3$s (/districts to configure)
+                %4$s
                 """,
                 statsText,
                 shareText,
-                filterByDistrict);
+                filterByDistrict,
+                notificationReminder);
     }
 
     public InlineKeyboardMarkup showConfigPage(User user) {
         var keyboard = new InlineKeyboardMarkup();
-        var enabledText = String.format("Notifications: %s", user.getEnabled() ? "Enabled" : "Disabled");
+        var enabledText = user.getEnabled() ? "Disable notifications" : "Start looking for listings!";
         var enabledButton = new InlineKeyboardButton(enabledText);
         enabledButton.callbackData(ConfigCallback.Toggle.CALLBACK_KEY);
 
