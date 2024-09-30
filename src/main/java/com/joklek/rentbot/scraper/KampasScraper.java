@@ -78,20 +78,21 @@ public class KampasScraper implements Scraper {
                         .replace("_heating", "")
                         .replace("gas", "dujinis")
                         .replace("central", "centrinis")
+                        .replace("city", "centrinis")
                         .replace("thermostat", "termostatas"));
                 break;
             }
         }
-        var floor = Optional.ofNullable(node.get("objectfloor")).map(JsonNode::asInt);
-        var totalFloors = Optional.ofNullable(node.get("totalfloors")).map(JsonNode::asInt);
+        var floor = Optional.ofNullable(node.get("objectfloor")).map(JsonNode::intValue).filter(x -> x > 0);
+        var totalFloors = Optional.ofNullable(node.get("totalfloors")).map(JsonNode::intValue).filter(x -> x > 0);
         var area = Optional.ofNullable(node.get("objectarea"))
                 .map(JsonNode::asText)
                 .flatMap(ScraperHelper::parseBigDecimal);
         var price = Optional.ofNullable(node.get("objectprice"))
                 .map(JsonNode::asText)
                 .flatMap(ScraperHelper::parseBigDecimal);
-        var rooms = Optional.ofNullable(node.get("totalrooms")).map(JsonNode::asInt);
-        var year = Optional.ofNullable(node.get("yearbuilt")).map(JsonNode::asInt);
+        var rooms = Optional.ofNullable(node.get("totalrooms")).map(JsonNode::intValue).filter(x -> x > 0);
+        var year = Optional.ofNullable(node.get("yearbuilt")).map(JsonNode::intValue).filter(x -> x > 0);
 
         post.setExternalId(kampasId);
         post.setLink(link);
