@@ -28,6 +28,6 @@ public class DisableCommand implements Command {
         var user = users.getByTelegramId(telegramId);
         user.setEnabled(false);
 
-        return simpleFinalResponse(update, "Notifications disabled!");
+        return simpleFinalResponse(update, "Scanning disabled!");
     }
 }

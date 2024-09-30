@@ -41,7 +41,7 @@ public class ConfigInfoProvider {
                         user.getYearMin().map(Object::toString).orElse("any"),
                         user.getFloorMin().map(Object::toString).orElse("any")
                 ) : "";
-        var notificationReminder = user.isConfigured() ? (user.getEnabled() ? "\n🔔 Notifications are enabled" : "\n🔕 Notifications are **disabled**") : "";
+        var notificationReminder = user.isConfigured() ? (user.getEnabled() ? "\n🔔 Scanning is enabled" : "\n🔕 Scanning is **disabled**. You will not see new posts") : "";
 
         return String.format(
                 """
@@ -58,7 +58,7 @@ public class ConfigInfoProvider {
 
     public InlineKeyboardMarkup showConfigPage(User user) {
         var keyboard = new InlineKeyboardMarkup();
-        var enabledText = user.getEnabled() ? "Disable notifications" : "Start looking for listings!";
+        var enabledText = user.getEnabled() ? "Disable scanning" : "Click to start scanning for listings!";
         var enabledButton = new InlineKeyboardButton(enabledText);
         enabledButton.callbackData(ConfigCallback.Toggle.CALLBACK_KEY);
 
