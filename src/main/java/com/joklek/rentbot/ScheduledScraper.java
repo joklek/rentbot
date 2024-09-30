@@ -82,7 +82,7 @@ public class ScheduledScraper {
 
     private boolean isNightTime() {
         var now = LocalDateTime.now();
-        return now.getHour() >= 23 || now.getHour() < 6;
+        return now.getHour() >= 23 || now.getHour() < 8;
     }
 
     private Optional<Post> save(PostDto postDto) {
