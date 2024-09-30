@@ -31,6 +31,6 @@ public class EnableCommand implements Command {
         }
 
         user.setEnabled(true);
-        return simpleFinalResponse(update, "Notifications enabled!");
+        return simpleFinalResponse(update, "Scanning enabled!");
     }
 }
