@@ -61,7 +61,7 @@ public class ScheduledScraper {
         Collections.shuffle(shuffledScrapers);
 
         var unpublishedPosts = shuffledScrapers.stream() // TODO parallel streams?
-                .map(Scraper::getLatestPosts)
+                .map(ScheduledScraper::getLatestPosts)
                 .flatMap(Collection::stream)
                 .filter(not(post -> posts.existsByExternalIdAndSource(post.getExternalId(), post.getSource())))
                 .toList();
@@ -71,6 +71,15 @@ public class ScheduledScraper {
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .forEach(post -> notifyUsers(post));
+    }
+
+    private static List<PostDto> getLatestPosts(Scraper scraper) {
+        try {
+            return scraper.getLatestPosts();
+        } catch (Exception e) {
+            LOGGER.error("{} failed with", scraper.getClass(), e);
+            return List.of();
+        }
     }
 
     private boolean isNightTime() {
