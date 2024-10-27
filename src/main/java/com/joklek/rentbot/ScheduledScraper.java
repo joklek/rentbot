@@ -4,6 +4,7 @@ import com.joklek.rentbot.bot.PostResponseCreator;
 import com.joklek.rentbot.bot.providers.PostDeduplicator;
 import com.joklek.rentbot.entities.Post;
 import com.joklek.rentbot.entities.PostEntityConverter;
+import com.joklek.rentbot.entities.PostPriceHistory;
 import com.joklek.rentbot.repo.DistrictRepo;
 import com.joklek.rentbot.repo.PostRepo;
 import com.joklek.rentbot.repo.UserRepo;
@@ -15,6 +16,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -66,7 +68,6 @@ public class ScheduledScraper {
         var unpublishedPosts = shuffledScrapers.stream() // TODO parallel streams?
                 .map(ScheduledScraper::getLatestPosts)
                 .flatMap(Collection::stream)
-                .filter(not(post -> posts.existsByExternalIdAndSource(post.getExternalId(), post.getSource())))
                 .toList();
 
         var posts = unpublishedPosts.stream()
@@ -95,13 +96,35 @@ public class ScheduledScraper {
     }
 
     private Optional<Post> save(PostDto postDto) {
-        var post = postConverter.convert(postDto);
+        var maybePost = fetchPost(postDto);
+        if (maybePost.isEmpty()) {
+            return Optional.empty();
+        }
+
         try {
-            return Optional.of(posts.save(post));
+            return Optional.of(posts.save(maybePost.get()));
         } catch (Exception e) {
             LOGGER.error("Failed to save post", e);
             return Optional.empty();
         }
+    }
+
+    private Optional<Post> fetchPost(PostDto postDto) {
+        var foundPost = posts.findByExternalIdAndSource(postDto.getExternalId(), postDto.getSource());
+        if (foundPost.isEmpty() || postDto.getPrice().isEmpty()) {
+            return Optional.of(postConverter.convert(postDto));
+        }
+
+        var post = foundPost.get();
+        var newPrice = postDto.getPrice().get();
+        if (post.getPrice().isPresent() && post.getPrice().get().compareTo(newPrice) == 0) {
+            return Optional.empty();
+        }
+
+        LOGGER.info("Price changed for post with ID: {}. Old price: {}. New price: {}", post.getId(), post.getPrice().orElse(BigDecimal.ZERO), newPrice);
+        post.setPrice(newPrice);
+        post.addPostPriceHistory(new PostPriceHistory(newPrice));
+        return Optional.of(post);
     }
 
     private void notifyUsers(List<Post> posts) {

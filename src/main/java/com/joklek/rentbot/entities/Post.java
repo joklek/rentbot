@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -34,6 +36,10 @@ public class Post {
     private BigDecimal area;
     private String buildingState;
     private String buildingMaterial;
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "post_id")
+    private List<PostPriceHistory> postPriceHistory = new ArrayList<>();
 
     public Long getId() {
         return id;
@@ -181,6 +187,20 @@ public class Post {
 
     public Post setBuildingState(String buildingState) {
         this.buildingState = buildingState;
+        return this;
+    }
+
+    public void addPostPriceHistory(PostPriceHistory postPriceHistory) {
+        getPostPriceHistory().add(postPriceHistory);
+        postPriceHistory.setPost(this);
+    }
+
+    public List<PostPriceHistory> getPostPriceHistory() {
+        return postPriceHistory;
+    }
+
+    public Post setPostPriceHistory(List<PostPriceHistory> postPriceHistory) {
+        this.postPriceHistory = postPriceHistory;
         return this;
     }
 

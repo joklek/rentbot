@@ -1,17 +1,22 @@
 package com.joklek.rentbot.repo;
 
 import com.joklek.rentbot.entities.Post;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface PostRepo extends JpaRepository<Post, Long> {
 
     boolean existsByExternalIdAndSource(String externalId, String source);
+
+    @EntityGraph(attributePaths = "postPriceHistory")
+    Optional<Post> findByExternalIdAndSource(String externalId, String source);
 
     @Query(value = "SELECT distinct p FROM Post p " +
             "JOIN User u ON u.id = :userId " +

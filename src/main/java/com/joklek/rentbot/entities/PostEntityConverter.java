@@ -44,7 +44,10 @@ public class PostEntityConverter {
         postDto.getArea()
                 .ifPresent(post::setArea);
         postDto.getPrice()
-                .ifPresent(post::setPrice);
+                .ifPresent(price -> {
+                    post.setPrice(price);
+                    post.addPostPriceHistory(new PostPriceHistory(price));
+                });
         postDto.getRooms()
                 .ifPresent(post::setRooms);
         postDto.getYear()
