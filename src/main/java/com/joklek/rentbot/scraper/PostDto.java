@@ -20,6 +20,7 @@ public abstract class PostDto {
     private Integer year;
     private String buildingState;
     private String buildingMaterial;
+    private boolean isPartial = false;
 
     public abstract String getSource();
 
@@ -155,6 +156,15 @@ public abstract class PostDto {
 
     public PostDto setBuildingState(String buildingState) {
         this.buildingState = buildingState;
+        return this;
+    }
+
+    public boolean isPartial() {
+        return isPartial;
+    }
+
+    public PostDto setPartial(boolean partial) {
+        isPartial = partial;
         return this;
     }
 }
