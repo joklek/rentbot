@@ -63,6 +63,7 @@ class ConfigCommandTest extends IntegrationTest {
                 
                 
                 🔄 *Filter by district*: no (/districts to configure)
+
                 """;
 
         assertThat(response).hasSize(1);
@@ -93,6 +94,8 @@ class ConfigCommandTest extends IntegrationTest {
                 ```
                 
                 🔄 *Filter by district*: no (/districts to configure)
+                
+                🔔 Scanning is enabled
                 """;
         assertThat(response).hasSize(1);
         assertThat(response.get(0).getParameters()).containsEntry("text", expectedText);
@@ -134,6 +137,8 @@ class ConfigCommandTest extends IntegrationTest {
                 ```
                 
                 🔄 *Filter by district*: no (/districts to configure)
+                
+                🔕 Scanning is **disabled**. You will not see new posts
                 """;
         assertThat(response).hasSize(1);
         assertThat(response.get(0).getParameters()).containsEntry("text", expectedText);
@@ -173,7 +178,7 @@ class ConfigCommandTest extends IntegrationTest {
                 ```
                 Here's how your message might look like:
                 ```
-                /config 200 330 1 2 50 2000 2 yes
+                /config 200 330 1 2 50 2000 2
                 
                 ```Here you'd search for flats between 200 and 330 eur, 1-2 rooms, total area is 50m², built after 2000, starting on the second floor
                 """;
@@ -209,7 +214,7 @@ class ConfigCommandTest extends IntegrationTest {
                 ```
                 Here's how your message might look like:
                 ```
-                /config 200 330 1 2 50 2000 2 yes
+                /config 200 330 1 2 50 2000 2
                 
                 ```Here you'd search for flats between 200 and 330 eur, 1-2 rooms, total area is 50m², built after 2000, starting on the second floor
                 """, message);
