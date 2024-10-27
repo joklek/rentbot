@@ -1,0 +1,172 @@
+package com.joklek.rentbot.scraper;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.joklek.rentbot.repo.PostRepo;
+import org.jsoup.nodes.Element;
+import org.slf4j.Logger;
+import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
+import static java.net.URI.create;
+import static org.slf4j.LoggerFactory.getLogger;
+
+@Component
+public class OberHausScraper extends JsoupScraper {
+    private static final Logger LOGGER = getLogger(OberHausScraper.class);
+    private static final URI BASE_URL = URI.create("https://www.ober-haus.lt/api/object.php?sorting=newest&page=1&type=Apartment+for+sale&city=Vilniaus+m.+sav.&sorting_select=newest");
+    private static final String DEFAULT_USER_AGENT = "Mozilla/5.0 (Android 14; Mobile; rv:129.0) Gecko/129.0 Firefox/129.0";
+    private final PostRepo posts;
+
+    private final HttpClient client;
+    private final ObjectMapper mapper;
+
+    public OberHausScraper(PostRepo posts, HttpClient client, ObjectMapper mapper) {
+        this.posts = posts;
+        this.client = client;
+        this.mapper = mapper;
+    }
+
+    @Override
+    public List<PostDto> getLatestPosts() {
+        var maybeTree = getPosts(BASE_URL);
+        if (maybeTree.isEmpty() || maybeTree.get().get("objects").isEmpty()) {
+            return List.of();
+        }
+        var rawPosts = jsonNodeToList(maybeTree.get().get("objects"));
+
+        return rawPosts.stream()
+                .filter(rawPost -> !rawPost.get("html").textValue().contains("<span class=\"reserved\">"))
+                .map(rawPost -> processItem(rawPost.get("id").textValue()))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .toList();
+    }
+
+    private Optional<PostDto> processItem(String id) {
+        if (posts.existsByExternalIdAndSource(id, OberHausPost.SOURCE)) {
+            return Optional.empty();
+        }
+
+        var link = create(String.format("https://www.ober-haus.lt/butas-pardavimas-vilniaus-m,%s", id));
+
+        var maybeDocument = getDocument(link);
+        if (maybeDocument.isEmpty()) {
+            // TODO log empty
+            return Optional.empty();
+        }
+        var document = maybeDocument.get();
+
+        var post = new OberHausPost();
+
+        var description = Optional.ofNullable(document.select("div.object__content_text").first()).map(Element::text).map(x -> x.replace("Apie šį turtą ", ""));
+        var rawAddress = Optional.ofNullable(document.select("h1.title").first()).map(Element::text);
+        Optional<String> district = Optional.empty();
+        Optional<String> street = Optional.empty();
+        if (rawAddress.isPresent() && rawAddress.get().contains(",")) {
+            var splitAddress = rawAddress.get().split(", ");
+            district = Optional.of(splitAddress[1]);
+            if (splitAddress.length > 2) {
+                street = Optional.of(splitAddress[2]);
+            }
+        }
+        var price = Optional.ofNullable(document.select("span.price").first()).map(Element::text)
+                .map(priceRaw -> priceRaw.replace(" ", "").trim())
+                .flatMap(ScraperHelper::parseBigDecimal);
+
+        var moreInfo = document.select("li.item").stream()
+                .collect(Collectors.toMap(x -> x.removeClass("item").className(), x -> x.select("div.right").text()));
+        var heating = Optional.ofNullable(moreInfo.get("item-heating"));
+        var floors = Optional.ofNullable(moreInfo.get("item-floor"));
+        var floor = floors.map(floorRaw -> floorRaw.split(" ")[0])
+                .flatMap(ScraperHelper::parseInt);
+        var totalFloors = floors.map(floorRaw -> floorRaw.split(" ")[2])
+                .flatMap(ScraperHelper::parseInt);
+        var area = Optional.ofNullable(moreInfo.get("item-area"))
+                .map(areaRaw -> areaRaw.trim().split(" ")[0])
+                .flatMap(ScraperHelper::parseBigDecimal);
+        var rooms = Optional.ofNullable(moreInfo.get("item-rooms"))
+                .flatMap(ScraperHelper::parseInt);
+        var year = Optional.ofNullable(moreInfo.get("item-year"))
+                .flatMap(ScraperHelper::parseInt);
+        var shortLink = Optional.ofNullable(moreInfo.get("item-reference")).map(URI::create);
+
+        post.setExternalId(id);
+        post.setLink(shortLink.orElse(link));
+
+        description.ifPresent(post::setDescription);
+        district.ifPresent(post::setDistrict);
+        street.ifPresent(post::setStreet);
+        heating.ifPresent(post::setHeating);
+        floor.ifPresent(post::setFloor);
+        totalFloors.ifPresent(post::setTotalFloors);
+        area.ifPresent(post::setArea);
+        price.ifPresent(post::setPrice);
+        rooms.ifPresent(post::setRooms);
+        year.ifPresent(post::setYear);
+
+        return Optional.of(post);
+    }
+
+    private Optional<JsonNode> getPosts(URI link) {
+        HttpResponse<String> response;
+        var request = HttpRequest.newBuilder()
+                .GET()
+                .uri(link)
+                .header("User-Agent", DEFAULT_USER_AGENT)
+                .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8")
+                .header("Accept-Language", "en-US")
+                .header("Upgrade-Insecure-Requests", "1")
+                .build();
+        try {
+            response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        } catch (IOException e) {
+            LOGGER.error("Failed while fetching '{}'", link, e);
+            return Optional.empty();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException(e);
+        }
+
+        if (response.statusCode() != 200) {
+            LOGGER.error("Failed while fetching '{}' with response code {}", link, response.statusCode());
+            return Optional.empty();
+        }
+
+        try {
+            return Optional.of(mapper.readTree(response.body()));
+        } catch (JsonProcessingException e) {
+            LOGGER.error("Failed while fetching '{}' because of invalid json", link, e);
+            return Optional.empty();
+        }
+    }
+
+    private List<JsonNode> jsonNodeToList(JsonNode node) {
+        if (!node.isArray()) {
+            LOGGER.warn("Expected array, but got {}", node.getNodeType());
+            return List.of();
+        }
+
+        return StreamSupport.stream(node.spliterator(), false).toList();
+    }
+
+
+    private static class OberHausPost extends PostDto {
+        private static final String SOURCE = "OberHaus";
+
+        @Override
+        public String getSource() {
+            return SOURCE;
+        }
+    }
+}
