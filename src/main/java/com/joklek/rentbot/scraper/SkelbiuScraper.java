@@ -60,6 +60,17 @@ public class SkelbiuScraper implements Scraper {
         var originalWindow = driver.getWindowHandle();
         var skelbiuId = rawPost.getAttribute("data-item-id");
         if (posts.existsByExternalIdAndSource(skelbiuId, SkelbiuPost.SOURCE)) {
+            var partialPost = new SkelbiuPost();
+            partialPost.setPartial(true);
+            partialPost.setExternalId(skelbiuId);
+
+            var elements = rawPost.findElements(By.cssSelector(".collapsed-info .price-item .price"));
+            if (!elements.isEmpty()) {
+                var price = elements.get(0).getText().trim()
+                        .replace(" ", "")
+                        .replace("€", "");
+                ScraperHelper.parseBigDecimal(price).ifPresent(partialPost::setPrice);
+            }
             return Optional.empty();
         }
 

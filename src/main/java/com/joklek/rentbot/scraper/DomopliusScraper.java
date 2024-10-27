@@ -41,6 +41,17 @@ public class DomopliusScraper extends JsoupScraper {
         var domoId = rawPost.attr("id").replace("ann_", "");
         var link = URI.create(String.format("https://domoplius.lt/skelbimai/-%s.html", domoId));
         if (posts.existsByExternalIdAndSource(domoId, DomopliusPost.SOURCE)) {
+            var partialPost = new DomopliusPost();
+            partialPost.setPartial(true);
+            partialPost.setExternalId(domoId);
+            var price = Optional.ofNullable(rawPost.select("span.price-list > strong").first())
+                    .map(Element::text)
+                    .map(priceRaw -> priceRaw.trim()
+                            .replace(" ", "")
+                            .replace("€", ""))
+                    .flatMap(ScraperHelper::parseBigDecimal);
+
+            price.ifPresent(partialPost::setPrice);
             return Optional.empty();
         }
 

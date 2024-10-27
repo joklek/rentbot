@@ -41,6 +41,18 @@ public class CapitalScraper extends JsoupScraper {
         var capitalId = rawPost.attr("id").replace("item-", "");
         var link = URI.create(String.format("https://www.capital.lt/lt/p%s", capitalId));
         if (posts.existsByExternalIdAndSource(capitalId, CapitalPost.SOURCE)) {
+            var partialPost = new CapitalPost();
+            partialPost.setPartial(true);
+            partialPost.setExternalId(capitalId);
+            var price = Optional.ofNullable(rawPost.select("div.realty-item-price > strong").first())
+                    .map(Element::text)
+                    .map(priceRaw -> priceRaw.trim()
+                            .replace(" ", "")
+                            .replace(",", "")
+                            .replace("€", ""))
+                    .flatMap(ScraperHelper::parseBigDecimal);
+
+            price.ifPresent(partialPost::setPrice);
             return Optional.empty();
         }
 
