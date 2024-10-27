@@ -74,6 +74,7 @@ class ConfigCommandTest extends IntegrationTest {
                 
                 
                 🔄 *Filter by district*: no (/districts to configure)
+
                 """;
 
         assertThat(response).hasSize(1);
@@ -104,6 +105,8 @@ class ConfigCommandTest extends IntegrationTest {
                 ```
                 
                 🔄 *Filter by district*: no (/districts to configure)
+                
+                🔔 Scanning is enabled
                 """;
         assertThat(response).hasSize(1);
         assertThat(response.get(0).getParameters()).containsEntry("text", expectedText);
@@ -146,6 +149,8 @@ class ConfigCommandTest extends IntegrationTest {
                 ```
                 
                 🔄 *Filter by district*: no (/districts to configure)
+                
+                🔕 Scanning is **disabled**. You will not see new posts
                 """;
         assertThat(response).hasSize(1);
         assertThat(response.get(0).getParameters()).containsEntry("text", expectedText);
@@ -187,6 +192,8 @@ class ConfigCommandTest extends IntegrationTest {
                 ```
                 
                 🔄 *Filter by district*: no (/districts to configure)
+                
+                🔔 Scanning is enabled
                 """;
         assertThat(response).hasSize(1);
         assertThat(response.get(0).getParameters()).containsEntry("text", expectedText);
@@ -225,6 +232,8 @@ class ConfigCommandTest extends IntegrationTest {
                 ```
                 
                 🔄 *Filter by district*: yes (/districts to configure)
+                
+                🔔 Scanning is enabled
                 """;
         assertThat(response).hasSize(1);
         assertThat(response.get(0).getParameters()).containsEntry("text", expectedText);

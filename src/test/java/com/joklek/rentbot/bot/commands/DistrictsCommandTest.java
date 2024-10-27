@@ -84,7 +84,7 @@ class DistrictsCommandTest extends IntegrationTest {
         assertThat(response.get(0).getParameters()).containsKey("reply_markup");
         assertThat(response.get(0).getParameters().get("reply_markup")).isInstanceOf(InlineKeyboardMarkup.class);
         var replyMarkup = (InlineKeyboardMarkup) response.get(0).getParameters().get("reply_markup");
-        assertThat(replyMarkup.inlineKeyboard()).hasNumberOfRows(4);
+        assertThat(replyMarkup.inlineKeyboard()).hasNumberOfRows(5);
 
         // First row of districts
         assertThat(replyMarkup.inlineKeyboard()[0]).hasSize(3)
@@ -102,14 +102,17 @@ class DistrictsCommandTest extends IntegrationTest {
                 .allSatisfy(button -> assertThat(button.text()).isNotBlank());
 
         // Control row is present
-        assertThat(replyMarkup.inlineKeyboard()[3]).hasSize(4); // Control row
+        assertThat(replyMarkup.inlineKeyboard()[3]).hasSize(3); // Control row
         assertThat(replyMarkup.inlineKeyboard()[3][0].text()).isEqualTo("⬅");
         assertThat(replyMarkup.inlineKeyboard()[3][0].callbackData()).isEqualTo("/fdistricts:page:0");
         assertThat(replyMarkup.inlineKeyboard()[3][1].text()).isEqualTo("➡");
         assertThat(replyMarkup.inlineKeyboard()[3][1].callbackData()).isEqualTo("/fdistricts:page:1");
-        assertThat(replyMarkup.inlineKeyboard()[3][2].text()).isEqualTo("\uD83D\uDD04");
+        assertThat(replyMarkup.inlineKeyboard()[3][2].text()).isEqualTo("Reset");
         assertThat(replyMarkup.inlineKeyboard()[3][2].callbackData()).isEqualTo("/fdistricts:reset");
-        assertThat(replyMarkup.inlineKeyboard()[3][3].text()).isEqualTo("❌");
-        assertThat(replyMarkup.inlineKeyboard()[3][3].callbackData()).isEqualTo("/fdistricts:off");
+
+        // Last for filtering by district
+        assertThat(replyMarkup.inlineKeyboard()[4]).hasSize(1);
+        assertThat(replyMarkup.inlineKeyboard()[4][0].text()).isEqualTo("Remove filtering by district");
+        assertThat(replyMarkup.inlineKeyboard()[4][0].callbackData()).isEqualTo("/fdistricts:off");
     }
 }

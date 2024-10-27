@@ -59,7 +59,7 @@ class DisableCommandTest extends IntegrationTest {
         var user = users.findByTelegramId(CHAT_ID).get();
         // Auto enables user on first config change
         assertThat(response).hasSize(1);
-        assertThat(response.get(0).getParameters()).containsEntry("text", "Notifications disabled!");
+        assertThat(response.get(0).getParameters()).containsEntry("text", "Scanning disabled!");
         assertThat(user.getEnabled()).isFalse();
     }
 
@@ -72,7 +72,7 @@ class DisableCommandTest extends IntegrationTest {
         var user = users.findByTelegramId(CHAT_ID).get();
         // Auto enables user on first config change
         assertThat(response).hasSize(1);
-        assertThat(response.get(0).getParameters()).containsEntry("text", "Notifications disabled!");
+        assertThat(response.get(0).getParameters()).containsEntry("text", "Scanning disabled!");
         assertThat(user.getEnabled()).isFalse();
     }
 

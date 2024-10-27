@@ -58,7 +58,7 @@ class EnableCommandTest extends IntegrationTest {
 
         var user = users.findByTelegramId(CHAT_ID).get();
         assertThat(response).hasSize(1);
-        assertThat(response.get(0).getParameters()).containsEntry("text", "Notifications enabled!");
+        assertThat(response.get(0).getParameters()).containsEntry("text", "Scanning enabled!");
         assertThat(user.getEnabled()).isTrue();
     }
 
@@ -71,7 +71,7 @@ class EnableCommandTest extends IntegrationTest {
         var user = users.findByTelegramId(CHAT_ID).get();
 
         assertThat(response).hasSize(1);
-        assertThat(response.get(0).getParameters()).containsEntry("text", "Notifications enabled!");
+        assertThat(response.get(0).getParameters()).containsEntry("text", "Scanning enabled!");
         assertThat(user.getEnabled()).isTrue();
     }
 
