@@ -113,7 +113,7 @@ public class ScheduledScraper {
         var foundPost = posts.findByExternalIdAndSource(postDto.getExternalId(), postDto.getSource());
         if (foundPost.isEmpty() || postDto.getPrice().isEmpty()) {
             if (postDto.isPartial()) {
-                LOGGER.warn("Partial post found, skipping. ID: {}", postDto.getExternalId());
+                LOGGER.warn("Partial post found, skipping. ID: {} {}", postDto.getSource(), postDto.getExternalId());
                 return Optional.empty();
             }
             return Optional.of(postConverter.convert(postDto));

@@ -64,7 +64,7 @@ public class SkelbiuScraper implements Scraper {
             partialPost.setPartial(true);
             partialPost.setExternalId(skelbiuId);
 
-            var elements = rawPost.findElements(By.cssSelector(".collapsed-info .price-item .price"));
+            var elements = rawPost.findElements(By.cssSelector(".price-line div.price"));
             if (!elements.isEmpty()) {
                 var price = elements.get(0).getText().trim()
                         .replace(" ", "")
