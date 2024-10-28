@@ -53,7 +53,7 @@ public class CapitalScraper extends JsoupScraper {
                     .flatMap(ScraperHelper::parseBigDecimal);
 
             price.ifPresent(partialPost::setPrice);
-            return Optional.empty();
+            return Optional.of(partialPost);
         }
 
         var maybeExactPost = getDocument(link);

@@ -71,7 +71,7 @@ public class SkelbiuScraper implements Scraper {
                         .replace("€", "");
                 ScraperHelper.parseBigDecimal(price).ifPresent(partialPost::setPrice);
             }
-            return Optional.empty();
+            return Optional.of(partialPost);
         }
 
         var link = URI.create(String.format("https://skelbiu.lt/skelbimai/%s.html", skelbiuId));

@@ -35,13 +35,11 @@ public class AlioScraper extends JsoupScraper {
         var rawPosts = doc.select("#main_left_b > #main-content-center > a.result");
 
         return rawPosts.stream()
-                .map(rawPost -> rawPost.attr("href"))
-                .map(link -> UrlEscapers.urlFragmentEscaper().escape(link))
-                .map(link -> {
+                .map(rawPost -> {
                     try {
-                        return processItem(URI.create(link));
+                        return processItem(rawPost);
                     } catch (Exception e) {
-                        LOGGER.error("Can't parse post '{}'", link, e);
+                        LOGGER.error("Can't parse post '{}'", rawPost.attr("href"), e);
                         return Optional.<PostDto>empty();
                     }
                 })
@@ -50,12 +48,25 @@ public class AlioScraper extends JsoupScraper {
                 .toList();
     }
 
-    private Optional<PostDto> processItem(URI longLink) {
+    private Optional<PostDto> processItem(Element rawPost) {
+        var rawLongLink = UrlEscapers.urlFragmentEscaper().escape(rawPost.attr("href"));
+        var longLink = URI.create(rawLongLink);
         var linkElements = longLink.toString().split("/");
         var alioId = linkElements[linkElements.length - 1].replaceFirst(".html$", "").replaceFirst("^ID", "");
         var link = URI.create(String.format("https://www.alio.lt/skelbimai/ID%s.html", alioId));
         if (posts.existsByExternalIdAndSource(alioId, AlioPost.SOURCE)) {
-            return Optional.empty();
+            var partialPost = new AlioPost();
+            partialPost.setPartial(true);
+            partialPost.setExternalId(alioId);
+            var price = Optional.ofNullable(rawPost.select(".main_price").first())
+                    .map(Element::text)
+                    .map(priceRaw -> priceRaw.trim()
+                            .replace(" ", "")
+                            .replace("€", ""))
+                    .flatMap(ScraperHelper::parseBigDecimal);
+
+            price.ifPresent(partialPost::setPrice);
+            return Optional.of(partialPost);
         }
 
         var maybeExactPost = getDocument(longLink);
