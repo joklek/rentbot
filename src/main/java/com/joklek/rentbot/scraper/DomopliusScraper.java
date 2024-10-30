@@ -60,7 +60,7 @@ public class DomopliusScraper extends JsoupScraper {
 
     private Optional<PostDto> processPartialItem(Element rawPost) {
         var domoId = rawPost.attr("id").replace("ann_", "");
-        var link = URI.create(String.format("https://domoplius.lt/skelbimai/-%s.html", domoId));
+        var link = URI.create(rawPost.select("li a").attr("href"));
         var price = Optional.ofNullable(rawPost.select("span.price-list > strong").first())
                 .map(Element::text)
                 .map(priceRaw -> priceRaw.trim()
@@ -139,7 +139,9 @@ public class DomopliusScraper extends JsoupScraper {
                 .flatMap(ScraperHelper::parseInt);
         var buildingState = Optional.ofNullable(moreInfo.get("Būklė"));
         var buildingMaterial = Optional.ofNullable(moreInfo.get("Namo tipas"));
+        var link = URI.create(String.format("https://domoplius.lt/skelbimai/-%s.html", post.getExternalId()));
 
+        post.setLink(link);
         description.ifPresent(post::setDescription);
         district.ifPresent(post::setDistrict);
         street.ifPresent(post::setStreet);
