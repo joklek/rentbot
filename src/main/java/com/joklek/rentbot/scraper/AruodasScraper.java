@@ -44,36 +44,84 @@ public class AruodasScraper implements Scraper {
 
     private List<PostDto> getPosts(WebDriver driver) {
         driver.get(BASE_URL.toString());
-        var ids = driver.findElements(By.cssSelector("ul.search-result-list-big_thumbs > li.result-item-big-thumb:not([style='display: none'])"))
-                .stream().flatMap(rawPost -> {
-                    var relatedIds = rawPost.findElements(By.cssSelector("table tr td.goto > a")).stream().map(element -> element.getAttribute("href").split("/")[3]).toList();
-                    var mainId = rawPost.getAttribute("data-id").replace("loadobject", "");
-                    return Stream.concat(relatedIds.stream(), Stream.of(mainId));
-                })
+        var partialPosts = driver.findElements(By.cssSelector("ul.search-result-list-big_thumbs > li.result-item-big-thumb:not([style='display: none'])"))
+                .stream().flatMap(rawPost -> processPartialItems(rawPost).stream())
                 .toList();
-        if (ids.isEmpty()) {
+        if (partialPosts.isEmpty()) {
             LOGGER.error("Cant fetch posts, might be blocked");
             return List.of();
         }
 
-        return ids.stream()
-                .map(aruodasId -> processItem(aruodasId, driver))
+        return partialPosts.stream()
+                .map(post -> {
+                    try {
+                        return processItem(post, driver);
+                    } catch (Exception e) {
+                        LOGGER.error("Can't parse post '{}'", post.getLink(), e);
+                        return Optional.<PostDto>empty();
+                    }
+                })
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .toList();
     }
 
-    private Optional<PostDto> processItem(String aruodasId, WebDriver driver) {
-        var originalWindow = driver.getWindowHandle();
+    private List<PostDto> processPartialItems(WebElement rawPost) {
+        var relatedPosts = rawPost.findElements(By.cssSelector("table tr")).stream()
+                .map(this::processPartialRelatedItem).filter(Optional::isPresent).map(Optional::get).toList();
+        var mainPost = processPartialItem(rawPost);
 
-        if (posts.existsByExternalIdAndSource(aruodasId, AruodasPost.SOURCE)) {
+        return Stream.concat(relatedPosts.stream(), mainPost.stream()).toList();
+    }
+
+    private Optional<PostDto> processPartialRelatedItem(WebElement rawPost) {
+        var aruodasId = rawPost.findElements(By.cssSelector("td.goto > a")).stream()
+                .map(element -> element.getAttribute("href").split("/")[3]).findFirst();
+        if (aruodasId.isEmpty()) {
             return Optional.empty();
         }
 
-        var link = URI.create(String.format("https://aruodas.lt/%s", aruodasId));
-        driver.switchTo().newWindow(WindowType.TAB).get(link.toString());
-
+        var price = rawPost.findElements(By.cssSelector("a.proj-tb-itm-txt-price > span")).stream()
+                .map(WebElement::getText)
+                .map(rawPrice -> rawPrice.replace("€", "").replace(" ", "").trim())
+                .findFirst();
+        var link = URI.create(String.format("https://aruodas.lt/%s", aruodasId.get()));
         var post = new AruodasPost();
+
+        post.setPartial(true);
+        post.setExternalId(aruodasId.get());
+        post.setLink(link);
+        price.flatMap(ScraperHelper::parseBigDecimal).ifPresent(post::setPrice);
+
+        return Optional.of(post);
+    }
+
+    private Optional<PostDto> processPartialItem(WebElement rawPost) {
+        var aruodasId = rawPost.getAttribute("data-id").replace("loadobject", "");
+
+        var price = rawPost.findElements(By.cssSelector("span.price-main")).stream()
+                .map(WebElement::getText)
+                .map(rawPrice -> rawPrice.replace("€", "").replace(" ", "").trim())
+                .findFirst();
+        var link = URI.create(String.format("https://aruodas.lt/%s", aruodasId));
+        var post = new AruodasPost();
+
+        post.setPartial(true);
+        post.setExternalId(aruodasId);
+        post.setLink(link);
+        price.flatMap(ScraperHelper::parseBigDecimal).ifPresent(post::setPrice);
+
+        return Optional.of(post);
+    }
+
+    private Optional<PostDto> processItem(PostDto post, WebDriver driver) {
+        var originalWindow = driver.getWindowHandle();
+        if (posts.existsByExternalIdAndSource(post.getExternalId(), AruodasPost.SOURCE)) {
+            return Optional.of(post);
+        }
+
+        driver.switchTo().newWindow(WindowType.TAB).get(post.getLink().toString());
+
         var description = selectByCss(driver, "#collapsedTextBlock > #collapsedText");
         var rawAddress = selectByCss(driver, ".main-content > .obj-cont > h1")
                 .or(() -> selectByCss(driver, ".advert-info-header .title-col > h1"))
@@ -112,8 +160,6 @@ public class AruodasScraper implements Scraper {
         var buildingState = Optional.ofNullable(moreInfo.get("Įrengimas:"));
         var buildingMaterial = Optional.ofNullable(moreInfo.get("Pastato tipas:"));
 
-        post.setExternalId(aruodasId);
-        post.setLink(link);
         district.ifPresent(post::setDistrict);
         street.ifPresent(post::setStreet);
         houseNumber.ifPresent(post::setHouseNumber);
@@ -127,6 +173,7 @@ public class AruodasScraper implements Scraper {
         year.ifPresent(post::setYear);
         buildingState.ifPresent(post::setBuildingState);
         buildingMaterial.ifPresent(post::setBuildingMaterial);
+        post.setPartial(false);
 
         driver.close();
         driver.switchTo().window(originalWindow);

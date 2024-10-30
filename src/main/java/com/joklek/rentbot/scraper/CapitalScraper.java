@@ -2,6 +2,7 @@ package com.joklek.rentbot.scraper;
 
 import com.joklek.rentbot.repo.PostRepo;
 import org.jsoup.nodes.Element;
+import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
 import java.net.URI;
@@ -10,9 +11,12 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static org.slf4j.LoggerFactory.getLogger;
+
 @Component
 public class CapitalScraper extends JsoupScraper {
     private static final URI BASE_URL = URI.create("https://www.capital.lt/lt/nekilnojamas-turtas/butai-pardavimui/vilniaus-m-sav/vilnius");
+    private static final Logger LOGGER = getLogger(CapitalScraper.class);
 
     private final PostRepo posts;
 
@@ -31,37 +35,58 @@ public class CapitalScraper extends JsoupScraper {
         var rawPosts = doc.select("div.realty-items > a:not(.realty-status-sold)");
 
         return rawPosts.stream()
-                .map(rawPost -> processItem(rawPost))
+                .map(rawPost -> {
+                    try {
+                        return processPartialItem(rawPost);
+                    } catch (Exception e) {
+                        LOGGER.error("Can't parse post '{}'", rawPost.attr("id").replace("item-", ""), e);
+                        return Optional.<PostDto>empty();
+                    }
+                })
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .map(post -> {
+                    try {
+                        return processItem(post);
+                    } catch (Exception e) {
+                        LOGGER.error("Can't parse post '{}'", post.getLink(), e);
+                        return Optional.<PostDto>empty();
+                    }
+                })
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .toList();
     }
 
-    private Optional<PostDto> processItem(Element rawPost) {
+    private Optional<PostDto> processPartialItem(Element rawPost) {
         var capitalId = rawPost.attr("id").replace("item-", "");
         var link = URI.create(String.format("https://www.capital.lt/lt/p%s", capitalId));
-        if (posts.existsByExternalIdAndSource(capitalId, CapitalPost.SOURCE)) {
-            var partialPost = new CapitalPost();
-            partialPost.setPartial(true);
-            partialPost.setExternalId(capitalId);
-            var price = Optional.ofNullable(rawPost.select("div.realty-item-price > strong").first())
-                    .map(Element::text)
-                    .map(priceRaw -> priceRaw.trim()
-                            .replace(" ", "")
-                            .replace(",", "")
-                            .replace("€", ""))
-                    .flatMap(ScraperHelper::parseBigDecimal);
+        var price = Optional.ofNullable(rawPost.select("div.realty-item-price > strong").first())
+                .map(Element::text)
+                .map(priceRaw -> priceRaw.trim()
+                        .replace(" ", "")
+                        .replace(",", "")
+                        .replace("€", ""))
+                .flatMap(ScraperHelper::parseBigDecimal);
+        var post = new CapitalPost();
 
-            price.ifPresent(partialPost::setPrice);
-            return Optional.of(partialPost);
+        post.setExternalId(capitalId);
+        post.setLink(link);
+        price.ifPresent(post::setPrice);
+        post.setPartial(true);
+
+        return Optional.of(post);
+    }
+
+    private Optional<PostDto> processItem(PostDto post) {
+        if (posts.existsByExternalIdAndSource(post.getExternalId(), CapitalPost.SOURCE)) {
+            return Optional.of(post);
         }
-
-        var maybeExactPost = getDocument(link);
+        var maybeExactPost = getDocument(post.getLink());
         if (maybeExactPost.isEmpty()) {
             return Optional.empty();
         }
         var exactPost = maybeExactPost.get();
-        var post = new CapitalPost();
         var description = Optional.ofNullable(exactPost.select(".realty-description").first())
                 .map(Element::text);
 
@@ -123,9 +148,6 @@ public class CapitalScraper extends JsoupScraper {
         var buildingState = Optional.ofNullable(moreInfo.get("Įrengimo lygis"));
         var buildingMaterial = Optional.ofNullable(moreInfo.get("Statinio tipas"));
 
-        post.setExternalId(capitalId);
-        post.setLink(link);
-
         description.ifPresent(post::setDescription);
         district.ifPresent(post::setDistrict);
         street.ifPresent(post::setStreet);
@@ -139,6 +161,7 @@ public class CapitalScraper extends JsoupScraper {
         year.ifPresent(post::setYear);
         buildingState.ifPresent(post::setBuildingState);
         buildingMaterial.ifPresent(post::setBuildingMaterial);
+        post.setPartial(false);
 
         return Optional.of(post);
     }

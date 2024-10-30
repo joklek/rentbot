@@ -50,34 +50,54 @@ public class SkelbiuScraper implements Scraper {
         }
 
         return rawPosts.stream()
-                .map(rawPost -> processItem(rawPost, driver))
+                .map(rawPost -> {
+                    try {
+                        return processPartialItem(rawPost);
+                    } catch (Exception e) {
+                        LOGGER.error("Can't parse post '{}'", rawPost.getAttribute("data-item-id"), e);
+                        return Optional.<PostDto>empty();
+                    }
+                })
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .map(post -> {
+                    try {
+                        return processItem(post, driver);
+                    } catch (Exception e) {
+                        LOGGER.error("Can't parse post '{}'", post.getLink(), e);
+                        return Optional.<PostDto>empty();
+                    }
+                })
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .toList();
     }
 
-    private Optional<PostDto> processItem(WebElement rawPost, WebDriver driver) {
-        var originalWindow = driver.getWindowHandle();
+    private Optional<PostDto> processPartialItem(WebElement rawPost) {
         var skelbiuId = rawPost.getAttribute("data-item-id");
-        if (posts.existsByExternalIdAndSource(skelbiuId, SkelbiuPost.SOURCE)) {
-            var partialPost = new SkelbiuPost();
-            partialPost.setPartial(true);
-            partialPost.setExternalId(skelbiuId);
-
-            var elements = rawPost.findElements(By.cssSelector(".price-line div.price"));
-            if (!elements.isEmpty()) {
-                var price = elements.get(0).getText().trim()
-                        .replace(" ", "")
-                        .replace("€", "");
-                ScraperHelper.parseBigDecimal(price).ifPresent(partialPost::setPrice);
-            }
-            return Optional.of(partialPost);
-        }
-
         var link = URI.create(String.format("https://skelbiu.lt/skelbimai/%s.html", skelbiuId));
-        driver.switchTo().newWindow(WindowType.TAB).get(link.toString());
-
         var post = new SkelbiuPost();
+        post.setPartial(true);
+        post.setExternalId(skelbiuId);
+        post.setLink(link);
+
+        var elements = rawPost.findElements(By.cssSelector(".price-line div.price"));
+        if (!elements.isEmpty()) {
+            var price = elements.get(0).getText().trim()
+                    .replace(" ", "")
+                    .replace("€", "");
+            ScraperHelper.parseBigDecimal(price).ifPresent(post::setPrice);
+        }
+        return Optional.of(post);
+    }
+
+    private Optional<PostDto> processItem(PostDto post, WebDriver driver) {
+        if (posts.existsByExternalIdAndSource(post.getExternalId(), SkelbiuPost.SOURCE)) {
+            return Optional.of(post);
+        }
+        var originalWindow = driver.getWindowHandle();
+        driver.switchTo().newWindow(WindowType.TAB).get(post.getLink().toString());
+
         var description = selectByCss(driver, "div[itemprop='description']");
         var price = selectByCss(driver, "p.price")
                 .map(x -> x.replace("€", ""))
@@ -109,9 +129,6 @@ public class SkelbiuScraper implements Scraper {
         var buildingState = Optional.ofNullable(moreInfo.get("Įrengimas:"));
         var buildingMaterial = Optional.ofNullable(moreInfo.get("Tipas:"));
 
-        post.setExternalId(skelbiuId);
-        post.setLink(link);
-
         description.ifPresent(post::setDescription);
         district.ifPresent(post::setDistrict);
         street.ifPresent(post::setStreet);
@@ -125,6 +142,7 @@ public class SkelbiuScraper implements Scraper {
         year.ifPresent(post::setYear);
         buildingState.ifPresent(post::setBuildingState);
         buildingMaterial.ifPresent(post::setBuildingMaterial);
+        post.setPartial(false);
 
         driver.close();
         driver.switchTo().window(originalWindow);

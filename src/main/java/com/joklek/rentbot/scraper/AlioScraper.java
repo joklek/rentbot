@@ -37,9 +37,19 @@ public class AlioScraper extends JsoupScraper {
         return rawPosts.stream()
                 .map(rawPost -> {
                     try {
-                        return processItem(rawPost);
+                        return processPartialItem(rawPost);
                     } catch (Exception e) {
                         LOGGER.error("Can't parse post '{}'", rawPost.attr("href"), e);
+                        return Optional.<PostDto>empty();
+                    }
+                })
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .map(post -> {
+                    try {
+                        return processItem(post);
+                    } catch (Exception e) {
+                        LOGGER.error("Can't parse post '{}'", post.getLink(), e);
                         return Optional.<PostDto>empty();
                     }
                 })
@@ -48,34 +58,37 @@ public class AlioScraper extends JsoupScraper {
                 .toList();
     }
 
-    private Optional<PostDto> processItem(Element rawPost) {
+    private Optional<PostDto> processPartialItem(Element rawPost) {
         var rawLongLink = UrlEscapers.urlFragmentEscaper().escape(rawPost.attr("href"));
         var longLink = URI.create(rawLongLink);
         var linkElements = longLink.toString().split("/");
         var alioId = linkElements[linkElements.length - 1].replaceFirst(".html$", "").replaceFirst("^ID", "");
         var link = URI.create(String.format("https://www.alio.lt/skelbimai/ID%s.html", alioId));
-        if (posts.existsByExternalIdAndSource(alioId, AlioPost.SOURCE)) {
-            var partialPost = new AlioPost();
-            partialPost.setPartial(true);
-            partialPost.setExternalId(alioId);
-            var price = Optional.ofNullable(rawPost.select(".main_price").first())
-                    .map(Element::text)
-                    .map(priceRaw -> priceRaw.trim()
-                            .replace(" ", "")
-                            .replace("€", ""))
-                    .flatMap(ScraperHelper::parseBigDecimal);
+        var price = Optional.ofNullable(rawPost.select(".main_price").first())
+                .map(Element::text)
+                .map(priceRaw -> priceRaw.trim()
+                        .replace(" ", "")
+                        .replace("€", ""))
+                .flatMap(ScraperHelper::parseBigDecimal);
+        var post = new AlioPost();
 
-            price.ifPresent(partialPost::setPrice);
-            return Optional.of(partialPost);
+        post.setExternalId(alioId);
+        post.setLink(link);
+        price.ifPresent(post::setPrice);
+        post.setPartial(true);
+
+        return Optional.of(post);
+    }
+
+    private Optional<PostDto> processItem(PostDto post) {
+        if (posts.existsByExternalIdAndSource(post.getExternalId(), AlioPost.SOURCE)) {
+            return Optional.of(post);
         }
-
-        var maybeExactPost = getDocument(longLink);
+        var maybeExactPost = getDocument(post.getLink());
         if (maybeExactPost.isEmpty()) {
-            // TODO log empty
             return Optional.empty();
         }
         var exactPost = maybeExactPost.get();
-        var post = new AlioPost();
         var description = Optional.ofNullable(exactPost.select("#adv_description_b > .a_line_val").first()).map(Element::text);
 
         var moreInfo = exactPost.select(".data_moreinfo_b").stream()
@@ -110,9 +123,6 @@ public class AlioScraper extends JsoupScraper {
         var buildingState = Optional.ofNullable(moreInfo.get("Būsto būklė"));
         var buildingMaterial = Optional.ofNullable(moreInfo.get("Namo tipas"));
 
-        post.setExternalId(alioId);
-        post.setLink(link);
-
         description.ifPresent(post::setDescription);
         district.ifPresent(post::setDistrict);
         street.ifPresent(post::setStreet);
@@ -125,6 +135,7 @@ public class AlioScraper extends JsoupScraper {
         year.ifPresent(post::setYear);
         buildingState.ifPresent(post::setBuildingState);
         buildingMaterial.ifPresent(post::setBuildingMaterial);
+        post.setPartial(false);
 
         return Optional.of(post);
     }

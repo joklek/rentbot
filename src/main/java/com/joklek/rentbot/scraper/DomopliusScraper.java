@@ -2,6 +2,7 @@ package com.joklek.rentbot.scraper;
 
 import com.joklek.rentbot.repo.PostRepo;
 import org.jsoup.nodes.Element;
+import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
 import java.net.URI;
@@ -10,8 +11,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static org.slf4j.LoggerFactory.getLogger;
+
 @Component
 public class DomopliusScraper extends JsoupScraper {
+    private static final Logger LOGGER = getLogger(DomopliusScraper.class);
     private static final URI BASE_URL = URI.create("https://m.domoplius.lt/skelbimai/butai?action_type=1&address_1=461&category=1&order_by=1&order_direction=DESC");
 
     private final PostRepo posts;
@@ -31,36 +35,57 @@ public class DomopliusScraper extends JsoupScraper {
         var rawPosts = doc.select("ul.list > li[id^='ann_']");
 
         return rawPosts.stream()
-                .map(rawPost -> processItem(rawPost))
+                .map(rawPost -> {
+                    try {
+                        return processPartialItem(rawPost);
+                    } catch (Exception e) {
+                        LOGGER.error("Can't parse post '{}'", rawPost.attr("id").replace("ann_", ""), e);
+                        return Optional.<PostDto>empty();
+                    }
+                })
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .map(post -> {
+                    try {
+                        return processItem(post);
+                    } catch (Exception e) {
+                        LOGGER.error("Can't parse post '{}'", post.getLink(), e);
+                        return Optional.<PostDto>empty();
+                    }
+                })
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .toList();
     }
 
-    private Optional<PostDto> processItem(Element rawPost) {
+    private Optional<PostDto> processPartialItem(Element rawPost) {
         var domoId = rawPost.attr("id").replace("ann_", "");
         var link = URI.create(String.format("https://domoplius.lt/skelbimai/-%s.html", domoId));
-        if (posts.existsByExternalIdAndSource(domoId, DomopliusPost.SOURCE)) {
-            var partialPost = new DomopliusPost();
-            partialPost.setPartial(true);
-            partialPost.setExternalId(domoId);
-            var price = Optional.ofNullable(rawPost.select("span.price-list > strong").first())
-                    .map(Element::text)
-                    .map(priceRaw -> priceRaw.trim()
-                            .replace(" ", "")
-                            .replace("€", ""))
-                    .flatMap(ScraperHelper::parseBigDecimal);
+        var price = Optional.ofNullable(rawPost.select("span.price-list > strong").first())
+                .map(Element::text)
+                .map(priceRaw -> priceRaw.trim()
+                        .replace(" ", "")
+                        .replace("€", ""))
+                .flatMap(ScraperHelper::parseBigDecimal);
+        var post = new DomopliusPost();
 
-            price.ifPresent(partialPost::setPrice);
-            return Optional.of(partialPost);
+        post.setPartial(true);
+        post.setExternalId(domoId);
+        post.setLink(link);
+        price.ifPresent(post::setPrice);
+
+        return Optional.of(post);
+    }
+
+    private Optional<PostDto> processItem(PostDto post) {
+        if (posts.existsByExternalIdAndSource(post.getExternalId(), DomopliusPost.SOURCE)) {
+            return Optional.of(post);
         }
-
-        var maybeExactPost = getDocument(URI.create(rawPost.select("li a").attr("href"))); // Not using created link because even with redirects turned on it doesn't work properly :/
+        var maybeExactPost = getDocument(post.getLink()); // Not using created link because even with redirects turned on it doesn't work properly :/
         if (maybeExactPost.isEmpty()) {
             return Optional.empty();
         }
         var exactPost = maybeExactPost.get();
-        var post = new DomopliusPost();
         var description = Optional.ofNullable(exactPost.select("div.container > div.group-comments").first())
                 .map(Element::text);
 
@@ -115,9 +140,6 @@ public class DomopliusScraper extends JsoupScraper {
         var buildingState = Optional.ofNullable(moreInfo.get("Būklė"));
         var buildingMaterial = Optional.ofNullable(moreInfo.get("Namo tipas"));
 
-        post.setExternalId(domoId);
-        post.setLink(link);
-
         description.ifPresent(post::setDescription);
         district.ifPresent(post::setDistrict);
         street.ifPresent(post::setStreet);
@@ -131,12 +153,9 @@ public class DomopliusScraper extends JsoupScraper {
         year.ifPresent(post::setYear);
         buildingState.ifPresent(post::setBuildingState);
         buildingMaterial.ifPresent(post::setBuildingMaterial);
+        post.setPartial(false);
 
         return Optional.of(post);
-    }
-
-    private String decode(String dataEncoded) {
-        return new String(Base64.getDecoder().decode(dataEncoded.substring(2)));
     }
 
     private static class DomopliusPost extends PostDto {

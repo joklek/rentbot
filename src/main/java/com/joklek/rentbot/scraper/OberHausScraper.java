@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.joklek.rentbot.repo.PostRepo;
+import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
@@ -46,28 +47,64 @@ public class OberHausScraper extends JsoupScraper {
         var rawPosts = jsonNodeToList(maybeTree.get().get("objects"));
 
         return rawPosts.stream()
-                .filter(rawPost -> !rawPost.get("html").textValue().contains("<span class=\"reserved\">"))
-                .map(rawPost -> processItem(rawPost.get("id").textValue()))
+                .map(rawPost -> {
+                    try {
+                        return processPartialItem(rawPost);
+                    } catch (Exception e) {
+                        LOGGER.error("Can't parse post '{}'", rawPost.get("id").textValue(), e);
+                        return Optional.<PostDto>empty();
+                    }
+                })
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .map(post -> {
+                    try {
+                        return processItem(post);
+                    } catch (Exception e) {
+                        LOGGER.error("Can't parse post '{}'", post.getLink(), e);
+                        return Optional.<PostDto>empty();
+                    }
+                })
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .toList();
     }
 
-    private Optional<PostDto> processItem(String id) {
-        if (posts.existsByExternalIdAndSource(id, OberHausPost.SOURCE)) {
+    private Optional<PostDto> processPartialItem(JsonNode rawPost) {
+        var rawHtml = rawPost.get("html").textValue();
+        var document = Jsoup.parse(rawHtml);
+        if (!document.select("span.reserved").isEmpty()) {
             return Optional.empty();
         }
 
+        var id = rawPost.get("id").textValue();
         var link = create(String.format("https://www.ober-haus.lt/butas-pardavimas-vilniaus-m,%s", id));
+        var price = Optional.ofNullable(document.select("div.price").first()).map(Element::text)
+                .map(priceRaw -> priceRaw
+                        .replace(" ", "")
+                        .replace("€", "")
+                        .trim()
+                ).flatMap(ScraperHelper::parseBigDecimal);
+        var post = new OberHausPost();
 
-        var maybeDocument = getDocument(link);
+        post.setExternalId(id);
+        post.setLink(link);
+        price.ifPresent(post::setPrice);
+        post.setPartial(true);
+
+        return Optional.of(post);
+    }
+
+    private Optional<PostDto> processItem(PostDto post) {
+        if (posts.existsByExternalIdAndSource(post.getExternalId(), OberHausPost.SOURCE)) {
+            return Optional.of(post);
+        }
+
+        var maybeDocument = getDocument(post.getLink());
         if (maybeDocument.isEmpty()) {
-            // TODO log empty
             return Optional.empty();
         }
         var document = maybeDocument.get();
-
-        var post = new OberHausPost();
 
         var description = Optional.ofNullable(document.select("div.object__content_text").first()).map(Element::text).map(x -> x.replace("Apie šį turtą ", ""));
         var rawAddress = Optional.ofNullable(document.select("h1.title").first()).map(Element::text);
@@ -101,9 +138,7 @@ public class OberHausScraper extends JsoupScraper {
                 .flatMap(ScraperHelper::parseInt);
         var shortLink = Optional.ofNullable(moreInfo.get("item-reference")).map(URI::create);
 
-        post.setExternalId(id);
-        post.setLink(shortLink.orElse(link));
-
+        shortLink.ifPresent(post::setLink);
         description.ifPresent(post::setDescription);
         district.ifPresent(post::setDistrict);
         street.ifPresent(post::setStreet);
@@ -114,6 +149,7 @@ public class OberHausScraper extends JsoupScraper {
         price.ifPresent(post::setPrice);
         rooms.ifPresent(post::setRooms);
         year.ifPresent(post::setYear);
+        post.setPartial(false);
 
         return Optional.of(post);
     }
