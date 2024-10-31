@@ -60,4 +60,16 @@ public class DistrictsPageProvider {
         keyboard.addRow(turnOffButton);
         return keyboard;
     }
+
+    public String getDistrictsPageText(User user) {
+        String message;
+        var configReminder = user.isConfigured() ? "Don't forget that you can configure your settings with /config" : "Don't forget to turn on scanning in /config";
+        if (!user.getFilterByDistrict()) {
+            message = "There is a possibility to filter listings by district. Listings without any district will always be shown. Please note that some sites have different district classifications or names.";
+        } else {
+            message = "Please select your wanted districts. If none are selected all listings will be shown. Listings without any district will always be shown. Please note that some sites have different district classifications or names.";
+        }
+
+        return message + "\n\n" + configReminder;
+    }
 }

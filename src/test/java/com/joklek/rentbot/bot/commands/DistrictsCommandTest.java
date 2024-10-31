@@ -51,7 +51,7 @@ class DistrictsCommandTest extends IntegrationTest {
 
     @Test
     void handle__whenFilteringByDistrictOff__thenGetTurnedOffPage() {
-        var expectedText = "There is a possibility to filter listings by district. Listings without any district will always be shown. Please note that some sites have different district classifications or names.";
+        var expectedText = "There is a possibility to filter listings by district. Listings without any district will always be shown. Please note that some sites have different district classifications or names.\n\nDon't forget to turn on scanning in /config";
 
         var response = command.handle(update, "");
 
@@ -75,7 +75,7 @@ class DistrictsCommandTest extends IntegrationTest {
         var user = users.findByTelegramId(CHAT_ID).get();
         user.setFilterByDistrict(true);
         users.save(user);
-        var expectedText = "Please select your wanted districts. If none are selected all listings will be shown. Listings without any district will always be shown. Please note that some sites have different district classifications or names.";
+        var expectedText = "Please select your wanted districts. If none are selected all listings will be shown. Listings without any district will always be shown. Please note that some sites have different district classifications or names.\n\nDon't forget to turn on scanning in /config";
 
         var response = command.handle(update, "");
 

@@ -29,15 +29,14 @@ public class DistrictsCommand implements Command {
     public List<SendMessage> handle(Update update, String payload) {
         var telegramId = update.message().chat().id();
         var user = users.getByTelegramId(telegramId);
-        String message;
+        var message = districtsPageProvider.getDistrictsPageText(user);
         InlineKeyboardMarkup content;
         if (!user.getFilterByDistrict()) {
-            message = "There is a possibility to filter listings by district. Listings without any district will always be shown. Please note that some sites have different district classifications or names.";
             content = districtsPageProvider.showTurnedOffPage();
         } else {
-            message = "Please select your wanted districts. If none are selected all listings will be shown. Listings without any district will always be shown. Please note that some sites have different district classifications or names.";
             content = districtsPageProvider.showPagedDistricts(user, 0);
         }
+
         return List.of(inlineResponse(update, message, content));
     }
 }
