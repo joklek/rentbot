@@ -48,13 +48,13 @@ public class ReplayCommand implements Command {
         var deduplicatedPosts = postDeduplicator.deduplicatePosts(posts);
 
         if (deduplicatedPosts.isEmpty()) {
-            return simpleFinalResponse(update, String.format("No posts found in the last %d days", POSTS_FROM_PREVIOUS_DAYS));
+            return simpleFinalResponse(update, String.format("No listings found in the last %d days", POSTS_FROM_PREVIOUS_DAYS));
         }
 
         var messages = new ArrayList<>(deduplicatedPosts.stream()
                 .map(similarPosts -> postResponseCreator.createTelegramMessage(telegramId, similarPosts))
                 .toList());
-        messages.add(simpleResponse(update, String.format("Replayed %d posts from last %d days", deduplicatedPosts.size(), POSTS_FROM_PREVIOUS_DAYS)));
+        messages.add(simpleResponse(update, String.format("Replayed %d listings from last %d days", deduplicatedPosts.size(), POSTS_FROM_PREVIOUS_DAYS)));
 
         return messages;
     }
