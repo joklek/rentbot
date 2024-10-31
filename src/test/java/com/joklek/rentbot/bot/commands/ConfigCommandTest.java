@@ -138,7 +138,7 @@ class ConfigCommandTest extends IntegrationTest {
                 
                 🔄 *Filter by district*: no (/districts to configure)
                 
-                🔕 Scanning is **disabled**. You will not see new posts
+                🔕 Scanning is **disabled**. You will not see new listings
                 """;
         assertThat(response).hasSize(1);
         assertThat(response.get(0).getParameters()).containsEntry("text", expectedText);

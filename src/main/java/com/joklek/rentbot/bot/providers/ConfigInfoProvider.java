@@ -41,7 +41,7 @@ public class ConfigInfoProvider {
                         user.getYearMin().map(Object::toString).orElse("any"),
                         user.getFloorMin().map(Object::toString).orElse("any")
                 ) : "";
-        var notificationReminder = user.isConfigured() ? (user.getEnabled() ? "\n🔔 Scanning is enabled" : "\n🔕 Scanning is **disabled**. You will not see new posts") : "";
+        var notificationReminder = user.isConfigured() ? (user.getEnabled() ? "\n🔔 Scanning is enabled" : "\n🔕 Scanning is **disabled**. You will not see new listings") : "";
 
         return String.format(
                 """

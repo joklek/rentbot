@@ -82,7 +82,7 @@ class ReplayCommandTest extends IntegrationTest {
     @Test
     void handle__whenNoPosts__notifiesUser() {
         makeUserAlreadyConfigured(CHAT_ID);
-        var expectedText = "No posts found in the last 2 days";
+        var expectedText = "No listings found in the last 2 days";
         var response = command.handle(update, "");
 
         assertThat(response).hasSize(1);
@@ -105,7 +105,7 @@ class ReplayCommandTest extends IntegrationTest {
 
         assertThat(response).hasSize(2);
         assertThat(response.get(0).getParameters()).containsEntry("text", expectedText);
-        assertThat(response.get(1).getParameters()).containsEntry("text", "Replayed 1 posts from last 2 days");
+        assertThat(response.get(1).getParameters()).containsEntry("text", "Replayed 1 listings from last 2 days");
     }
 
     @Test
@@ -131,7 +131,7 @@ class ReplayCommandTest extends IntegrationTest {
 
         assertThat(response).hasSize(2);
         assertThat(response.get(0).getParameters()).containsEntry("text", expectedText);
-        assertThat(response.get(1).getParameters()).containsEntry("text", "Replayed 1 posts from last 2 days");
+        assertThat(response.get(1).getParameters()).containsEntry("text", "Replayed 1 listings from last 2 days");
     }
     @Test
     void handle__whenPostsWithNotExistingDistrictExistsAndDistrictsConfigured__thenSendsPostAndNotification() {
@@ -156,7 +156,7 @@ class ReplayCommandTest extends IntegrationTest {
 
         assertThat(response).hasSize(2);
         assertThat(response.get(0).getParameters()).containsEntry("text", expectedText);
-        assertThat(response.get(1).getParameters()).containsEntry("text", "Replayed 1 posts from last 2 days");
+        assertThat(response.get(1).getParameters()).containsEntry("text", "Replayed 1 listings from last 2 days");
     }
 
     @Test
@@ -166,7 +166,7 @@ class ReplayCommandTest extends IntegrationTest {
         var response = command.handle(update, "");
 
         assertThat(response).hasSize(1);
-        assertThat(response.get(0).getParameters()).containsEntry("text", "No posts found in the last 2 days");
+        assertThat(response.get(0).getParameters()).containsEntry("text", "No listings found in the last 2 days");
     }
 
     private Post createPost(LocalDateTime createdAt, String district) {
