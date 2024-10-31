@@ -99,7 +99,8 @@ public class DistrictsCallback implements CallbackResponder {
             var updateMarkupRequest = new EditMessageReplyMarkup(update.callbackQuery().maybeInaccessibleMessage().chat().id(), update.callbackQuery().maybeInaccessibleMessage().messageId());
             updateMarkupRequest.replyMarkup(districtsPageProvider.showPagedDistricts(user, 0));
 
-            var updateMessageRequest = new EditMessageText(update.callbackQuery().maybeInaccessibleMessage().chat().id(), update.callbackQuery().maybeInaccessibleMessage().messageId(), "Please select your wanted districts. If none are selected all listings will be shown. Listings without any district will always be shown. Please note that some sites have different district classifications or names.");
+            var message = districtsPageProvider.getDistrictsPageText(user);
+            var updateMessageRequest = new EditMessageText(update.callbackQuery().maybeInaccessibleMessage().chat().id(), update.callbackQuery().maybeInaccessibleMessage().messageId(), message);
             bot.execute(updateMessageRequest);
             bot.execute(updateMarkupRequest);
         }
@@ -133,7 +134,8 @@ public class DistrictsCallback implements CallbackResponder {
             var updateMarkupRequest = new EditMessageReplyMarkup(update.callbackQuery().maybeInaccessibleMessage().chat().id(), update.callbackQuery().maybeInaccessibleMessage().messageId());
             updateMarkupRequest.replyMarkup(districtsPageProvider.showTurnedOffPage());
 
-            var updateMessageRequest = new EditMessageText(update.callbackQuery().maybeInaccessibleMessage().chat().id(), update.callbackQuery().maybeInaccessibleMessage().messageId(), "There is a possibility to filter listings by district. Listings without any district will always be shown. Please note that some sites have different district classifications or names.");
+            var message = districtsPageProvider.getDistrictsPageText(user);
+            var updateMessageRequest = new EditMessageText(update.callbackQuery().maybeInaccessibleMessage().chat().id(), update.callbackQuery().maybeInaccessibleMessage().messageId(), message);
             bot.execute(updateMessageRequest);
             bot.execute(updateMarkupRequest);
         }
@@ -168,7 +170,8 @@ public class DistrictsCallback implements CallbackResponder {
             var updateMarkupRequest = new EditMessageReplyMarkup(update.callbackQuery().maybeInaccessibleMessage().chat().id(), update.callbackQuery().maybeInaccessibleMessage().messageId());
             updateMarkupRequest.replyMarkup(districtsPageProvider.showPagedDistricts(user, 0));
 
-            var updateMessageRequest = new EditMessageText(update.callbackQuery().maybeInaccessibleMessage().chat().id(), update.callbackQuery().maybeInaccessibleMessage().messageId(), "Please select your wanted districts. If none are selected all listings will be shown. Listings without any district will always be shown. Please note that some sites have different district classifications or names.");
+            var message = districtsPageProvider.getDistrictsPageText(user);
+            var updateMessageRequest = new EditMessageText(update.callbackQuery().maybeInaccessibleMessage().chat().id(), update.callbackQuery().maybeInaccessibleMessage().messageId(), message);
             var callbackResponse = new AnswerCallbackQuery(update.callbackQuery().id());
             callbackResponse.text("List cleared");
             bot.execute(updateMessageRequest);
