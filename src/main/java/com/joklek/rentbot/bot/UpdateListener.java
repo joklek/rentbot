@@ -28,6 +28,7 @@ public class UpdateListener {
     private final ReplyRecognizer replyRecognizer;
     private final UserRepo users;
     private final SentMessageRepo replyableMessages;
+    private String botName;
 
     public UpdateListener(CommandRecognizer commandRecognizer, CallbackRecognizer callbackRecognizer, ReplyRecognizer replyRecognizer, UserRepo users, SentMessageRepo replyableMessages) {
         this.commandRecognizer = commandRecognizer;
@@ -52,13 +53,21 @@ public class UpdateListener {
         return UpdatesListener.CONFIRMED_UPDATES_ALL;
     }
 
+    public void setBotName(String botName) {
+        this.botName = botName;
+    }
+
     private void handleMessage(TelegramBot bot, Update update) {
-        var rawText = update.message().text().replaceFirst("@\\w+$", "");
-        var handler = commandRecognizer.getHandler(rawText);
+        var rawText = update.message().text();
+        if (botName != null && rawText.matches(".+@\\w+$") && !rawText.endsWith("@" +botName)) {
+            return;
+        }
+        var command = botName != null ? rawText.replaceFirst("@" + botName, "") : rawText.replaceFirst("@\\w+$", "");
+        var handler = commandRecognizer.getHandler(command);
         if (handler == null) {
             return;
         }
-        var payload = commandRecognizer.getPayload(rawText);
+        var payload = commandRecognizer.getPayload(command);
         var messages = handler.handle(update, payload);
 
         messages.forEach(request -> bot.execute(request, new Callback<SendMessage, SendResponse>() {
