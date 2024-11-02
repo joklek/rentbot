@@ -23,8 +23,19 @@ public class ConfigCommand implements Command {
 
     private static final Logger LOGGER = getLogger(ConfigCommand.class);
 
-    private static final Pattern CONFIG_PATTERN = Pattern.compile("^(\\d+|any) (\\d+|any) (\\d+|any) (\\d+|any) (\\d+|any) (\\d+|any) (\\d+|any)$");
-    private static final String CONFIG_TEXT = "Use this format to configure your settings:\n\n```\n/config <price_from> <price_to> <rooms_from> <rooms_to> <min_area> <year_from> <min_floor>\n```\nHere's how your message might look like:\n```\n/config 200 330 1 2 50 2000 2\n\n```Here you'd search for flats between 200 and 330 eur, 1-2 rooms, total area is 50m², built after 2000, starting on the second floor\n";
+    private static final Pattern CONFIG_PATTERN = Pattern.compile("^(\\d+|any) (\\d+|any) (\\d+|any) (\\d+|any) (\\d+|any) (\\d+|any) (\\d+|any) (\\d+|any)$");
+    private static final String CONFIG_TEXT = """
+            Use this format to configure your settings:
+            
+            ```
+            /config <price_from> <price_to> <rooms_from> <rooms_to> <min_area> <year_from> <min_floor> <price_per_square_max>
+            ```
+            Here's how your message might look like:
+            ```
+            /config 20000 330000 1 2 50 2000 2 2500
+            
+            ```Here you'd search for flats between 20000 and 330000 eur, 1-2 rooms, max total area is 50m² but max price per m²: 2500, built after 2000, starting on the second floor
+            """;
 
     private final UserRepo users;
     private final Validator validator;
@@ -82,6 +93,7 @@ public class ConfigCommand implements Command {
         var areaMin = matcher.group(5).equalsIgnoreCase("any") ? null : Integer.parseInt(matcher.group(5));
         var yearMin = matcher.group(6).equalsIgnoreCase("any") ? null : Integer.parseInt(matcher.group(6));
         var floorMin = matcher.group(7).equalsIgnoreCase("any") ? null : Integer.parseInt(matcher.group(7));
+        var pricePerSquareMax = matcher.group(7).equalsIgnoreCase("any") ? null : Integer.parseInt(matcher.group(8));
 
         user.setPriceMin(priceMin);
         user.setPriceMax(priceMax);
@@ -90,6 +102,7 @@ public class ConfigCommand implements Command {
         user.setAreaMin(areaMin);
         user.setYearMin(yearMin);
         user.setFloorMin(floorMin);
+        user.setPricePerSquareMax(pricePerSquareMax);
         if (isFirstTimeSettingUp) {
             user.setEnabled(true);
         }

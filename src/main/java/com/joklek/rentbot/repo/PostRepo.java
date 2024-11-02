@@ -39,6 +39,9 @@ public interface PostRepo extends JpaRepository<Post, Long> {
                 "(p.area >= u.areaMin " +
                 "OR u.areaMin IS NULL " +
                 "OR p.area IS NULL) " +
+            "AND " +
+                "(p.price/p.area <= u.pricePerSquareMax " +
+                "OR p.price IS NULL OR p.area IS NULL OR u.pricePerSquareMax IS NULL)" +
             "AND (u.filterByDistrict = false OR (" +
             "   d.name = p.district OR " +
             "   NOT EXISTS(SELECT 1 FROM District WHERE name = p.district)" +
@@ -68,6 +71,9 @@ public interface PostRepo extends JpaRepository<Post, Long> {
                 "(p.area >= u.areaMin " +
                 "OR u.areaMin IS NULL " +
                 "OR p.area IS NULL) " +
+            "AND " +
+                "(p.price/p.area <= u.pricePerSquareMax " +
+                "OR p.price IS NULL OR p.area IS NULL OR u.pricePerSquareMax IS NULL)" +
             "AND (u.filterByDistrict = false OR (" +
             "   d.name = p.district OR " +
             "   NOT EXISTS(SELECT 1 FROM District WHERE name = p.district)" +

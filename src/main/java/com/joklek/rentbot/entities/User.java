@@ -50,6 +50,10 @@ public class User {
     @Min(0)
     @Max(100)
     private Integer floorMin;
+
+    @Min(0)
+    private Integer pricePerSquareMax;
+
     @NotNull
     private boolean filterByDistrict;
 
@@ -74,7 +78,7 @@ public class User {
     public boolean isConfigured() {
         return getPriceMin().isPresent() || getPriceMax().isPresent()
                 || getRoomsMin().isPresent() || getRoomsMax().isPresent() || getAreaMin().isPresent()
-                || getYearMin().isPresent() || getFloorMin().isPresent();
+                || getYearMin().isPresent() || getFloorMin().isPresent() || getPricePerSquareMax().isPresent();
     }
 
     public Long getId() {
@@ -152,6 +156,14 @@ public class User {
 
     public void setFloorMin(Integer minFloor) {
         this.floorMin = minFloor;
+    }
+
+    public Optional<Integer> getPricePerSquareMax() {
+        return Optional.ofNullable(pricePerSquareMax);
+    }
+
+    public void setPricePerSquareMax(Integer pricePerSquareMax) {
+        this.pricePerSquareMax = pricePerSquareMax;
     }
 
     public boolean getFilterByDistrict() {
