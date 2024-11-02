@@ -80,7 +80,7 @@ class ConfigCommandTest extends IntegrationTest {
 
     @Test
     void handle__whenNormalPayloadAndFirstTime__hasExpectedTextAndChangesConfig() {
-        var response = command.handle(update, "200 330 1 2 50 2000 2");
+        var response = command.handle(update, "200 330 1 2 50 2000 2 any");
 
         // Has expected text
         var expectedText = """
@@ -90,7 +90,7 @@ class ConfigCommandTest extends IntegrationTest {
                 
                 🔗 Share your settings with other people by sharing this command:
                 ```
-                /config 200 330 1 2 50 2000 2
+                /config 200 330 1 2 50 2000 2 any
                 ```
                 
                 🔄 *Filter by district*: no (/districts to configure)
@@ -123,7 +123,7 @@ class ConfigCommandTest extends IntegrationTest {
     @Test
     void handle__whenNormalPayloadAndNotFirstTime__hasExpectedTextAndChangesConfig() {
         makeUserAlreadyConfigured();
-        var response = command.handle(update, "200 330 1 2 50 2000 2");
+        var response = command.handle(update, "200 330 1 2 50 2000 2 any");
 
         // Has expected text
         var expectedText = """
@@ -133,7 +133,7 @@ class ConfigCommandTest extends IntegrationTest {
                 
                 🔗 Share your settings with other people by sharing this command:
                 ```
-                /config 200 330 1 2 50 2000 2
+                /config 200 330 1 2 50 2000 2 any
                 ```
                 
                 🔄 *Filter by district*: no (/districts to configure)
@@ -174,13 +174,13 @@ class ConfigCommandTest extends IntegrationTest {
                 Use this format to configure your settings:
                 
                 ```
-                /config <price_from> <price_to> <rooms_from> <rooms_to> <min_area> <year_from> <min_floor>
+                /config <price_from> <price_to> <rooms_from> <rooms_to> <min_area> <year_from> <min_floor> <price_per_square_max>
                 ```
                 Here's how your message might look like:
                 ```
-                /config 200 330 1 2 50 2000 2
+                /config 20000 330000 1 2 50 2000 2 2500
                 
-                ```Here you'd search for flats between 200 and 330 eur, 1-2 rooms, total area is 50m², built after 2000, starting on the second floor
+                ```Here you'd search for flats between 20000 and 330000 eur, 1-2 rooms, max total area is 50m² but max price per m²: 2500, built after 2000, starting on the second floor
                 """;
         assertThat(response).hasSize(1);
         assertThat(response.get(0).getParameters()).containsEntry("text", expectedText);
@@ -210,20 +210,20 @@ class ConfigCommandTest extends IntegrationTest {
                 Use this format to configure your settings:
                 
                 ```
-                /config <price_from> <price_to> <rooms_from> <rooms_to> <min_area> <year_from> <min_floor>
+                /config <price_from> <price_to> <rooms_from> <rooms_to> <min_area> <year_from> <min_floor> <price_per_square_max>
                 ```
                 Here's how your message might look like:
                 ```
-                /config 200 330 1 2 50 2000 2
+                /config 20000 330000 1 2 50 2000 2 2500
                 
-                ```Here you'd search for flats between 200 and 330 eur, 1-2 rooms, total area is 50m², built after 2000, starting on the second floor
+                ```Here you'd search for flats between 20000 and 330000 eur, 1-2 rooms, max total area is 50m² but max price per m²: 2500, built after 2000, starting on the second floor
                 """, message);
         assertThat(response).hasSize(1);
         assertThat(response.get(0).getParameters()).containsEntry("text", expectedText);
     }
 
     private void makeUserAlreadyConfigured() {
-        command.handle(update, "100 500 3 4 50 1900 1");
+        command.handle(update, "100 500 3 4 50 1900 1 any");
         var user = users.findByTelegramId(CHAT_ID).get();
         user.setEnabled(false);
         users.save(user);

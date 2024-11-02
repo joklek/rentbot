@@ -87,7 +87,7 @@ class EnableCommandTest extends IntegrationTest {
     }
 
     private void makeUserAlreadyConfigured(boolean isEnabled) {
-        configCommand.handle(update, "100 500 3 4 50 1900 1");
+        configCommand.handle(update, "100 500 3 4 50 1900 1 any");
         var user = users.findByTelegramId(CHAT_ID).get();
         user.setEnabled(isEnabled);
         users.save(user);

@@ -93,7 +93,7 @@ public class ConfigCommand implements Command {
         var areaMin = matcher.group(5).equalsIgnoreCase("any") ? null : Integer.parseInt(matcher.group(5));
         var yearMin = matcher.group(6).equalsIgnoreCase("any") ? null : Integer.parseInt(matcher.group(6));
         var floorMin = matcher.group(7).equalsIgnoreCase("any") ? null : Integer.parseInt(matcher.group(7));
-        var pricePerSquareMax = matcher.group(7).equalsIgnoreCase("any") ? null : Integer.parseInt(matcher.group(8));
+        var pricePerSquareMax = matcher.group(8).equalsIgnoreCase("any") ? null : Integer.parseInt(matcher.group(8));
 
         user.setPriceMin(priceMin);
         user.setPriceMax(priceMax);

@@ -91,16 +91,16 @@ public class ConfigInfoProvider {
         var areaButton = new InlineKeyboardButton(areaText);
         areaButton.callbackData(ConfigCallback.AreaMin.CALLBACK_KEY);
 
-        var maxPricePerSquare = String.format("Max price per m²: %s", user.getPricePerSquareMax().map(Object::toString).orElse("any"));
+        var maxPricePerSquare = String.format("Max price per m²: %s€", user.getPricePerSquareMax().map(Object::toString).orElse("any"));
         var maxPricePerSquareButton = new InlineKeyboardButton(maxPricePerSquare);
         maxPricePerSquareButton.callbackData(ConfigCallback.PricePerSquareMax.CALLBACK_KEY);
 
         keyboard.addRow(enabledButton);
         keyboard.addRow(priceMinButton, priceMaxButton);
         keyboard.addRow(roomsMinButton, roomsMaxButton);
-        keyboard.addRow(constructionButton);
         keyboard.addRow(floorButton, areaButton);
         keyboard.addRow(maxPricePerSquareButton);
+        keyboard.addRow(constructionButton);
 
         return keyboard;
     }
