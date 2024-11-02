@@ -129,6 +129,7 @@ public class KampasScraper implements Scraper {
                     case "stone", "brick", "bricks" -> "Plytinis";
                     case "monolithic", "monolith" -> "Monolitinis";
                     case "wood" -> "Medinis";
+                    case "framehouse" -> "Karkasinis";
                     case "null", "other" -> null;
                     default -> type;
                 });
