@@ -1,6 +1,7 @@
 package com.joklek.rentbot.entities;
 
 import com.joklek.rentbot.scraper.PostDto;
+import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
 import java.security.MessageDigest;
@@ -11,8 +12,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import static org.slf4j.LoggerFactory.getLogger;
+
 @Component
 public class PostEntityConverter {
+    private static final Logger LOGGER = getLogger(PostEntityConverter.class);
 
     public Post convert(PostDto postDto) {
         var post = new Post();
@@ -54,6 +58,17 @@ public class PostEntityConverter {
                 .ifPresent(post::setConstructionYear);
         post.setWithFees(postDto.getDescription()
                 .map(this::isWithFees).orElse(false));
+
+        if (postDto.getStreet().isPresent() && postDto.getHouseNumber().isEmpty() && postDto.getDescription().isPresent()) {
+            var description = postDto.getDescription().get();
+            var street = postDto.getStreet().get();
+            var streetPattern = Pattern.compile(String.format("%s (\\d{1,3}[A-Z]?)", street), Pattern.CASE_INSENSITIVE);
+            var matcher = streetPattern.matcher(description);
+            if (matcher.find()) {
+                LOGGER.info("Found house number in description: {} of {} {}", matcher.group(1), postDto.getSource(), postDto.getExternalId());
+                post.setHouseNumber(matcher.group(1));
+            }
+        }
 
         post.setCreatedAt(LocalDateTime.now());
 
