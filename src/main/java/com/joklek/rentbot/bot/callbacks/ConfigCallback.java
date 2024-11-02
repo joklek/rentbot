@@ -42,7 +42,8 @@ public class ConfigCallback implements CallbackResponder {
                 new RoomsMax(),
                 new ConstructionMin(),
                 new FloorMin(),
-                new AreaMin()
+                new AreaMin(),
+                new PricePerSquareMax()
         ).collect(Collectors.toMap(CallbackAction::key, x -> x));
     }
 
@@ -376,6 +377,44 @@ public class ConfigCallback implements CallbackResponder {
                 @Override
                 public void onResponse(SendMessage request, SendResponse response) {
                     var sentMessage = new SentMessage(message.chat().id(), response.message().messageId(), AreaMinReplyResponder.KEY);
+                    sentMessages.save(sentMessage);
+                }
+
+                @Override
+                public void onFailure(SendMessage request, IOException e) {
+                }
+            });
+        }
+
+        @Override
+        public String callbackKey() {
+            return CALLBACK_KEY;
+        }
+
+        @Override
+        public String key() {
+            return KEY;
+        }
+    }
+
+    public class PricePerSquareMax implements CallbackAction {
+        public static final String KEY = "pricePerSquareMax";
+        public static final String CALLBACK_KEY = String.format("/f%s:%s", NAME, KEY);
+
+        @Override
+        public void action(User user, Update update, TelegramBot bot, String... payload) {
+            var message = update.callbackQuery().maybeInaccessibleMessage();
+
+            var updateMarkupRequest = new EditMessageReplyMarkup(message.chat().id(), message.messageId());
+            updateMarkupRequest.replyMarkup(configInfoProvider.showConfigPage(user));
+
+            var sendMessage = new SendMessage(message.chat().id(), "What is the new price per m² max in EUR? (enter \"any\" if you want to disable this filter)");
+            var reply = new ForceReply(false, "Enter a number");
+            sendMessage.replyMarkup(reply);
+            bot.execute(sendMessage, new Callback<SendMessage, SendResponse>() {
+                @Override
+                public void onResponse(SendMessage request, SendResponse response) {
+                    var sentMessage = new SentMessage(message.chat().id(), response.message().messageId(), PricePerSquareMaxReplyResponder.KEY);
                     sentMessages.save(sentMessage);
                 }
 

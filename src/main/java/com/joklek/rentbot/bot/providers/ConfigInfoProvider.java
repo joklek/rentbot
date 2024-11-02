@@ -17,7 +17,7 @@ public class ConfigInfoProvider {
     private static final String SHARE_TEXT = """
                 🔗 Share your settings with other people by sharing this command:
                 ```
-                /config %1$s %2$s %3$s %4$s %5$s %6$s %7$s
+                /config %1$s %2$s %3$s %4$s %5$s %6$s %7$s %8$s
                 ```
                 """;
 
@@ -39,7 +39,8 @@ public class ConfigInfoProvider {
                         user.getRoomsMax().map(Object::toString).orElse("any"),
                         user.getAreaMin().map(Object::toString).orElse("any"),
                         user.getYearMin().map(Object::toString).orElse("any"),
-                        user.getFloorMin().map(Object::toString).orElse("any")
+                        user.getFloorMin().map(Object::toString).orElse("any"),
+                        user.getPricePerSquareMax().map(Object::toString).orElse("any")
                 ) : "";
         var notificationReminder = user.isConfigured() ? (user.getEnabled() ? "\n🔔 Scanning is enabled" : "\n🔕 Scanning is **disabled**. You will not see new listings") : "";
 
@@ -90,11 +91,16 @@ public class ConfigInfoProvider {
         var areaButton = new InlineKeyboardButton(areaText);
         areaButton.callbackData(ConfigCallback.AreaMin.CALLBACK_KEY);
 
+        var maxPricePerSquare = String.format("Max price per m²: %s", user.getPricePerSquareMax().map(Object::toString).orElse("any"));
+        var maxPricePerSquareButton = new InlineKeyboardButton(maxPricePerSquare);
+        maxPricePerSquareButton.callbackData(ConfigCallback.PricePerSquareMax.CALLBACK_KEY);
+
         keyboard.addRow(enabledButton);
         keyboard.addRow(priceMinButton, priceMaxButton);
         keyboard.addRow(roomsMinButton, roomsMaxButton);
         keyboard.addRow(constructionButton);
         keyboard.addRow(floorButton, areaButton);
+        keyboard.addRow(maxPricePerSquareButton);
 
         return keyboard;
     }

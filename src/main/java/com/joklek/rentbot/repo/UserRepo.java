@@ -22,7 +22,8 @@ public interface UserRepo extends JpaRepository<User, Long> {
             "AND (((:rooms >= roomsMin OR roomsMin IS NULL) AND (:rooms <= roomsMax OR roomsMax IS NULL)) OR :rooms IS NULL) " +
             "AND (:year >= yearMin OR :year IS NULL OR yearMin IS NULL) " +
             "AND (floorMin <= :floor OR :floor IS NULL OR floorMin IS NULL) " +
-            "AND (areaMin <= :area OR :area IS NULL OR areaMin IS NULL)")
+            "AND (areaMin <= :area OR :area IS NULL OR areaMin IS NULL) " +
+            "AND (:area IS NULL OR :price IS NULL OR pricePerSquareMax IS NULL OR :price/:area <= pricePerSquareMax)")
     List<Long> findAllTelegramIdsInterested(BigDecimal price, Integer rooms, Integer year, Integer floor, Integer area);
 
     @Query(value = "SELECT DISTINCT u.telegramId FROM User u " +
@@ -35,6 +36,7 @@ public interface UserRepo extends JpaRepository<User, Long> {
             "AND (:year >= yearMin OR :year IS NULL OR yearMin IS NULL) " +
             "AND (floorMin <= :floor OR :floor IS NULL OR floorMin IS NULL) " +
             "AND (areaMin <= :area OR :area IS NULL OR areaMin IS NULL) " +
+            "AND (:area IS NULL OR :price IS NULL OR pricePerSquareMax IS NULL OR :price/:area <= pricePerSquareMax) " +
             "AND lower(d.name) = lower(:district)")
     List<Long> findAllTelegramIdsInterestedInDistrict(BigDecimal price, Integer rooms, Integer year, Integer floor, Integer area, String district);
 
@@ -46,6 +48,7 @@ public interface UserRepo extends JpaRepository<User, Long> {
             "AND (((:rooms >= roomsMin OR roomsMin IS NULL) AND (:rooms <= roomsMax OR roomsMax IS NULL)) OR :rooms IS NULL) " +
             "AND (:year >= yearMin OR :year IS NULL OR yearMin IS NULL) " +
             "AND (floorMin <= :floor OR :floor IS NULL OR floorMin IS NULL) " +
-            "AND (areaMin <= :area OR :area IS NULL OR areaMin IS NULL)")
+            "AND (areaMin <= :area OR :area IS NULL OR areaMin IS NULL) " +
+            "AND (:area IS NULL OR :price IS NULL OR pricePerSquareMax IS NULL OR :price/:area <= pricePerSquareMax)")
     List<Long> findAllTelegramIdsNotInterestedInDistricts(BigDecimal price, Integer rooms, Integer year, Integer floor, Integer area);
 }
