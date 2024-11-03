@@ -21,6 +21,7 @@ public interface PostRepo extends JpaRepository<Post, Long> {
     @Query(value = "SELECT distinct p FROM Post p " +
             "JOIN User u ON u.id = :userId " +
             "LEFT JOIN u.districts d " +
+            "JOIN PostPriceHistory ph ON p = ph.post " +
             "WHERE (" +
                 "((p.price >= u.priceMin OR u.priceMin IS NULL) AND (p.price <= u.priceMax OR u.priceMax IS NULL)) " +
                 "OR p.price IS NULL) " +
@@ -46,13 +47,14 @@ public interface PostRepo extends JpaRepository<Post, Long> {
             "   d.name = p.district OR " +
             "   NOT EXISTS(SELECT 1 FROM District WHERE name = p.district)" +
             "))" +
-            "AND p.createdAt >= :afterDate " +
+            "AND (p.createdAt >= :afterDate OR ph.createdAt >= :afterDate) " +
             "ORDER BY p.id ASC")
     List<Post> getAllPostsForUserFromDays(Long userId, LocalDateTime afterDate);
 
     @Query(value = "SELECT COUNT(distinct p.id) FROM Post p " +
             "JOIN User u ON u.id = :userId " +
             "LEFT JOIN u.districts d " +
+            "JOIN PostPriceHistory ph ON p = ph.post " +
             "WHERE (" +
                 "((p.price >= u.priceMin OR u.priceMin IS NULL) AND (p.price <= u.priceMax OR u.priceMax IS NULL)) " +
                 "OR p.price IS NULL) " +
@@ -78,6 +80,6 @@ public interface PostRepo extends JpaRepository<Post, Long> {
             "   d.name = p.district OR " +
             "   NOT EXISTS(SELECT 1 FROM District WHERE name = p.district)" +
             "))" +
-            "AND p.createdAt >= :afterDate")
+            "AND (p.createdAt >= :afterDate OR ph.createdAt >= :afterDate)")
     int getCountOfPostsForUserFromDays(Long userId, LocalDateTime afterDate);
 }

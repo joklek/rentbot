@@ -3,6 +3,7 @@ package com.joklek.rentbot.bot.commands;
 import com.joklek.rentbot.IntegrationTest;
 import com.joklek.rentbot.entities.District;
 import com.joklek.rentbot.entities.Post;
+import com.joklek.rentbot.entities.PostPriceHistory;
 import com.joklek.rentbot.entities.User;
 import com.joklek.rentbot.repo.DistrictRepo;
 import com.joklek.rentbot.repo.PostRepo;
@@ -169,9 +170,33 @@ class ReplayCommandTest extends IntegrationTest {
         assertThat(response.get(0).getParameters()).containsEntry("text", "No listings found in the last 2 days");
     }
 
+    @Test
+    void handle__whenOldPostButPriceUpdatedRecently__thenSendsNotification() {
+        makeUserAlreadyConfigured(CHAT_ID);
+        var post = createPost(LocalDateTime.now().minusDays(2L).minusMinutes(2L));
+        var postPriceHistory = new PostPriceHistory(BigDecimal.valueOf(200));
+        post.addPostPriceHistory(postPriceHistory);
+        post.setPrice(postPriceHistory.getPrice());
+        posts.save(post);
+        var expectedText = String.format("""
+                %d. EXTERNAL_LINK
+                » *Address:* [Random](https://maps.google.com/?q=Random)
+                » *Price:* `200.00€`
+                » *Rooms:* `3`
+                » *Contruction year:* `1999`
+                » *Floor:* `2`
+                """, post.getId());
+        var response = command.handle(update, "");
+
+        assertThat(response).hasSize(2);
+        assertThat(response.get(0).getParameters()).containsEntry("text", expectedText);
+        assertThat(response.get(1).getParameters()).containsEntry("text", "Replayed 1 listings from last 2 days");
+    }
+
     private Post createPost(LocalDateTime createdAt, String district) {
         var post = new Post();
-        post.setPrice(BigDecimal.valueOf(150));
+        var price = BigDecimal.valueOf(150);
+        post.setPrice(price);
         post.setRooms(3);
         post.setConstructionYear(1999);
         post.setFloor(2);
@@ -180,6 +205,9 @@ class ReplayCommandTest extends IntegrationTest {
         post.setLink("EXTERNAL_LINK");
         post.setDistrict(district);
         post.setCreatedAt(createdAt);
+        var postPriceHistory = new PostPriceHistory(price);
+        postPriceHistory.setCreatedAt(createdAt);
+        post.addPostPriceHistory(postPriceHistory);
         return posts.save(post);
     }
 
