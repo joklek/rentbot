@@ -22,8 +22,8 @@ public class PostResponseCreator {
         post.getPhone().ifPresent(phone -> sb.append(String.format("» *Phone number:* [%1$s](tel:%1$s)\n", phone)));
 
         var address = getAddress(post);
-        if (address.isPresent()) {
-            sb.append(String.format("» *Address:* [%s](https://maps.google.com/?q=%s)\n", address.get(), URLEncoder.encode(address.get(), StandardCharsets.UTF_8)));
+        if (!address.isEmpty()) {
+            sb.append(String.format("» *Address:* [%s](https://maps.google.com/?q=%s)\n", address, URLEncoder.encode(address, StandardCharsets.UTF_8)));
         }
 
         if (post.getPrice().isPresent() && post.getArea().isPresent()) {
@@ -63,7 +63,7 @@ public class PostResponseCreator {
                 .linkPreviewOptions(new LinkPreviewOptions().isDisabled(true));
     }
 
-    private Optional<String> getAddress(Post post) {
+    private String getAddress(Post post) {
         var sb = new StringBuilder();
         if (post.getDistrict().isPresent()) {
             sb.append(post.getDistrict().get()).append(" ");
@@ -74,9 +74,6 @@ public class PostResponseCreator {
                 sb.append(post.getHouseNumber().get());
             }
         }
-        if (sb.isEmpty()) {
-            return Optional.empty();
-        }
-        return Optional.of(sb.toString().trim());
+        return sb.toString().trim();
     }
 }
