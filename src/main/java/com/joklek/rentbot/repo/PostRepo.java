@@ -15,6 +15,9 @@ public interface PostRepo extends JpaRepository<Post, Long> {
 
     boolean existsByExternalIdAndSource(String externalId, String source);
 
+    @Query(value = "SELECT * FROM posts WHERE source = :source ORDER BY id ASC LIMIT 1", nativeQuery = true)
+    Optional<Post> findOldestBySource(String source);
+
     @EntityGraph(attributePaths = "postPriceHistory")
     Optional<Post> findByExternalIdAndSource(String externalId, String source);
 

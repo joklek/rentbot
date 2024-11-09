@@ -29,7 +29,7 @@ public class SkelbiuScraper implements Scraper {
     }
 
     @Override
-    public List<PostDto> getLatestPosts() {
+    public List<PostDto> getLatestPosts(boolean fullScan) {
         var options = new FirefoxOptions().addArguments("-headless");
         var driver = new FirefoxDriver(options);
         try {

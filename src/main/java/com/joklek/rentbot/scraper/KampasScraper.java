@@ -35,7 +35,7 @@ public class KampasScraper implements Scraper {
     }
 
     @Override
-    public List<PostDto> getLatestPosts() {
+    public List<PostDto> getLatestPosts(boolean fullScan) {
         var maybeTree = getPosts(BASE_URL);
         if (maybeTree.isEmpty() || maybeTree.get().get("hits").isEmpty() || !maybeTree.get().get("hits").isArray()) {
             // TODO log empty

@@ -25,7 +25,7 @@ public class AlioScraper extends JsoupScraper {
     }
 
     @Override
-    public List<PostDto> getLatestPosts() {
+    public List<PostDto> getLatestPosts(boolean fullScan) {
         var maybeDoc = getDocument(BASE_URL);
         if (maybeDoc.isEmpty()) {
             return List.of();

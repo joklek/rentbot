@@ -42,6 +42,10 @@ public class ScheduledScraper {
     private final TelegramBot bot;
     private final Random random;
 
+    // Ugly local state, imagine this is in Redis or something
+    private int lastFullScanAt = 0;
+    private boolean scanningFinished = true;
+
     public ScheduledScraper(List<Scraper> scrapers, UserRepo users, PostRepo posts, DistrictRepo districts, PostEntityConverter postConverter, PostResponseCreator postResponseCreator, PostDeduplicator postDeduplicator, TelegramBot bot) {
         this.scrapers = scrapers;
         this.users = users;
@@ -62,11 +66,21 @@ public class ScheduledScraper {
             Thread.sleep(SECONDS.toMillis(random.nextInt(60)));
         }
 
+        if (!scanningFinished) {
+            LOGGER.warn("Previous scan is still running, skipping this one");
+            return;
+        }
+        scanningFinished = false;
         var shuffledScrapers = new ArrayList<>(scrapers);
         Collections.shuffle(shuffledScrapers);
 
+        var currentHour = LocalDateTime.now().getHour();
+        var fullScan = currentHour != lastFullScanAt;
+        if (fullScan) {
+            lastFullScanAt = currentHour;
+        }
         var unpublishedPosts = shuffledScrapers.stream() // TODO parallel streams?
-                .map(ScheduledScraper::getLatestPosts)
+                .map(scraper -> getLatestPosts(scraper, fullScan))
                 .flatMap(Collection::stream)
                 .toList();
 
@@ -75,15 +89,16 @@ public class ScheduledScraper {
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .toList();
+        scanningFinished = true;
 
         List<List<Post>> deduplicatedPosts = postDeduplicator.deduplicatePosts(posts);
 
         deduplicatedPosts.forEach(similarPosts -> notifyUsers(similarPosts));
     }
 
-    private static List<PostDto> getLatestPosts(Scraper scraper) {
+    private static List<PostDto> getLatestPosts(Scraper scraper, boolean fullScan) {
         try {
-            return scraper.getLatestPosts();
+            return scraper.getLatestPosts(fullScan);
         } catch (Exception e) {
             LOGGER.error("{} failed with", scraper.getClass(), e);
             return List.of();

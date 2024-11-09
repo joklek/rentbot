@@ -4,17 +4,22 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.joklek.rentbot.repo.PostRepo;
+import org.apache.hc.core5.net.URIBuilder;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Element;
+import org.openqa.selenium.InvalidArgumentException;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -39,24 +44,51 @@ public class OberHausScraper extends JsoupScraper {
     }
 
     @Override
-    public List<PostDto> getLatestPosts() {
-        var maybeTree = getPosts(BASE_URL);
-        if (maybeTree.isEmpty() || maybeTree.get().get("objects").isEmpty()) {
-            return List.of();
-        }
-        var rawPosts = jsonNodeToList(maybeTree.get().get("objects"));
+    public List<PostDto> getLatestPosts(boolean fullScan) {
+        var oldestPost = posts.findOldestBySource(OberHausPost.SOURCE);
+        var partialPosts = new ArrayList<PostDto>();
+        List<PostDto> lastPage = List.of();
 
-        return rawPosts.stream()
-                .map(rawPost -> {
-                    try {
-                        return processPartialItem(rawPost);
-                    } catch (Exception e) {
-                        LOGGER.error("Can't parse post '{}'", rawPost.get("id").textValue(), e);
-                        return Optional.<PostDto>empty();
-                    }
-                })
-                .filter(Optional::isPresent)
-                .map(Optional::get)
+        for (var page = 1; true; page++) {
+            var rawPosts = getRawPostsInPage(page);
+            var partialPostsFromPage = rawPosts.stream()
+                    .map(rawPost -> {
+                        try {
+                            return processPartialItem(rawPost);
+                        } catch (Exception e) {
+                            LOGGER.error("Can't parse post '{}'", rawPost.get("id").textValue(), e);
+                            return Optional.<PostDto>empty();
+                        }
+                    })
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .toList();
+            if (partialPostsFromPage.isEmpty()) {
+                break;
+            }
+            if (page != 1 && Objects.equals(lastPage, partialPostsFromPage)) {
+                LOGGER.info("Paging broken, reached page {}", page);
+                break;
+            }
+
+            partialPosts.addAll(partialPostsFromPage);
+            lastPage = partialPostsFromPage;
+            if (page != 1) {
+                LOGGER.info("Fetched {} posts from page {}", partialPostsFromPage.size(), page);
+            }
+            if (oldestPost.isEmpty()) {
+                break; // Not sure if we should scrape all existing posts if we don't have any in the database
+            }
+            if (!fullScan) {
+                break;
+            }
+            if (partialPostsFromPage.stream().map(PostDto::getExternalId)
+                    .anyMatch(externalId -> oldestPost.get().getExternalId().compareTo(externalId) >= 0)) {
+                break;
+            }
+        }
+
+        return partialPosts.stream()
                 .map(post -> {
                     try {
                         return processItem(post);
@@ -68,6 +100,24 @@ public class OberHausScraper extends JsoupScraper {
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .toList();
+    }
+
+    private List<JsonNode> getRawPostsInPage(int pageNum) {
+        var url = getLinkToPage(pageNum);
+        var maybeTree = getPosts(url);
+        if (maybeTree.isEmpty() || maybeTree.get().get("objects").isEmpty()) {
+            return List.of();
+        }
+        return jsonNodeToList(maybeTree.get().get("objects"));
+    }
+
+    private static URI getLinkToPage(int page) {
+        try {
+            return new URIBuilder(BASE_URL).addParameter("page", Integer.toString(page)).build();
+        } catch (URISyntaxException e) {
+            LOGGER.error("Failed to create link to page {}", page, e);
+            throw new InvalidArgumentException("Failed to create link to page " + page, e);
+        }
     }
 
     private Optional<PostDto> processPartialItem(JsonNode rawPost) {

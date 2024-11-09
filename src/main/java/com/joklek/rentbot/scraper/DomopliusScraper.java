@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
 import java.net.URI;
-import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -25,7 +24,7 @@ public class DomopliusScraper extends JsoupScraper {
     }
 
     @Override
-    public List<PostDto> getLatestPosts() {
+    public List<PostDto> getLatestPosts(boolean fullScan) {
         var maybeDoc = getDocument(BASE_URL);
         if (maybeDoc.isEmpty()) {
             return List.of();
