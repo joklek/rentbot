@@ -2,6 +2,7 @@ package com.joklek.rentbot.scraper;
 
 import java.math.BigDecimal;
 import java.net.URI;
+import java.util.Objects;
 import java.util.Optional;
 
 public abstract class PostDto {
@@ -166,5 +167,25 @@ public abstract class PostDto {
     public PostDto setPartial(boolean partial) {
         isPartial = partial;
         return this;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PostDto postDto = (PostDto) o;
+        return isPartial == postDto.isPartial && Objects.equals(externalId, postDto.externalId) && Objects.equals(link, postDto.link)
+                && Objects.equals(description, postDto.description) && Objects.equals(street, postDto.street)
+                && Objects.equals(district, postDto.district) && Objects.equals(houseNumber, postDto.houseNumber)
+                && Objects.equals(heating, postDto.heating) && Objects.equals(floor, postDto.floor)
+                && Objects.equals(totalFloors, postDto.totalFloors) && Objects.equals(area, postDto.area)
+                && Objects.equals(price, postDto.price) && Objects.equals(rooms, postDto.rooms) && Objects.equals(year, postDto.year)
+                && Objects.equals(buildingState, postDto.buildingState) && Objects.equals(buildingMaterial, postDto.buildingMaterial);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(externalId, link, description, street, district, houseNumber, heating, floor, totalFloors, area, price,
+                rooms, year, buildingState, buildingMaterial, isPartial);
     }
 }
