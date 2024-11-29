@@ -62,7 +62,7 @@ public class PostEntityConverter {
         if (postDto.getStreet().isPresent() && postDto.getHouseNumber().isEmpty() && postDto.getDescription().isPresent()) {
             var description = postDto.getDescription().get();
             var street = postDto.getStreet().get();
-            var streetPattern = Pattern.compile(String.format("%s (\\d{1,3}[A-Z]?)", street), Pattern.CASE_INSENSITIVE);
+            var streetPattern = Pattern.compile(String.format("%s ?(\\d{1,3}[A-Z]?)", street), Pattern.CASE_INSENSITIVE);
             var matcher = streetPattern.matcher(description);
             if (matcher.find()) {
                 LOGGER.info("Found house number in description: {} of {} {}", matcher.group(1), postDto.getSource(), postDto.getExternalId());
