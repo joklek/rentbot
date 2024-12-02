@@ -28,8 +28,7 @@ public class PostEntityConverter {
                 .ifPresent(post::setPhone);
         postDto.getDescription()
                 .filter(x -> !x.isBlank())
-                .map(x -> x.replace("<br>", "\n")
-                        .replace("</br>", "\n"))
+                .map(x -> x.replaceAll("\\s", "").trim())
                 .map(this::getHash)
                 .ifPresent(post::setDescriptionHash);
         postDto.getStreet()

@@ -52,7 +52,7 @@ public class CapitalScraper extends JsoupScraper {
         var phone = Optional.ofNullable(exactPost.select(".estate-phone-sticker a").first())
                 .map(Element::text);
         var description = Optional.ofNullable(exactPost.select(".realty-description").first())
-                .map(Element::text);
+                .map(element -> element.ownText().replace("Trumpa nuoroda :", ""));
 
         var price = Optional.ofNullable(exactPost.select(".realty-price-info > strong").first())
                 .map(Element::text)

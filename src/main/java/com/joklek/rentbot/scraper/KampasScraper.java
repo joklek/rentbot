@@ -3,6 +3,7 @@ package com.joklek.rentbot.scraper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.jsoup.Jsoup;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
@@ -44,19 +45,15 @@ public class KampasScraper implements Scraper {
 
         return rawPosts.stream()
                 .map(rawPost -> processItem(rawPost))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
                 .toList();
     }
 
-    private Optional<PostDto> processItem(JsonNode node) {
+    private PostDto processItem(JsonNode node) {
         var kampasId = node.get("id").asText();
         var link = create(String.format("https://www.kampas.lt/skelbimai/%s", kampasId));
 
         var post = new KampasPost();
-        var description = Optional.ofNullable(node.get("description")).map(JsonNode::asText);
         var rawAddress = Optional.ofNullable(node.get("title")).map(JsonNode::asText);
-
         Optional<String> district = Optional.empty();
         Optional<String> street = Optional.empty();
         if (rawAddress.isPresent()) {
@@ -68,6 +65,10 @@ public class KampasScraper implements Scraper {
                 street = Optional.of(splitAddress[2]);
             }
         }
+
+        var descriptionPostfix = kampasId + street.orElse("") + district.orElse("");
+        var description = Optional.ofNullable(node.get("description"))
+                .map(descriptionNode -> Jsoup.parse(descriptionNode.asText()).text().replaceAll(String.format(" %s$", descriptionPostfix), ""));
 
         Optional<String> heating = Optional.empty();
         var featureIterator = node.get("features").elements();
@@ -108,7 +109,7 @@ public class KampasScraper implements Scraper {
         rooms.ifPresent(post::setRooms);
         year.ifPresent(post::setYear);
 
-        return Optional.of(post);
+        return post;
     }
 
     private Optional<JsonNode> getPosts(URI link) {
