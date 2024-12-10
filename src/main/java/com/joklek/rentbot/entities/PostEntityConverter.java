@@ -35,13 +35,13 @@ public class PostEntityConverter {
                 .map(street -> street.trim())
                 .ifPresent(post::setStreet);
         postDto.getDistrict()
-                .map(street -> street.trim())
+                .map(district -> district.trim())
                 .ifPresent(post::setDistrict);
         postDto.getHouseNumber()
-                .map(street -> street.trim())
+                .map(number -> number.trim().toUpperCase())
                 .ifPresent(post::setHouseNumber);
         postDto.getHeating()
-                .map(street -> street.trim())
+                .map(heating -> heating.trim())
                 .ifPresent(post::setHeating);
         postDto.getFloor()
                 .ifPresent(post::setFloor);
@@ -61,11 +61,11 @@ public class PostEntityConverter {
         if (postDto.getStreet().isPresent() && postDto.getHouseNumber().isEmpty() && postDto.getDescription().isPresent()) {
             var description = postDto.getDescription().get();
             var street = postDto.getStreet().get();
-            var streetPattern = Pattern.compile(String.format("%s ?(\\d{1,3}[A-Z]?)", street), Pattern.CASE_INSENSITIVE);
+            var streetPattern = Pattern.compile(String.format("%s ?(\\d{1,3}[A-Z]?)(\\s|(-\\d)|\\.|,|;|!|$)", street), Pattern.CASE_INSENSITIVE);
             var matcher = streetPattern.matcher(description);
             if (matcher.find()) {
                 LOGGER.info("Found house number in description: {} of {} {}", matcher.group(1), postDto.getSource(), postDto.getExternalId());
-                post.setHouseNumber(matcher.group(1));
+                post.setHouseNumber(matcher.group(1).toUpperCase());
             }
         }
 
