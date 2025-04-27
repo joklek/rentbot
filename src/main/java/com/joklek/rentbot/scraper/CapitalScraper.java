@@ -81,7 +81,7 @@ public class CapitalScraper extends JsoupScraper {
         var heating = Optional.ofNullable(moreInfo.get("Šildymas"));
         Optional<Integer> floor = Optional.empty();
         Optional<Integer> totalFloors = Optional.empty();
-        var floorRaw = Optional.ofNullable(moreInfo.get("Aukštas"));
+        var floorRaw = Optional.ofNullable(moreInfo.get("Aukštai"));
         if (floorRaw.isPresent()) {
             var floorSplit = floorRaw.get().split("/");
             floor = ScraperHelper.parseInt(floorSplit[0]);
